@@ -131,8 +131,9 @@ Consequences:
   file uses heavily, and never `open ... in`.
 - One mathematical topic per module. Imports name specific modules only
   (never `import Mathlib`).
-- Files are 100 columns or fewer; every file carries the standard Mathlib
-  copyright header; every public declaration carries a docstring.
+- Files are 100 columns or fewer; every file carries the standard copyright
+  header (with the Hippocratic Mathematics License line); every public
+  declaration carries a docstring.
 
 ## 7. The sorry protocol
 

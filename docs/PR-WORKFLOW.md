@@ -61,3 +61,13 @@ Same as `docs/STYLE.md`, §10, plus:
 3. Does any statement duplicate something Mathlib already has? (The PR note
    `docs/PRs/<topic>.md` must answer this.)
 4. Questions for the human are collected and asked once, concretely.
+
+## Contributions and licensing
+
+All contributions to this repository (including pull requests from the
+work assistant) are accepted only under the Hippocratic Mathematics License
+v1.0 (`LICENSE`). By opening a pull request, the contributor offers the
+work under that license. Files destined for a hypothetical Mathlib
+submission would be re-licensed Apache 2.0 upstream, at Mathlib's own
+requirements; this repository's copy remains under the Hippocratic
+Mathematics License.
