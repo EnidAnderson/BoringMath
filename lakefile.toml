@@ -18,8 +18,8 @@ rev = "v4.35.0-rc3"
 
 [[require]]
 name = "CombinatorialGames"
-git = "https://github.com/vihdzp/combinatorial-games.git"
-rev = "d949bd1fd3355d23175b8ed0834e0bb166e5fd3b"
+git = "https://github.com/EnidAnderson/combinatorial-games.git"
+rev = "0dd03232a3ab5e7cbd3d79a26f313e85e3435194"
 
 [[lean_lib]]
 name = "BoringMath"
