@@ -3,6 +3,7 @@ Copyright (c) 2026 Enid. All rights reserved.
 Released under the Hippocratic Mathematics License v1.0, as described in the file LICENSE.
 Authors: Enid
 -/
+import BoringMath.Algebra.SubfieldMemCancel
 import BoringMath.Foundations.Eta
 
 /-!
