@@ -125,6 +125,17 @@ theorem residueDegree_comp :
     (Z.residueField ((g ≫ h) x)) (Y.residueField (g x)) (X.residueField x)
     _ _ _ _ _ _ (residueFieldIsScalarTower g h x) _ _ _ _)
 
+-- Reference: S. Lang, *Algebra* (the degree of an isomorphism of fields
+-- is one).
+-- REVIEW(citation): pin down the section.
+/-- The residue degree of an isomorphism is one: composing with the
+inverse is the identity, and the tower law identifies the factors. -/
+theorem residueDegree_of_isIso {X Y : Scheme.{u}} (f : X ⟶ Y) [IsIso f]
+    (x : X) : f.residueDegree x = 1 :=
+  (mul_eq_one.mp (Eq.trans (residueDegree_comp f (inv f) x).symm
+    (Eq.trans (congrArg (fun ψ => ψ.residueDegree x) (IsIso.hom_inv_id f))
+      (Hom.residueDegree_id x)))).2
+
 end Hom
 
 end Scheme
