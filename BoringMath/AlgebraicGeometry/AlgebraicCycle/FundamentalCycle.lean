@@ -113,6 +113,53 @@ theorem isFinite_fundamentalCycle (X : Scheme.{u}) [IsNoetherian X] :
     (finite_irreducibleComponents_of_isNoetherian (X := X))).subset
     (Eq.subset (support_fundamentalCycle X))
 
+-- Reference: Stacks Project, tag 0BA8 (the generic points of the
+-- irreducible components; homeomorphisms transport components).
+-- REVIEW(citation): pin down the exact tag.
+/-- The generic points transport along homeomorphisms of the underlying
+spaces: the image of the closure of a generic point is the closure of
+the image, and the image of an irreducible component is an irreducible
+component. -/
+theorem image_genericPoints_of_isIso {X Y : Scheme.{u}} (f : X ⟶ Y)
+    [IsIso f] :
+    f.base '' (genericPoints ↥X) = (genericPoints ↥Y) := by
+  have key : ∀ {A B : Scheme.{u}} (h : ↥A ≃ₜ ↥B) (η : ↥A),
+      η ∈ genericPoints ↥A → h η ∈ genericPoints ↥B := by
+    intro _A _B h η hη
+    have hclo : closure ({h η} : Set ↥_B) =
+        ⇑h '' closure ({η} : Set ↥_A) :=
+      Eq.trans (congrArg closure (Set.image_singleton).symm)
+        (Homeomorph.image_closure h _).symm
+    have hpre : ⇑h '' closure ({η} : Set ↥_A) =
+        ⇑h.symm ⁻¹' closure ({η} : Set ↥_A) := by
+      refine Set.ext fun y => Iff.intro (fun hy => ?_) (fun hy => ?_)
+      · obtain ⟨z, hz, rfl⟩ := hy
+        exact Set.mem_preimage.mpr
+          (Eq.subst (Homeomorph.symm_apply_apply h z).symm hz)
+      · exact ⟨h.symm y, Set.mem_preimage.mp hy,
+          Homeomorph.apply_symm_apply h y⟩
+    have hcomp : ⇑h.symm ⁻¹' closure ({η} : Set ↥_A) ∈
+        irreducibleComponents ↥_B :=
+      preimage_mem_irreducibleComponents_of_isPreirreducible_fiber hη
+        (Homeomorph.continuous h.symm) (Homeomorph.isOpenMap h.symm)
+        (fun x => Set.Subsingleton.isPreirreducible
+          fun y hy y' hy' => h.symm.injective
+            (Eq.trans (Set.mem_singleton_iff.mp (Set.mem_preimage.mp hy))
+              (Eq.symm (Set.mem_singleton_iff.mp
+                (Set.mem_preimage.mp hy')))))
+        ⟨η, subset_closure rfl,
+          Set.mem_range.mpr ⟨h η, Homeomorph.symm_apply_apply h η⟩⟩
+    change closure ({h η} : Set ↥_B) ∈ irreducibleComponents ↥_B
+    exact Eq.subst (Eq.trans hclo hpre).symm hcomp
+  refine Set.Subset.antisymm ?_ ?_
+  · intro y hy
+    obtain ⟨η, hη, rfl⟩ := hy
+    exact key (Scheme.Hom.homeomorph f) η hη
+  · intro y hy
+    exact ⟨(Scheme.Hom.homeomorph f).symm y,
+      key (Scheme.Hom.homeomorph f).symm y hy,
+      Homeomorph.apply_symm_apply (Scheme.Hom.homeomorph f) y⟩
+
 end Scheme
 
 end AlgebraicGeometry
