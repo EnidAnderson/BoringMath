@@ -4,6 +4,7 @@ Released under the Hippocratic Mathematics License v1.0, as described in the fil
 Authors: Enid
 -/
 import Mathlib.AlgebraicGeometry.Fiber
+import Mathlib.AlgebraicGeometry.Morphisms.Flat
 
 /-!
 # The base change of the scheme-theoretic fiber
@@ -13,7 +14,9 @@ fiber of the vertical morphism at the point maps to the fiber of the given
 morphism at the image point, over the map of the spectra of the residue
 fields, and the square of the base change is cartesian. The base-changed
 fiber is the fiber product of the fiber with the spectrum of the residue
-field of the point.
+field of the point. The base-change map of the fibers is flat and
+surjective: the base change is by the map of the spectra of the residue
+fields.
 
 ## References
 * [EGA I] A. Grothendieck, J. A. Dieudonné, *Éléments de géométrie
@@ -87,5 +90,42 @@ noncomputable def fiberBaseChangeIso (h : IsPullback fst snd f g) (y : Y) :
       pullback (f.fiberToSpecResidueField (g y))
         (Spec.map (g.residueFieldMap y)) :=
   (isPullback_fiberBaseChange h y).isoPullback
+
+-- Reference: [EGA IV] A. Grothendieck, J. A. Dieudonné, *Éléments de
+-- géométrie algébrique IV: Étude locale des schémas et des morphismes de
+-- schémas*, ch. 2 (flatness is stable under base change; a field
+-- extension is flat).
+-- REVIEW(citation): pin down the section.
+-- The flatness instance assembles from limit data and the instance for
+-- isomorphisms; it is noncomputable.
+/-- **The base-change map of the fibers is flat**: the base change is by a
+field extension — the map of the spectra of the residue fields — and
+flatness is stable under base change. -/
+noncomputable instance flat_fiberBaseChange (h : IsPullback fst snd f g)
+    (y : Y) : Flat (fiberBaseChange h y) :=
+  Eq.subst (motive := fun φ => Flat φ)
+    (IsPullback.isoPullback_hom_fst (isPullback_fiberBaseChange h y))
+    (Flat.comp
+      ((IsPullback.isoPullback (isPullback_fiberBaseChange h y)).hom)
+      (pullback.fst (f.fiberToSpecResidueField (g y))
+        (Spec.map (g.residueFieldMap y))))
+
+-- Reference: [EGA IV], ch. 2 (surjectivity is stable under base change;
+-- the map of the spectra of the residue fields is surjective).
+-- REVIEW(citation): pin down the section.
+/-- **The base-change map of the fibers is surjective**: the base change
+is by the map of the spectra of the residue fields, a surjective map of
+one-point spectra, and surjectivity is stable under base change. -/
+theorem surjective_fiberBaseChange (h : IsPullback fst snd f g) (y : Y) :
+    Function.Surjective (fiberBaseChange h y).base := by
+  intro ξ
+  have hc : (f.fiberToSpecResidueField (g y)).base ξ =
+      (Spec.map (g.residueFieldMap y)).base
+        (IsLocalRing.closedPoint (Y.residueField y)) :=
+    Subsingleton.elim _ _
+  obtain ⟨p, hp, -⟩ := Scheme.exists_preimage_of_isPullback
+    (isPullback_fiberBaseChange h y) ξ
+    (IsLocalRing.closedPoint (Y.residueField y)) hc
+  exact ⟨p, hp⟩
 
 end AlgebraicGeometry
