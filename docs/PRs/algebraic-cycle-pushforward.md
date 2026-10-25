@@ -23,6 +23,16 @@ mirroring `Basic.lean` at the pin; see `docs/OWNERSHIP.md`).
   `Function.locallyFinsupp.support_map_subset_of_forall_mem`).
 * `IsFinite.pushforward` — the pushforward of a finitely supported cycle
   is finitely supported (the image of a finite support is finite).
+* `pushforward_single` — the pushforward of a point cycle is the point
+  cycle at the image point, with the coefficient weighted by the residue
+  degree: `g_* (r · [x]) = (r · [κ(x) : κ(g x)]) · [g x]` (Fulton, ch. 1).
+  The fiber sum is reduced to a singleton sum via
+  `finsum_cond_eq_sum_of_cond_iff`; only the point of the cycle
+  contributes, by `eq_of_multiplicity_ne_zero`.
+* Support lemmas in the zero-cycle module: `support_single_subset` (the
+  support of a point cycle is contained in the singleton of its point;
+  now also used by `isFinite_single`), `eq_of_multiplicity_ne_zero` (a
+  point of nonzero multiplicity for a point cycle is its point).
 
 ## Trace formula findings (GOLD, at the pin)
 
@@ -39,10 +49,9 @@ mirroring `Basic.lean` at the pin; see `docs/OWNERSHIP.md`).
 * Finsum reduction: `finsum_eq_finsetSum_of_support_subset (f) (s)
   (h : support f ⊆ ↑s) : ∑ᶠ i, f i = ∑ i ∈ s, f i` — the same
   explicit-containing-set discipline as `degree`.
-* Named next peels: `pushforward_single` (`g_* (r · [x]) =
-  (r · [κ(x) : κ(g x)]) · [g x]`, Fulton ch. 1) via the finsum reduction;
-  then the trace formula `degree h (g_* D) = degree (g ≫ h) D` (tower
-  law + fiber re-indexing).
+* Named next peels: the trace formula `degree h (g_* D) = degree (g ≫ h) D`
+  (tower law + fiber re-indexing; the `IsScalarTower` of residue fields
+  is the missing construction).
 
 ## Literature
 
