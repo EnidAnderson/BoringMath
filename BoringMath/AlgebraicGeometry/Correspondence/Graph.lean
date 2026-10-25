@@ -94,4 +94,140 @@ theorem isFinite_graphCorrespondence (f : X ⟶ Y) (hf : f ≫ pY = pX)
   AlgebraicCycle.IsFinite.pushforward (graph pX pY f hf)
     (Scheme.isFinite_fundamentalCycle X)
 
+-- Reference: A. Suslin, V. Voevodsky, *Singular homology of abstract
+-- algebraic varieties* (the composite of the graphs: the fiber product
+-- of the two graph factors).
+-- REVIEW(citation): pin down the section.
+variable {Z : Scheme.{u}} (pZ : Z ⟶ S)
+
+/-- The pair of the graphs: the lift into the fiber product of the two
+graph factors — the source point maps to its graph points on both
+factors. -/
+noncomputable def graphComposite (f : X ⟶ Y) (hf : f ≫ pY = pX)
+    (g : Y ⟶ Z) (hg : g ≫ pZ = pY) :
+    X ⟶ pullback (pullback.snd pX pY) (pullback.fst pY pZ) := by
+  have w1 : f ≫ pY = (f ≫ g) ≫ pZ :=
+    Eq.trans (congrArg (f ≫ ·) hg.symm) (Category.assoc f g pZ)
+  exact pullback.lift (graph pX pY f hf) (pullback.lift f (f ≫ g) w1)
+    (Eq.trans (graph_snd pX pY f hf)
+      (pullback.lift_fst f (f ≫ g) w1).symm)
+
+-- Reference: A. Suslin, V. Voevodsky, *Singular homology of abstract
+-- algebraic varieties* (the fiber product of the two graph factors).
+-- REVIEW(citation): pin down the section.
+/-- The first-and-third components of the fiber product of the two graph
+factors agree on the base: the structure maps match through the fiber
+product conditions. -/
+theorem graphComposite_condition :
+    (pullback.fst (pullback.snd pX pY) (pullback.fst pY pZ) ≫
+        pullback.fst pX pY) ≫ pX =
+      (pullback.snd (pullback.snd pX pY) (pullback.fst pY pZ) ≫
+        pullback.snd pY pZ) ≫ pZ :=
+  calc (pullback.fst (pullback.snd pX pY) (pullback.fst pY pZ) ≫
+          pullback.fst pX pY) ≫ pX
+      = pullback.fst (pullback.snd pX pY) (pullback.fst pY pZ) ≫
+          (pullback.fst pX pY ≫ pX) :=
+        Category.assoc _ _ _
+    _ = pullback.fst (pullback.snd pX pY) (pullback.fst pY pZ) ≫
+          (pullback.snd pX pY ≫ pY) :=
+        congrArg (pullback.fst (pullback.snd pX pY)
+          (pullback.fst pY pZ) ≫ ·) pullback.condition
+    _ = (pullback.fst (pullback.snd pX pY) (pullback.fst pY pZ) ≫
+          pullback.snd pX pY) ≫ pY :=
+        (Category.assoc _ _ _).symm
+    _ = (pullback.snd (pullback.snd pX pY) (pullback.fst pY pZ) ≫
+          pullback.fst pY pZ) ≫ pY :=
+        congrArg (· ≫ pY) pullback.condition
+    _ = pullback.snd (pullback.snd pX pY) (pullback.fst pY pZ) ≫
+          (pullback.fst pY pZ ≫ pY) :=
+        Category.assoc _ _ _
+    _ = pullback.snd (pullback.snd pX pY) (pullback.fst pY pZ) ≫
+          (pullback.snd pY pZ ≫ pZ) :=
+        congrArg (pullback.snd (pullback.snd pX pY)
+          (pullback.fst pY pZ) ≫ ·) pullback.condition
+    _ = (pullback.snd (pullback.snd pX pY) (pullback.fst pY pZ) ≫
+          pullback.snd pY pZ) ≫ pZ :=
+        (Category.assoc _ _ _).symm
+
+-- Reference: A. Suslin, V. Voevodsky, *Singular homology of abstract
+-- algebraic varieties* (the first-and-third projection).
+-- REVIEW(citation): pin down the section.
+/-- The first-and-third projection of the fiber product of the two graph
+factors. -/
+noncomputable def graphCompositeMap :
+    pullback (pullback.snd pX pY) (pullback.fst pY pZ) ⟶ pullback pX pZ :=
+  pullback.lift
+    (pullback.fst (pullback.snd pX pY) (pullback.fst pY pZ) ≫
+      pullback.fst pX pY)
+    (pullback.snd (pullback.snd pX pY) (pullback.fst pY pZ) ≫
+      pullback.snd pY pZ)
+    (graphComposite_condition pX pY pZ)
+
+-- Reference: A. Suslin, V. Voevodsky, *Singular homology of abstract
+-- algebraic varieties* (the composite of the graph correspondences is
+-- the graph correspondence of the composite).
+-- REVIEW(citation): pin down the section.
+/-- **The factorization of the composite of the graphs**: the composite
+of the pair of the graphs with the first-and-third projection is the
+graph of the composite morphism. -/
+theorem graphCompositeMap_comp (f : X ⟶ Y) (hf : f ≫ pY = pX)
+    (g : Y ⟶ Z) (hg : g ≫ pZ = pY) :
+    graphComposite pX pY pZ f hf g hg ≫
+      graphCompositeMap pX pY pZ =
+      graph pX pZ (f ≫ g)
+        (Eq.trans (Eq.trans (Category.assoc f g pZ).symm
+          (congrArg (f ≫ ·) hg)) hf) := by
+  have w1 : f ≫ pY = (f ≫ g) ≫ pZ :=
+    Eq.trans (congrArg (f ≫ ·) hg.symm) (Category.assoc f g pZ)
+  have hg' : (f ≫ g) ≫ pZ = pX :=
+    Eq.trans (Eq.trans (Category.assoc f g pZ).symm
+      (congrArg (f ≫ ·) hg)) hf
+  -- the first components: both are the identity on the source
+  have hfst : (graphComposite pX pY pZ f hf g hg ≫
+      graphCompositeMap pX pY pZ) ≫ pullback.fst pX pZ = 𝟙 X := by
+    calc (graphComposite pX pY pZ f hf g hg ≫
+            graphCompositeMap pX pY pZ) ≫ pullback.fst pX pZ
+        = graphComposite pX pY pZ f hf g hg ≫
+            (graphCompositeMap pX pY pZ ≫
+              pullback.fst pX pZ) :=
+          Category.assoc _ _ _
+      _ = graphComposite pX pY pZ f hf g hg ≫
+            (pullback.fst (pullback.snd pX pY) (pullback.fst pY pZ) ≫
+              pullback.fst pX pY) :=
+          congrArg (graphComposite pX pY pZ f hf g hg ≫ ·)
+            (pullback.lift_fst _ _ _)
+      _ = (graphComposite pX pY pZ f hf g hg ≫
+            pullback.fst (pullback.snd pX pY) (pullback.fst pY pZ)) ≫
+            pullback.fst pX pY :=
+          (Category.assoc _ _ _).symm
+      _ = graph pX pY f hf ≫ pullback.fst pX pY :=
+          congrArg (· ≫ pullback.fst pX pY) (pullback.lift_fst _ _ _)
+      _ = 𝟙 X := graph_fst pX pY f hf
+  -- the second components: both are the composite morphism
+  have hsnd : (graphComposite pX pY pZ f hf g hg ≫
+      graphCompositeMap pX pY pZ) ≫ pullback.snd pX pZ =
+      f ≫ g := by
+    calc (graphComposite pX pY pZ f hf g hg ≫
+            graphCompositeMap pX pY pZ) ≫ pullback.snd pX pZ
+        = graphComposite pX pY pZ f hf g hg ≫
+            (graphCompositeMap pX pY pZ ≫
+              pullback.snd pX pZ) :=
+          Category.assoc _ _ _
+      _ = graphComposite pX pY pZ f hf g hg ≫
+            (pullback.snd (pullback.snd pX pY) (pullback.fst pY pZ) ≫
+              pullback.snd pY pZ) :=
+          congrArg (graphComposite pX pY pZ f hf g hg ≫ ·)
+            (pullback.lift_snd _ _ _)
+      _ = (graphComposite pX pY pZ f hf g hg ≫
+            pullback.snd (pullback.snd pX pY) (pullback.fst pY pZ)) ≫
+            pullback.snd pY pZ :=
+          (Category.assoc _ _ _).symm
+      _ = pullback.lift f (f ≫ g) w1 ≫ pullback.snd pY pZ :=
+          congrArg (· ≫ pullback.snd pY pZ) (pullback.lift_snd _ _ _)
+      _ = f ≫ g := pullback.lift_snd f (f ≫ g) w1
+  -- the two morphisms agree by the universal property
+  refine pullback.hom_ext ?_ ?_
+  · refine Eq.trans hfst (graph_fst pX pZ (f ≫ g) hg').symm
+  · refine Eq.trans hsnd (graph_snd pX pZ (f ≫ g) hg').symm
+
 end AlgebraicGeometry

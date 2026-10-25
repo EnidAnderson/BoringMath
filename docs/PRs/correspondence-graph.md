@@ -49,3 +49,20 @@ recorded on the ticket.
 * A. Suslin, V. Voevodsky, *Singular homology of abstract algebraic
   varieties* (the classical reference for finite correspondences).
   REVIEW(citation): to be pinned.
+
+## Addendum: the graph composite morphism layer
+
+* `graphComposite` — the pair of the graphs: the lift into the fiber
+  product of the two graph factors (the source point maps to its graph
+  points on both factors).
+* `graphComposite_condition` — the first-and-third components of the
+  fiber product agree on the base: the structure maps match through the
+  fiber product conditions (a seven-step calculation over the
+  associativity law and the two pullback conditions).
+* `graphCompositeMap` — the first-and-third projection of the fiber
+  product of the two graph factors.
+* `graphCompositeMap_comp` — **the factorization of the composite of
+  the graphs**: the composite of the pair of the graphs with the
+  first-and-third projection is the graph of the composite morphism
+  (`pullback.hom_ext`, with the first components both the identity on
+  the source and the second components both the composite morphism).
