@@ -29,6 +29,12 @@ mirroring `Basic.lean` at the pin; see `docs/OWNERSHIP.md`).
   The fiber sum is reduced to a singleton sum via
   `finsum_cond_eq_sum_of_cond_iff`; only the point of the cycle
   contributes, by `eq_of_multiplicity_ne_zero`.
+* `pushforward_zero` — the pushforward of the zero cycle is the zero
+  cycle (the fiber sums vanish termwise:
+  `finsum_mem_of_eqOn_zero`, `zero_mul`).
+* `pushforward_id` — the pushforward along the identity is the identity
+  on cycles (the substrate's `AlgebraicCycle.map_id`; the constant
+  weights agree on both sides).
 * Support lemmas in the zero-cycle module: `support_single_subset` (the
   support of a point cycle is contained in the singleton of its point;
   now also used by `isFinite_single`), `eq_of_multiplicity_ne_zero` (a
