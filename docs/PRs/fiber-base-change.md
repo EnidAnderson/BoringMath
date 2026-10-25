@@ -32,6 +32,18 @@ Given a cartesian square `IsPullback fst snd f g` (with `fst : P ⟶ X`,
 * `AlgebraicGeometry.fiberBaseChangeIso` — **the base-change iso of the
   fibers**: `snd.fiber y ≅ f.fiber (g y) ×[Spec κ(g y)] Spec κ(y)`
   (`IsPullback.isoPullback`).
+* `AlgebraicGeometry.flat_fiberBaseChange` — **the base-change map of the
+  fibers is flat**: the base change is by a field extension — the map of
+  the spectra of the residue fields — and flatness is stable under base
+  change (the flatness of the residue-field square rides the flatness of
+  a morphism into a one-point integral scheme; the transport to the
+  named map is `IsPullback.isoPullback_hom_fst` and `Flat.comp`).
+* `AlgebraicGeometry.surjective_fiberBaseChange` — **the base-change map
+  of the fibers is surjective**: the base change is by a surjective map
+  of one-point spectra, and surjectivity is stable under base change
+  (`Scheme.exists_preimage_of_isPullback`; the agreement of the two
+  points of the spectra of the residue fields is the uniqueness of the
+  point of the spectrum of a field).
 
 ## Notes
 
