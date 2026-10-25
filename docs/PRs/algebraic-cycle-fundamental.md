@@ -25,6 +25,17 @@ mirroring `Basic.lean` at the pin; see `docs/OWNERSHIP.md`).
   generic points.
 * `Scheme.isFinite_fundamentalCycle` — the fundamental cycle has finite
   support.
+* `Scheme.image_genericPoints_of_isIso` — the generic points transport
+  along isomorphisms: the image of the set of generic points is the set
+  of generic points. The proof: the closure of the image of a point is
+  the image of the closure (`Homeomorph.image_closure` — the base of an
+  isomorphism is a homeomorphism via `Scheme.Hom.homeomorph`), the
+  image of the closure is the preimage of the closure under the inverse
+  homeomorphism, and the preimage of an irreducible component under the
+  inverse is an irreducible component
+  (`preimage_mem_irreducibleComponents_of_isPreirreducible_fiber`,
+  whose fiber condition holds because the fibers of a homeomorphism are
+  singletons).
 
 ## Unblocking
 
