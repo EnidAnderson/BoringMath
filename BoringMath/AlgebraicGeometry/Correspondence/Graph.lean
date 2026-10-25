@@ -230,4 +230,55 @@ theorem graphCompositeMap_comp (f : X ⟶ Y) (hf : f ≫ pY = pX)
   · refine Eq.trans hfst (graph_fst pX pZ (f ≫ g) hg').symm
   · refine Eq.trans hsnd (graph_snd pX pZ (f ≫ g) hg').symm
 
+-- The fiber product cycle of the two graphs is the pushforward of the
+-- fundamental cycle along the pair (the fiber product of the two graph
+-- factors on the pair); the general fiber product cycle — the
+-- intersection of the two pulled-back cycles — needs the intersection
+-- machinery, which the graph case bypasses.
+open scoped Classical in
+-- Reference: A. Suslin, V. Voevodsky, *Singular homology of abstract
+-- algebraic varieties* (the composition of correspondences: the
+-- first-and-third projection of the fiber product cycle).
+-- REVIEW(citation): pin down the section.
+/-- **The composite of the graph correspondences** — the
+Suslin–Voevodsky formula for graphs: the first-and-third projection of
+the fiber product cycle of the two graphs, the fiber product cycle
+being the pushforward of the fundamental cycle of the source along the
+pair of the graphs. The quasicompactness of the first-and-third
+projection is an explicit hypothesis. -/
+noncomputable def graphCorrespondenceComposite (f : X ⟶ Y)
+    (hf : f ≫ pY = pX) (g : Y ⟶ Z) (hg : g ≫ pZ = pY) [IsNoetherian X]
+    (hqc : QuasiCompact (graphCompositeMap pX pY pZ)) :
+    AlgebraicCycle (pullback pX pZ) ℤ :=
+  AlgebraicCycle.pushforward (graphCompositeMap pX pY pZ)
+    (AlgebraicCycle.pushforward (graphComposite pX pY pZ f hf g hg)
+      (Scheme.fundamentalCycle X))
+
+-- Reference: A. Suslin, V. Voevodsky, *Singular homology of abstract
+-- algebraic varieties* (the composite of the graph correspondences is
+-- the graph correspondence of the composite).
+-- REVIEW(citation): pin down the section.
+/-- **The composition law for graph correspondences**: the composite of
+the graph correspondences of two morphisms over a base is the graph
+correspondence of the composite morphism — the pushforward composition
+law over the factorization of the pair of the graphs. -/
+theorem graphCorrespondence_comp (f : X ⟶ Y) (hf : f ≫ pY = pX)
+    (g : Y ⟶ Z) (hg : g ≫ pZ = pY) [IsNoetherian X]
+    (hqc : QuasiCompact (graphCompositeMap pX pY pZ)) :
+    graphCorrespondenceComposite pX pY pZ f hf g hg hqc =
+      graphCorrespondence pX pZ (f ≫ g)
+        (Eq.trans (Eq.trans (Category.assoc f g pZ).symm
+          (congrArg (f ≫ ·) hg)) hf)
+        (inferInstance : QuasiCompact
+          (graph pX pZ (f ≫ g)
+            (Eq.trans (Eq.trans (Category.assoc f g pZ).symm
+              (congrArg (f ≫ ·) hg)) hf)) ) :=
+  Eq.trans
+    (Eq.symm (AlgebraicCycle.pushforward_comp
+      (graphComposite pX pY pZ f hf g hg) (graphCompositeMap pX pY pZ)
+      (Scheme.fundamentalCycle X)))
+    (congrArg
+      (AlgebraicCycle.pushforward · (Scheme.fundamentalCycle X))
+      (graphCompositeMap_comp pX pY pZ f hf g hg))
+
 end AlgebraicGeometry
