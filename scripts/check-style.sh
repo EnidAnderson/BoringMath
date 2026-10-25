@@ -80,6 +80,15 @@ for file in "${FILES[@]}"; do
     done
   fi
 
+  # 2a. restricted tactics (informational, per STYLE §2.1): rw/rewrite must
+  #     carry a justification comment; anonymous rewriting (▸) is forbidden.
+  restricted=$(strip_comments "$file" | grep -nP "(^|[^\w.])(rw|rewrite)\b|▸" | cut -d: -f1)
+  if [ -n "$restricted" ]; then
+    for num in $restricted; do
+      echo "check-style: RESTRICTED (justify inline, prefer Eq.subst): ${file}:${num}: $(sed -n "${num}p" "$file")"
+    done
+  fi
+
   # 2. missing references (declarations detected in stripped code; the
   #    reference window reads the raw lines, so references may be comments).
   missing=$(awk -v file="$file" '
