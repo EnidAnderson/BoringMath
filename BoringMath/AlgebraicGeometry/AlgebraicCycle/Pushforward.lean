@@ -384,6 +384,16 @@ theorem pushforward_comp {Z : Scheme.{u}} (g : X ⟶ Y) (h : Y ⟶ Z)
         (Eq.trans hext (Finset.sum_congr rfl fun y _ => fiber_red y)))
   exact Eq.trans left_red (Eq.trans part right_red.symm)
 
+-- Reference: W. Fulton, *Intersection Theory*, ch. 1 (the pushforward is
+-- functorial).
+-- REVIEW(citation): pin down the section.
+/-- The pushforward homomorphism is functorial: the homomorphism of a
+composite is the composite of the homomorphisms. -/
+theorem pushforwardHom_comp {Z : Scheme.{u}} (g : X ⟶ Y) (h : Y ⟶ Z)
+    [QuasiCompact g] [QuasiCompact h] :
+    pushforwardHom (g ≫ h) = (pushforwardHom h).comp (pushforwardHom g) :=
+  AddMonoidHom.ext fun D => pushforward_comp g h D
+
 end AlgebraicCycle
 
 end AlgebraicGeometry
