@@ -21,6 +21,13 @@ available, write a well-typed `sorry` (see §7) — never a clever tactic.
 
 ## 2. Tactic whitelist (default deny)
 
+The ultimate realization of the boring style is **tactic-free**: a proof is
+a term. Prefer a **direct term proof** always; the `exact` tactic is
+optional sugar at the end of a tactic block. Use a whitelisted tactic only
+when it is genuinely cleaner — for example `match`-style case analysis, or
+`calc`/`have` for indentation and stepwise readability — and say why in a
+comment when the choice is not obvious.
+
 Only the following tactics may be used, and only in their explicit forms:
 
 | Allowed | Remarks |
@@ -28,7 +35,7 @@ Only the following tactics may be used, and only in their explicit forms:
 | `exact`, `refine`, `apply` | with explicit terms or explicit holes |
 | `intro`, `intros` | |
 | `have`, `show`, `change` | `have` with an explicit type ascription |
-| `rw`, `rewrite` | only with explicitly named lemmas, e.g. `rw [eta g]` |
+| `rw`, `rewrite` | **restricted**; see §2.1 below |
 | `calc` | every step justified by a named lemma |
 | `rfl` | **only** inside primitive definitional lemmas (§5) |
 | `cases`, `rcases`, `obtain`, `rintro` | explicit patterns; name what you use |
@@ -38,6 +45,36 @@ Only the following tactics may be used, and only in their explicit forms:
 | `generalize`, `revert`, `clear` | |
 | `unfold` | only with explicit constant names |
 | `sorry` | see §7; highly encouraged as a temporary measure |
+
+### 2.1 The rewriting discipline (`rw` is restricted)
+
+`rw` performs unification-based search for rewrite locations; it is not a
+boring primitive. Equality-based rewriting is done by *explicit
+application* of named lemmas:
+
+- `Eq.subst` (Leibniz substitutivity of equality), applied to a fully
+  instantiated named equality and an explicit predicate fact, is the
+  primitive of choice: it names the theorem and fixes the location, since
+  the fact it acts on *is* the location.
+- anonymous rewriting (`h ▸ e`) is forbidden: it hides both the rule and
+  the location.
+- `rw` itself is acceptable only when (a) the rule is fully instantiated
+  (all arguments given explicitly) and (b) the target occurrence is
+  unique, or has been made unique by an explicit `show`/`have` type
+  ascription — and even then an `Eq.subst` term is preferred.
+- every `rw` carries an inline comment naming the rule instance and why
+  the occurrence is unique.
+
+### 2.2 Linearity
+
+A proof is **linear** when every hypothesis input is used exactly once.
+Prefer linear proofs whenever possible: each assumption earns its place
+exactly once, and the proof reads like the standard mathematical derivation.
+If a proof is intentionally affine or nonlinear (an input used more than
+once, or deliberately unused), mark it with a comment such as
+`-- NONLINEAR: <reason>` (a flag emoji serves too, when unicode is
+convenient); never force linearity at the cost of clarity.
+
 
 **Anything not listed is forbidden by default.** In particular, the
 following are forbidden (non-exhaustive):
@@ -198,8 +235,11 @@ For each candidate commit, check:
 1. Every lemma is named after its standard mathematical theorem (§3).
 2. Every declaration carries a verified literature reference (§4).
 3. No forbidden tactic appears (§2).
-4. Every eta/definitional step is peeled into a named lemma (§5).
-5. Every remaining `sorry` has a peeling plan; no statement was weakened (§7).
-6. The statement is the standard mathematical one, in Mathlib-compatible
+4. The proof is direct (tactic-free) where possible; every tactic use is
+   justified; every `rw` satisfies the rewriting discipline (§2.1).
+5. The proof is linear, or its nonlinearity is flagged with a reason (§2.2).
+6. Every eta/definitional step is peeled into a named lemma (§5).
+7. Every remaining `sorry` has a peeling plan; no statement was weakened (§7).
+8. The statement is the standard mathematical one, in Mathlib-compatible
    form; the PR note answers: does Mathlib already have it?
-7. The file would be accepted into Mathlib as-is, stylistically.
+9. The file would be accepted into Mathlib as-is, stylistically.
