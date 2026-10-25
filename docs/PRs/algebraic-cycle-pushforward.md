@@ -45,6 +45,10 @@ mirroring `Basic.lean` at the pin; see `docs/OWNERSHIP.md`).
   multiplicities add and multiplication distributes; the fiber sums
   add by `finsum_mem_add_distrib'`, the fiber finiteness by
   `finite_support_inter_fiber`).
+* `pushforwardHom` — the **pushforward homomorphism**: the pushforward
+  along a quasicompact morphism as a homomorphism of the additive
+  monoids of zero-cycles, with `pushforwardHom_apply` (definitional).
+  Noncomputable: the fiber sums are enumerated by choice.
 * Support lemmas in the zero-cycle module: `support_single_subset` (the
   support of a point cycle is contained in the singleton of its point;
   now also used by `isFinite_single`), `eq_of_multiplicity_ne_zero` (a

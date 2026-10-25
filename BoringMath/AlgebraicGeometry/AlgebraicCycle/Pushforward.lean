@@ -144,6 +144,26 @@ theorem pushforward_add (g : X ⟶ Y) [QuasiCompact g]
       exact Eq.symm (congrArg₂ HAdd.hAdd (pushforward_apply g D z)
         (pushforward_apply g E z))
 
+-- Reference: Stacks Project, tag 02R3 (the pushforward is a homomorphism
+-- of the groups of cycles).
+-- REVIEW(citation): pin down the exact tag.
+/-- The **pushforward homomorphism**: the pushforward along a
+quasicompact morphism is a homomorphism of the additive monoids of
+zero-cycles. The pushforward is noncomputable (the fiber sums are
+enumerated by choice). -/
+noncomputable def pushforwardHom (g : X ⟶ Y) [QuasiCompact g] :
+    AlgebraicCycle X ℤ →+ AlgebraicCycle Y ℤ where
+  toFun := pushforward g
+  map_zero' := pushforward_zero g
+  map_add' := pushforward_add g
+
+-- Reference: Stacks Project, tag 02R3.
+-- REVIEW(citation): pin down the exact tag.
+/-- The pushforward homomorphism is the pushforward. -/
+theorem pushforwardHom_apply (g : X ⟶ Y) [QuasiCompact g]
+    (D : AlgebraicCycle X ℤ) :
+    pushforwardHom g D = pushforward g D := rfl
+
 -- Reference: W. Fulton, *Intersection Theory*, ch. 1 (the pushforward of
 -- a point cycle: `g_* (r · [x]) = (r · [κ(x) : κ(g x)]) · [g x]`).
 -- REVIEW(citation): pin down the section.
