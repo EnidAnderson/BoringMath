@@ -66,3 +66,21 @@ recorded on the ticket.
   first-and-third projection is the graph of the composite morphism
   (`pullback.hom_ext`, with the first components both the identity on
   the source and the second components both the composite morphism).
+
+## Addendum: the composition law
+
+* `graphCorrespondenceComposite` — **the composite of the graph
+  correspondences**: the Suslin–Voevodsky formula for graphs — the
+  first-and-third projection of the fiber product cycle of the two
+  graphs, the fiber product cycle being the pushforward of the
+  fundamental cycle of the source along the pair of the graphs. The
+  quasicompactness of the first-and-third projection is an explicit
+  hypothesis. The general fiber product cycle (the intersection of the
+  two pulled-back cycles) needs the intersection machinery, which the
+  graph case bypasses; a finding recorded for the general composite of
+  C.2.
+* `graphCorrespondence_comp` — **the composition law**: the composite of
+  the graph correspondences of two morphisms over a base is the graph
+  correspondence of the composite morphism — the pushforward
+  composition law over the factorization of the pair of the graphs,
+  sorry-free.
