@@ -41,6 +41,13 @@ mathematician collaborate through GitHub:
 
 ## Rules for PRs from Work
 
+- **Never submit PRs to upstream or third-party repositories** (mathlib,
+  combinatorial-games, or any repository outside our own). The candidate-PR
+  framing is an organizational device only. Compatibility fixes for external
+  dependencies live in our own forks, documented as deltas on the wire
+  ticket; upstream goodwill gestures (issues, PRs, comments) are not
+  permitted.
+
 - Every declaration carries a literature reference with `REVIEW(citation)`
   tags where unverified; citations from memory must be tagged.
 - A PR may carry well-typed `sorry`s with peeling plans (see the sorry

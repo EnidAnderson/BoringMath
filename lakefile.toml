@@ -16,6 +16,11 @@ name = "mathlib"
 scope = "leanprover-community"
 rev = "v4.35.0-rc3"
 
+[[require]]
+name = "CombinatorialGames"
+git = "https://github.com/vihdzp/combinatorial-games.git"
+rev = "d949bd1fd3355d23175b8ed0834e0bb166e5fd3b"
+
 [[lean_lib]]
 name = "BoringMath"
 globs = ["BoringMath.+"]
