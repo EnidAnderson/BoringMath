@@ -27,3 +27,5 @@ The Hippocratic Mathematics License v1.0 (see `LICENSE`): the library may
 be used only in ways that help people and the natural environment; never
 for policing, war, cruelty, or profit; and no worker may ever be required
 to use it against her own conscience.
+
+<!-- Pull-request pipeline smoke-tested 2026-10-24. -->
