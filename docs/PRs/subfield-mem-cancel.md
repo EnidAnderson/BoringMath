@@ -1,7 +1,7 @@
 # Candidate PR: subfield membership cancellation across an inclusion
 
 Branch: `pr/algebra-subfield-mem-cancel`
-Module: `BoringMath/Algebra/SubfieldMemCancel.lean`
+Module: `BoringMath/Algebra/Field/Subfield/MemCancel.lean` (owner directory: Mathlib's `Algebra/Field/Subfield/`, see `docs/OWNERSHIP.md`)
 
 ## Statement
 
@@ -75,7 +75,7 @@ clause (Section 62, FINDING 1: the reduction layer is pure subfield algebra).
     which all equality-based rewriting is done here.
 - **Verification** (both outputs, per the work order):
   - `lake build`: `Build completed successfully (996 jobs)`; no warnings
-    for `BoringMath.Algebra.SubfieldMemCancel` (its sorry is gone; the
+    for `BoringMath.Algebra.Field.Subfield.MemCancel` (its sorry is gone; the
     build's only warnings are the pre-existing deliberate sorries in
     `BoringMath/Foundations/Eta.lean`).
   - `scripts/check-style.sh`: `0 violation(s)` (after fixing a checker
