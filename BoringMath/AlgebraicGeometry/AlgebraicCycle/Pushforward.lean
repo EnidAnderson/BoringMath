@@ -80,6 +80,24 @@ theorem IsFinite.pushforward (g : X ⟶ Y) [QuasiCompact g]
     IsFinite (pushforward g D) :=
   (hD.image g.base).subset (support_pushforward_subset_image g D)
 
+-- Reference: Stacks Project, tag 02R3 (the pushforward of the zero cycle
+-- is the zero cycle).
+-- REVIEW(citation): pin down the exact tag.
+/-- The pushforward of the zero cycle is the zero cycle. -/
+theorem pushforward_zero (g : X ⟶ Y) [QuasiCompact g] :
+    pushforward g (0 : AlgebraicCycle X ℤ) = 0 := by
+  refine Function.locallyFinsuppWithin.ext (fun z => ?_)
+  refine Eq.trans (pushforward_apply g (0 : AlgebraicCycle X ℤ) z) ?_
+  exact finsum_mem_of_eqOn_zero (fun _ _ => zero_mul _)
+
+-- Reference: Stacks Project, tag 02R3 (the pushforward along the
+-- identity is the identity).
+-- REVIEW(citation): pin down the exact tag.
+/-- The pushforward along the identity is the identity on cycles. -/
+theorem pushforward_id (D : AlgebraicCycle X ℤ) :
+    pushforward (𝟙 X) D = D :=
+  AlgebraicCycle.map_id (fun _ => (0 : ℕ)) D
+
 -- Reference: W. Fulton, *Intersection Theory*, ch. 1 (the pushforward of
 -- a point cycle: `g_* (r · [x]) = (r · [κ(x) : κ(g x)]) · [g x]`).
 -- REVIEW(citation): pin down the section.
