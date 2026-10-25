@@ -45,18 +45,39 @@ but provides no cd-structure API.
 
 ## Review notes
 
-* Tier 1 statement-only skeleton per directive 70a: three honest `sorry`s
-  with peeling plans (`ofCdStructure`, the generation clause, the minimality
-  clause); one direct proof
-  (`exists_mayerVietorisSquare_and_sheafCondition`, drafted by the brain,
-  build verification pending the bot).
-* Every name outside the three sorry'd declarations is GOLD-verified at the
-  pin from Riou's file: `Square C`, `sq.f₂₄`, `sq.f₃₄`, `sq.X₄`,
-  `Sieve.ofTwoArrows`, `J.MayerVietorisSquare`, `S.toSquare`,
+* Opened by the brain as a Tier 1 statement-only skeleton per directive
+  70a (three honest `sorry`s with peeling plans; one brain-drafted direct
+  proof); all three sorries since instantiated by the coding agent (see
+  the peeling record below); the module is sorry-free.
+* Every name is GOLD-verified at the pin: `Square C`, `sq.f₂₄`, `sq.f₃₄`,
+  `sq.X₄`, `Sieve.ofTwoArrows`, `J.MayerVietorisSquare`, `S.toSquare`,
   `S.SheafCondition`, `S.sheafCondition_of_sheaf`, `Sheaf J (Type v)`,
   `HasWeakSheafify J (Type v)`.
 
-### Verification record (coding agent, 2026-10-25)
+### Peeling record (coding agent, 2026-10-25)
+
+The three sorries are instantiated; the module is sorry-free and
+warning-clean.
+
+- **Route decision.** `ofCdStructure D` is defined as the `sInf` of all
+  topologies in which every distinguished square's two-arrow sieve covers
+  — the smallest such topology, per Voevodsky. The `Coverage` route was
+  rejected for the general case: `Coverage` (Sites/Coverage.lean:159)
+  carries a **pullback-stability field** that a general cd-structure does
+  not satisfy; the two routes agree on saturated coverages by
+  `Coverage.toGrothendieck_eq_sInf` (:299), which is recorded in the
+  definition's comment for the future `IsComplete`/`IsRegular` work.
+- **The load-bearing named lemma.** `GrothendieckTopology.mem_sInf`
+  (Sites/Grothendieck.lean:291): `S ∈ sInf s X ↔ ∀ t ∈ s, S ∈ t X`.
+  Both characterizing clauses are single direct terms through it:
+  - generation: `(mem_sInf _ _).mpr fun _ hJ => hJ hsq`;
+  - minimality: `(mem_sInf _ _).mp hS J' h` (`J'` belongs to the defining
+    set by `h`, definitionally).
+- **Verification**: `lake build` — `Build completed successfully
+  (1777 jobs)`, no warnings for this module; `scripts/check-style.sh`:
+  `0 violation(s)`, and the module is sorry-free.
+
+
 
 * **Build**: `lake build` — `Build completed successfully (1777 jobs)`;
   the only warnings for this module are its three deliberate sorries
