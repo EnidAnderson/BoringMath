@@ -36,12 +36,12 @@ are subfields of `L`, `a + b ∈ K'`, and `b ∈ K`, then `a ∈ K'`: a summand 
 a `K'`-member cannot escape `K'` when the other summand lies in the smaller
 subfield. -/
 theorem add_mem_cancel_right_of_le {L : Type u} [DivisionRing L] {K K' : Subfield L}
-    (hle : K ≤ K') {a b : L} (h : a + b ∈ K') (hb : b ∈ K) : a ∈ K' := by
-  -- TEMPORARY SORRY: the honest proof has not been instantiated yet.
-  -- PEELING PLAN: (1) transfer `hb : b ∈ K` along the inclusion to get
-  -- `b ∈ K'`; (2) `Subfield.sub_mem` applied to `h` and the transferred
-  -- membership gives `(a + b) - b ∈ K'`; (3) rewrite by the named ring
-  -- identity `add_sub_cancel_right : (a + b) - b = a` to conclude.
-  sorry
+    (hle : K ≤ K') {a b : L} (h : a + b ∈ K') (hb : b ∈ K) : a ∈ K' :=
+  -- Linear proof: each input is used exactly once. Leibniz substitutivity
+  -- (`Eq.subst`) applied to the fully instantiated ring identity
+  -- `add_sub_cancel_right a b : (a + b) - b = a` and to the `K'`-closure
+  -- `Subfield.sub_mem` of `h` against `b ∈ K'`, which is `hb` transferred
+  -- along the inclusion `hle` by `mem_of_le_of_mem`. No tactic is used.
+  Eq.subst (add_sub_cancel_right a b) (Subfield.sub_mem K' h (mem_of_le_of_mem hle hb))
 
 end Subfield

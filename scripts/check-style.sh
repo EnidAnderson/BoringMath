@@ -9,7 +9,8 @@
 #   1. no banned tactics appear in code (block comments/docstrings and line
 #      comments are stripped first);
 #   2. every declaration (theorem/lemma/def/structure/instance/abbrev)
-#      has a "Reference:" line in the 12 lines above it;
+#      has a "Reference:" line in the 12 lines above it (declarations are
+#      detected only in code, but the reference window reads raw lines);
 #   3. lists every `sorry` (informational).
 #
 # This is a best-effort backstop; the human reviewer is authoritative.
@@ -79,16 +80,39 @@ for file in "${FILES[@]}"; do
     done
   fi
 
-  # 2. missing references
+  # 2. missing references (declarations detected in stripped code; the
+  #    reference window reads the raw lines, so references may be comments).
   missing=$(awk -v file="$file" '
-    /^ *(private |protected |noncomputable |macro )*(theorem|lemma|def|structure|instance|abbrev)[ ]/ {
-      found = 0
-      for (i = NR - 12; i < NR; i++) {
-        if (i >= 1 && buf[i] ~ /Reference:/) { found = 1; break }
+    BEGIN { skip = 0 }
+    {
+      raw = $0
+      line = $0
+      out = ""
+      while (1) {
+        if (skip) {
+          p = index(line, "-/")
+          if (p == 0) { break }
+          line = substr(line, p + 2)
+          skip = 0
+        } else {
+          p = index(line, "/-")
+          if (p == 0) { out = out line; break }
+          out = out substr(line, 1, p - 1)
+          line = substr(line, p + 2)
+          skip = 1
+        }
       }
-      if (!found) { print file ":" NR ": missing -- Reference: above declaration" }
+      p = index(out, "--")
+      if (p > 0) { out = substr(out, 1, p - 1) }
+      if (out ~ /^ *(private |protected |noncomputable |macro )*(theorem|lemma|def|structure|instance|abbrev)[ ]/) {
+        found = 0
+        for (i = NR - 12; i < NR; i++) {
+          if (i >= 1 && buf[i] ~ /Reference:/) { found = 1; break }
+        }
+        if (!found) { print file ":" NR ": missing -- Reference: above declaration" }
+      }
+      buf[NR] = raw
     }
-    { buf[NR] = $0 }
   ' "$file")
   if [ -n "$missing" ]; then
     echo "$missing"
