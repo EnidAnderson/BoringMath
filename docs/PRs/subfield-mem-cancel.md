@@ -52,7 +52,32 @@ clause (Section 62, FINDING 1: the reduction layer is pure subfield algebra).
 
 - Naming follows the `Submodule`/`AddSubgroup` cancel convention with an
   `_of_le` transfer suffix; reviewer to confirm.
-- The `sorry` is deliberate (statement-only candidate; fidelity test of
-  the PR workflow): the coding agent completes the proof on this branch.
-- Line budget: the honest proof is expected at ≤ 6 lines under the tactic
-  whitelist (task bound: 20).
+- **Proof instantiated** (coding agent, 2026-10-25): the sorry is replaced
+  by a single direct term — no tactic is used at all, per the direct-proof
+  preference of the boring style:
+
+  ```lean
+  Eq.subst (add_sub_cancel_right a b)
+    (Subfield.sub_mem K' h (mem_of_le_of_mem hle hb))
+  ```
+
+  The proof is linear: each input (`hle`, `h`, `hb`) is used exactly once.
+- **Mathlib lemmas used** (all verified against the pinned `v4.35.0-rc3`):
+  - `mem_of_le_of_mem` — `Mathlib/Data/SetLike/Basic.lean:268`, an alias
+    of `IsConcreteLE.le_iff`: membership transfer along `K ≤ K'`.
+  - `Subfield.sub_mem` — `Mathlib/Algebra/Field/Subfield/Defs.lean:236`:
+    closure of subtraction. (Precision found in review: in this revision
+    the Subfield membership API lives in `Defs.lean`, not `Basic.lean`.)
+  - `add_sub_cancel_right` — the `to_additive` form of
+    `mul_div_cancel_right`, `Mathlib/Algebra/Group/Defs.lean:81`:
+    `a + b - b = a`.
+  - `Eq.subst` — Leibniz substitutivity of equality, the primitive through
+    which all equality-based rewriting is done here.
+- **Verification** (both outputs, per the work order):
+  - `lake build`: `Build completed successfully (996 jobs)`; no warnings
+    for `BoringMath.Algebra.SubfieldMemCancel` (its sorry is gone; the
+    build's only warnings are the pre-existing deliberate sorries in
+    `BoringMath/Foundations/Eta.lean`).
+  - `scripts/check-style.sh`: `0 violation(s)` (after fixing a checker
+    false positive found in review — declaration detection now ignores
+    docstring prose; the fix ships with this PR).
