@@ -4,6 +4,11 @@ Ticket: BoringMath issue #15 (TREE B.0). Branch: `pr/square-base-change`.
 Module: `BoringMath/CategoryTheory/Limits/Shapes/Pullback/SquareBaseChange.lean`
 (owner directory per `docs/OWNERSHIP.md`; see the ownership note below).
 
+**Revision (2026-10-26, computability decree):** per the human referee's
+standing rule ("keep everything computable rather than noncomputable"),
+the module was redesigned on explicit pullback-cone data — see the
+revision record at the end of this note.
+
 ## Statement
 
 * `Square.baseChange` — the base change of a commutative square `sq`
@@ -81,3 +86,32 @@ collision. `Square.pullback`-style names: 0 in-flight hits.
 * `lake build`: warning-clean except the module's single deliberate
   sorry (statement-only, per the sorry law).
 * `scripts/check-style.sh`: 0 violations.
+
+## Revision record (2026-10-26, computability decree)
+
+Per the human referee's standing rule — keep everything computable
+rather than noncomputable — the module was redesigned; codified as
+STYLE §2.3 (computability discipline) in the same PR.
+
+- `Square.baseChange` now takes its pullback data **explicitly** (three
+  `PullbackCone` parameters: the two base-changed legs and the corner
+  cone) instead of `[HasPullbacks C]` instance-chosen data. The
+  construction is **computable** — the previous design depended on
+  `Limits.pullback` (`Classical.choice`-backed) and was `noncomputable`.
+  Callers holding a `HasPullbacks C` instance obtain cone data at their
+  own call sites; the library bakes no choice in.
+- `Square.isPullback_baseChange` restated on the data-explicit form:
+  the corner cone's limit witness is now a hypothesis; the proof is a
+  single direct term (`⟨⟨c₁.condition⟩, ⟨IsLimit.ofIsoLimit hc₁
+  (PullbackCone.eta c₁)⟩⟩` — `Limits/IsLimit.lean:181`,
+  `PullbackCone.lean:162`), linear, no tactics.
+- `Square.baseChangeCompIso` (the statement-only composition law) is
+  **retired with this revision**: its statement was phrased against the
+  instance-chosen design. The data-explicit composition law is the
+  cone-pasting law, which belongs with B.3's saturation work where it
+  is consumed; re-scoped there (obstruction honestly recorded here, not
+  silently dropped).
+
+Protocol note: this is a revision (not supersession) of a landed module
+under a direct human decree; no downstream consumers existed; recorded
+as a protocol exception with the decree as authority.
