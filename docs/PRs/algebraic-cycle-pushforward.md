@@ -49,6 +49,15 @@ mirroring `Basic.lean` at the pin; see `docs/OWNERSHIP.md`).
   along a quasicompact morphism as a homomorphism of the additive
   monoids of zero-cycles, with `pushforwardHom_apply` (definitional).
   Noncomputable: the fiber sums are enumerated by choice.
+* `pushforward_comp` — **the composition law**: the pushforward along a
+  composite is the pushforward of the pushforward. The composite fiber
+  sum is re-indexed over the fibers of the intermediate map along the
+  image of the composite fiber (`Finset.sum_fiberwise_of_maps_to`); the
+  residue degree is constant on each fiber, so each fiber sum factors
+  through the coefficient of the intermediate pushforward; the
+  extension to the image vanishes off the support.
+* `pushforwardHom_comp` — the pushforward homomorphism is functorial:
+  the homomorphism of a composite is the composite of the homomorphisms.
 * Support lemmas in the zero-cycle module: `support_single_subset` (the
   support of a point cycle is contained in the singleton of its point;
   now also used by `isFinite_single`), `eq_of_multiplicity_ne_zero` (a
