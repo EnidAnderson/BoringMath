@@ -6,18 +6,12 @@ Authors: Enid
 import Mathlib.Init
 
 /-!
-# Eta conversion, in the boring style
+# Eta conversion
 
-This module records the basic eta conversion laws, and doubles as the
-reference specimen for the *boring style* (see `docs/STYLE.md`): every
-declaration is named after its standard mathematical designation, every
-declaration carries an inline literature reference, proofs are exact and
-explicit, and any proof not yet honestly instantiated carries a well-typed
-`sorry` together with a peeling plan.
-
-Eta conversion is the identification of a function with its eta expansion;
-in the lambda calculus literature it is the conversion rule
-`η : (λ x. f x) → f`.
+The basic eta conversion laws: a function equals its eta expansion, and an
+ordered pair equals the pair assembled from its components. Eta conversion
+identifies a function with its eta expansion; in the lambda calculus
+literature it is the conversion rule `η : (λ x. f x) → f`.
 
 ## References
 * [Barendregt] H. P. Barendregt, *The Lambda Calculus: Its Syntax and
@@ -54,12 +48,8 @@ theorem eta_pair {α : Type u} {β : Type v} (p : α × β) : (p.1, p.2) = p := 
 /-- **Eta conversion respects composition**: eta expansion of the inner
 factor inside a composition changes nothing. -/
 theorem eta_comp {α : Type u} {β : Type v} {γ : Type w} (f : β → γ) (g : α → β) :
-    (fun x => f ((fun y => g y) x)) = fun x => f (g x) := by
-  -- TEMPORARY SORRY: the honest proof has not been instantiated yet.
-  -- PEELING PLAN: eta-reduce the inner expansion via `rw [eta g]`, leaving a
-  -- goal of the form `(fun x => f (g x)) = fun x => f (g x)`, which is the
-  -- primitive eta lemma `eta (fun x => f (g x))` (permitted as `rfl` only
-  -- because it is a primitive definitional lemma).
-  sorry
+    (fun x => f ((fun y => g y) x)) = fun x => f (g x) :=
+  -- β: `(fun y => g y) x` is `g x`, so both sides are the same term.
+  rfl
 
 end BoringMath

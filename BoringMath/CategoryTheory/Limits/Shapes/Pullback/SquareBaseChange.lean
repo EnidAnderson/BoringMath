@@ -15,20 +15,13 @@ Given a commutative square `sq : Square C` in a category `C` and a morphism
 base-changed legs (cones over the cospans `(sq.f₂₄, h)` and `(sq.f₃₄, h)`)
 and the corner cone over the induced cospan of legs.
 
-This is the API substrate of the cd-structure program (the completeness
-condition of Voevodsky — stability of distinguished squares under base
-change — is its first consumer), and of the scheme-level Nisnevich layer.
-
-The construction is **computable** (per the computability discipline of
-`docs/STYLE.md`): the pullback data is an explicit parameter, not
-instance-chosen — mathlib's `Limits.pullback` data is `Classical.choice`-
-backed and would force `noncomputable`. Callers with a `HasPullbacks C`
-instance obtain cone data at their own call sites; the library bakes no
-choice into its definitions.
+This is the substrate of Voevodsky's completeness condition (stability of
+distinguished squares under base change) and of the scheme-level Nisnevich
+layer.
 
 The base change of any commutative square, on limit corner data, is a
-pullback square (the preservation clause is the special case that consumes
-no hypothesis beyond the corner's limit witness).
+pullback square. The preservation clause for pullback squares is
+the special case consuming no hypothesis beyond the limit witness.
 
 ## References
 * V. Voevodsky, *cd-structures*, unpublished notes (2010) — the
@@ -51,9 +44,7 @@ namespace Square
 `h : Y ⟶ sq.X₄` into its lower-right corner, on explicit pullback-cone
 data: `c₂` and `c₃` are cones over the base-change cospans of the two
 legs, and `c₁` is a cone over the induced cospan of the two new legs.
-The square over `Y` assembles from the cone points and projections.
-
-Computable by construction: the cone data is a parameter. -/
+The square over `Y` assembles from the cone points and projections. -/
 def baseChange (sq : Square C) {Y : C} (h : Y ⟶ sq.X₄)
     (c₂ : Limits.PullbackCone sq.f₂₄ h)
     (c₃ : Limits.PullbackCone sq.f₃₄ h)
@@ -74,20 +65,14 @@ def baseChange (sq : Square C) {Y : C} (h : Y ⟶ sq.X₄)
 -- REVIEW(citation): pin down the exact section in review.
 /-- The base change of a commutative square, on limit corner data, is a
 pullback square: the corner cone `c₁` being a limit says exactly that
-the assembled square is a pullback square. The `IsPullback` preservation
-clause for base changes of pullback squares is the special case with no
-hypothesis to consume beyond the corner's limit witness. -/
+the assembled square is a pullback square. -/
 theorem isPullback_baseChange (sq : Square C) {Y : C} (h : Y ⟶ sq.X₄)
     (c₂ : Limits.PullbackCone sq.f₂₄ h)
     (c₃ : Limits.PullbackCone sq.f₃₄ h)
     (c₁ : Limits.PullbackCone c₂.snd c₃.snd)
     (hc₁ : Limits.IsLimit c₁) : (sq.baseChange h c₂ c₃ c₁).IsPullback :=
-  -- Direct term: `Square.IsPullback` unfolds to the four-arrow
-  -- `IsPullback c₁.fst c₁.snd c₂.snd c₃.snd`, whose commutativity is
-  -- `c₁.condition` and whose limit witness is `hc₁` transported along
-  -- the cone isomorphism `PullbackCone.eta c₁`
-  -- (`IsLimit.ofIsoLimit`, `Limits/IsLimit.lean:181`). Linear: each input
-  -- is used exactly once.
+  -- The limit witness `hc₁` transports along the cone isomorphism
+  -- `PullbackCone.eta c₁` (`IsLimit.ofIsoLimit`).
   ⟨⟨c₁.condition⟩, ⟨Limits.IsLimit.ofIsoLimit hc₁ (Limits.PullbackCone.eta c₁)⟩⟩
 
 end Square

@@ -194,6 +194,10 @@ Consequences:
 - Files are 100 columns or fewer; every file carries the standard copyright
   header (with the Hippocratic Mathematics License line); every public
   declaration carries a docstring.
+- Comments are boring, short, and focused on the mathematics: they name the
+  load-bearing lemma of a proof step, record a non-obvious constraint, or
+  cite the mathematical content. Comments do not remark on style, process,
+  or the state of the codebase.
 
 ## 7. The sorry protocol
 
