@@ -29,6 +29,10 @@ the tower extends that file's residue field API; see `docs/OWNERSHIP.md`).
   `(g ≫ h).residueDegree x = h.residueDegree (g x) * g.residueDegree x`
   (via `Module.finrank_mul_finrank`, the tower law for the ranks of free
   modules: every residue field is a free module over a subfield).
+* `Scheme.Hom.residueDegree_of_isIso` — the residue degree of an
+  isomorphism is one: composing with the inverse is the identity
+  (`residueDegree_id`), and the tower law identifies the factors
+  (`mul_eq_one`).
 
 ## Notes
 
