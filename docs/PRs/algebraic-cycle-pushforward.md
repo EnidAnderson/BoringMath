@@ -35,6 +35,16 @@ mirroring `Basic.lean` at the pin; see `docs/OWNERSHIP.md`).
 * `pushforward_id` — the pushforward along the identity is the identity
   on cycles (the substrate's `AlgebraicCycle.map_id`; the constant
   weights agree on both sides).
+* `finite_support_inter_fiber` — the support of a cycle meets a fiber
+  of a quasicompact morphism in a finite set (any compact open
+  neighborhood of the point has compact preimage under the spectral
+  map, and the support meets a compact set finitely; the compact open
+  neighborhoods form a basis of the space of points).
+* `pushforward_add` — the pushforward is additive: the pushforward of a
+  sum of cycles is the sum of the pushforwards (pointwise
+  multiplicities add and multiplication distributes; the fiber sums
+  add by `finsum_mem_add_distrib'`, the fiber finiteness by
+  `finite_support_inter_fiber`).
 * Support lemmas in the zero-cycle module: `support_single_subset` (the
   support of a point cycle is contained in the singleton of its point;
   now also used by `isFinite_single`), `eq_of_multiplicity_ne_zero` (a
