@@ -58,6 +58,9 @@ The zero-cycle layer on top of `Mathlib.AlgebraicGeometry.AlgebraicCycle.Basic`
 * `degree_zero`, `degree_single`, `degree_add` — the degree of the zero
   cycle is zero; the degree of `r · [x]` is `r · [κ(x) : κ(g x)]`; the
   degree is additive.
+* `degree_subset`, `degree_wellDefined` — enlarging the containing set
+  does not change the degree; any two finite sets containing the
+  support give the same degree (well-definedness).
 * `support_add_subset_union` — the support of a sum of cycles is
   contained in the union of any two finite sets containing the
   summands' supports (the witness needed to sum `D + E` over `s ∪ t`).
@@ -91,12 +94,6 @@ on the degree, per the referee's standing computability preference.
 * Flat pullback on cycles: needs the flat-morphism API (`Flat`) and the
   local-finiteness of preimages under flat morphisms; separate GOLD
   reads required before staking statements.
-* Well-definedness of `degree` in the containing set `s` (degree is
-  independent of the choice of `s`): provable from
-  `Function.notMem_support` by the same vanishing computation as in
-  `degree_add`; deliberately not declared here to keep the module
-  minimal — it belongs with the trace-formula module where it is
-  consumed.
 
 ## Clause (4) verification (ticket B-line note)
 
