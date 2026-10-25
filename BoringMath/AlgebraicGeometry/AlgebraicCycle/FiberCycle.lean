@@ -91,6 +91,18 @@ theorem support_fiberCycle_subset_preimage
   exact Scheme.fromSpecResidueField_apply P
     (IsLocalRing.closedPoint (Y.residueField P))
 
+-- Reference: W. Fulton, *Intersection Theory*, ch. 1 (the flat
+-- pullback of a point cycle vanishes off the fiber).
+-- REVIEW(citation): pin down the section.
+/-- The fiber cycle vanishes at points outside the fiber: a point
+whose image differs from the given point has coefficient zero. -/
+theorem fiberCycle_apply_of_ne [IsNoetherian (Scheme.Hom.fiber f P)]
+    (x : ↥X) (hx : f.base x ≠ P) :
+    fiberCycle f P x = 0 :=
+  Function.notMem_support.mp fun hmem =>
+    hx (Set.mem_singleton_iff.mp
+      (support_fiberCycle_subset_preimage f P hmem))
+
 end AlgebraicCycle
 
 end AlgebraicGeometry
