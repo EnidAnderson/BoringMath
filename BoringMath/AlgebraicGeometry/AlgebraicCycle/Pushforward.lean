@@ -98,6 +98,52 @@ theorem pushforward_id (D : AlgebraicCycle X ℤ) :
     pushforward (𝟙 X) D = D :=
   AlgebraicCycle.map_id (fun _ => (0 : ℕ)) D
 
+-- Reference: Stacks Project, tag 02R3 (the fiber sums of the
+-- pushforward are finite sums).
+-- REVIEW(citation): pin down the exact tag.
+/-- The support of a cycle meets a fiber of a quasicompact morphism in
+a finite set. -/
+theorem finite_support_inter_fiber (g : X ⟶ Y) [QuasiCompact g]
+    (D : AlgebraicCycle X ℤ) (z : ↥Y) :
+    (g.base ⁻¹' {z} ∩ D.support).Finite := by
+  obtain ⟨U, hU⟩ :=
+    (PrespectralSpace.isTopologicalBasis (X := ↥Y)).exists_subset_of_mem_open
+      (Set.mem_univ z) isOpen_univ
+  refine Set.Finite.subset
+    (LocallyFiniteSupport.finite_inter_support_of_isCompact
+      (Function.locallyFinsupp.locallyFiniteSupport D)
+      (IsCompact.preimage_of_isOpen g.isSpectralMap hU.1.2 hU.1.1)) ?_
+  intro x hx
+  exact ⟨Set.mem_preimage.mpr
+      (Eq.subst (Set.mem_singleton_iff.mp (Set.mem_preimage.mp hx.1)).symm hU.2.1),
+    hx.2⟩
+
+-- Reference: Stacks Project, tag 02R3 (the pushforward is additive).
+-- REVIEW(citation): pin down the exact tag.
+/-- The pushforward is additive: the pushforward of a sum of cycles is
+the sum of the pushforwards. -/
+theorem pushforward_add (g : X ⟶ Y) [QuasiCompact g]
+    (D E : AlgebraicCycle X ℤ) :
+    pushforward g (D + E) = pushforward g D + pushforward g E := by
+  refine Function.locallyFinsuppWithin.ext (fun z => ?_)
+  calc (pushforward g (D + E)) z
+      = ∑ᶠ (x : ↥X) (_ : x ∈ g.base ⁻¹' {z}),
+          (D + E) x * (g.residueDegree x : ℤ) :=
+        pushforward_apply g (D + E) z
+    _ = (pushforward g D + pushforward g E) z := by
+      refine Eq.trans (finsum_mem_congr rfl fun x _ =>
+        Eq.trans (congrArg₂ HMul.hMul (multiplicity_add D E x) rfl)
+          (add_mul (D x) (E x) (g.residueDegree x))) ?_
+      refine Eq.trans (finsum_mem_add_distrib'
+        (Set.Finite.subset (finite_support_inter_fiber g D z) fun x hx =>
+          ⟨hx.1, Function.mem_support.mpr
+            (mul_ne_zero_iff.mp (Function.mem_support.mp hx.2)).1⟩)
+        (Set.Finite.subset (finite_support_inter_fiber g E z) fun x hx =>
+          ⟨hx.1, Function.mem_support.mpr
+            (mul_ne_zero_iff.mp (Function.mem_support.mp hx.2)).1⟩)) ?_
+      exact Eq.symm (congrArg₂ HAdd.hAdd (pushforward_apply g D z)
+        (pushforward_apply g E z))
+
 -- Reference: W. Fulton, *Intersection Theory*, ch. 1 (the pushforward of
 -- a point cycle: `g_* (r · [x]) = (r · [κ(x) : κ(g x)]) · [g x]`).
 -- REVIEW(citation): pin down the section.
