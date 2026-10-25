@@ -71,3 +71,39 @@ work under that license. Files destined for a hypothetical Mathlib
 submission would be re-licensed Apache 2.0 upstream, at Mathlib's own
 requirements; this repository's copy remains under the Hippocratic
 Mathematics License.
+
+## The modular fast-forward protocol (no-merge discipline)
+
+Merging, in the strict sense, is the reconciliation of divergent work — a
+sign that two PRs touched the same ground. This protocol makes that
+structurally impossible:
+
+1. **One PR = one new module + one new PR note.** A content PR adds
+   exactly one new file under `BoringMath/<Area>/` and exactly one new
+   file under `docs/PRs/`. New files only.
+2. **No PR edits any file it did not create in that same PR.** In
+   particular: never edit the lakefile, `docs/STYLE.md`, `scripts/`,
+   another module, or another PR note. A module may *import* existing
+   modules freely; importing is not editing.
+3. **Shared-file changes are serialized.** The lakefile, the style
+   guide, the scripts, and this protocol are the only shared mutable
+   files. A PR touching them may be open only while no other PR is
+   open, and it lands before any new content PR is opened. This is the
+   single serialization point of the whole workflow.
+4. **Landing is a rebase, never a merge.** Only rebase-merging is
+   enabled on GitHub, linear history is required on `main`, and
+   branches are deleted on landing. A landed PR contributes exactly
+   its reviewed candidate commits to `main`, in order; git never
+   reconciles anything, and no merge commit ever exists.
+5. **Supersession, not revision.** A result that subsumes an earlier
+   one is a new module; the earlier module is left untouched. Superseded
+   modules are removed only by a periodic, human-ordered compaction PR
+   (itself serialized per rule 3).
+6. **Content PRs commute.** Because every content PR is purely
+   additive, any set of open content PRs can land in any order. If two
+   content PRs ever overlap, that is a protocol violation caught in
+   review — not a merge situation.
+
+The root import file is eliminated: the library is built by globs
+(`BoringMath.+`), so no content PR ever touches a shared file in order
+to be built.
