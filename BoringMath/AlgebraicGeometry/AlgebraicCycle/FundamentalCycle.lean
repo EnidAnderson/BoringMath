@@ -4,6 +4,7 @@ Released under the Hippocratic Mathematics License v1.0, as described in the fil
 Authors: Enid
 -/
 import BoringMath.AlgebraicGeometry.AlgebraicCycle.Zero
+import BoringMath.AlgebraicGeometry.AlgebraicCycle.Pushforward
 import Mathlib.AlgebraicGeometry.Noetherian
 
 /-!
@@ -159,6 +160,71 @@ theorem image_genericPoints_of_isIso {X Y : Scheme.{u}} (f : X ⟶ Y)
     exact ⟨(Scheme.Hom.homeomorph f).symm y,
       key (Scheme.Hom.homeomorph f).symm y hy,
       Homeomorph.apply_symm_apply (Scheme.Hom.homeomorph f) y⟩
+
+-- Reference: W. Fulton, *Intersection Theory*, ch. 1 (the fundamental
+-- cycle is invariant under isomorphism).
+-- REVIEW(citation): pin down the section.
+open scoped Classical in
+/-- **The fundamental cycle transports along isomorphisms**: the
+pushforward of the fundamental cycle along an isomorphism is the
+fundamental cycle of the target — the generic points correspond, and
+each point cycle pushes forward to the point cycle at the image with
+coefficient one, the residue degree of an isomorphism. -/
+theorem fundamentalCycle_of_isIso {X Y : Scheme.{u}} (f : X ⟶ Y)
+    [IsIso f] [IsNoetherian X] [IsNoetherian Y] :
+    AlgebraicCycle.pushforward f (Scheme.fundamentalCycle X) =
+      Scheme.fundamentalCycle Y := by
+  have hgpX : (genericPoints ↥X : Set ↥X).Finite :=
+    genericPoints.finite (α := ↥X)
+      (finite_irreducibleComponents_of_isNoetherian (X := X))
+  have hgpY : (genericPoints ↥Y : Set ↥Y).Finite :=
+    genericPoints.finite (α := ↥Y)
+      (finite_irreducibleComponents_of_isNoetherian (X := Y))
+  -- the generic points correspond
+  have hfin : (Scheme.genericPointsFinset X).image f.base =
+      Scheme.genericPointsFinset Y := by
+    refine Finset.ext fun y => Iff.intro (fun hy => ?_) (fun hy => ?_)
+    · obtain ⟨η, hη, rfl⟩ := Finset.mem_image.mp hy
+      exact (Set.Finite.mem_toFinset hgpY).mpr
+        ((Eq.subset (image_genericPoints_of_isIso f))
+          (Set.mem_image_of_mem f.base
+            ((Set.Finite.mem_toFinset hgpX).mp hη)))
+    · obtain ⟨η, hη, heq⟩ := (Set.mem_image f.base _ y).mp
+        ((Eq.subset (image_genericPoints_of_isIso f).symm)
+          ((Set.Finite.mem_toFinset hgpY).mp hy))
+      exact Finset.mem_image.mpr ⟨η,
+        (Set.Finite.mem_toFinset hgpX).mpr hη, heq⟩
+  -- each point cycle pushes forward to the point cycle at the image
+  have hpt : ∀ η : ↥X,
+      AlgebraicCycle.pushforward f
+        (Function.locallyFinsuppWithin.single η (1 : ℤ)) =
+      Function.locallyFinsuppWithin.single (f.base η) (1 : ℤ) := fun η =>
+    Eq.trans (AlgebraicCycle.pushforward_single f η 1)
+      (congrArg (Function.locallyFinsuppWithin.single (f.base η))
+        (Eq.trans (one_mul (f.residueDegree η : ℤ))
+          (Eq.trans (congrArg ((Nat.cast (R := ℤ)))
+            (Scheme.Hom.residueDegree_of_isIso f η))
+            (Nat.cast_one))))
+  -- the pushforward distributes over the sum of the point cycles
+  calc AlgebraicCycle.pushforward f (Scheme.fundamentalCycle X)
+      = AlgebraicCycle.pushforward f
+          (∑ η ∈ Scheme.genericPointsFinset X,
+            Function.locallyFinsuppWithin.single η (1 : ℤ)) := rfl
+    _ = ∑ η ∈ Scheme.genericPointsFinset X,
+          AlgebraicCycle.pushforward f
+            (Function.locallyFinsuppWithin.single η (1 : ℤ)) :=
+        map_sum (AlgebraicCycle.pushforwardHom f) _ _
+    _ = ∑ η ∈ Scheme.genericPointsFinset X,
+          Function.locallyFinsuppWithin.single (f.base η) (1 : ℤ) :=
+        Finset.sum_congr rfl fun η _ => hpt η
+    _ = ∑ ξ ∈ Scheme.genericPointsFinset Y,
+          Function.locallyFinsuppWithin.single ξ (1 : ℤ) :=
+        Eq.trans (Eq.symm (Finset.sum_image
+          ((Scheme.Hom.homeomorph f).injective.injOn)))
+          (congrArg
+            (fun s => ∑ ξ ∈ s, Function.locallyFinsuppWithin.single ξ (1 : ℤ))
+            hfin)
+    _ = Scheme.fundamentalCycle Y := rfl
 
 end Scheme
 
