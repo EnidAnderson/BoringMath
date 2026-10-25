@@ -80,6 +80,72 @@ theorem IsFinite.pushforward (g : X ⟶ Y) [QuasiCompact g]
     IsFinite (pushforward g D) :=
   (hD.image g.base).subset (support_pushforward_subset_image g D)
 
+-- Reference: W. Fulton, *Intersection Theory*, ch. 1 (the pushforward of
+-- a point cycle: `g_* (r · [x]) = (r · [κ(x) : κ(g x)]) · [g x]`).
+-- REVIEW(citation): pin down the section.
+/-- The pushforward of a point cycle is the point cycle at the image
+point, with the coefficient weighted by the residue degree. -/
+theorem pushforward_single (g : X ⟶ Y) [QuasiCompact g] [DecidableEq ↥X]
+    [DecidableEq ↥Y] (x : ↥X) (r : ℤ) :
+    pushforward g (Function.locallyFinsuppWithin.single x r) =
+      Function.locallyFinsuppWithin.single (g.base x)
+        (r * (g.residueDegree x : ℤ)) := by
+  refine Function.locallyFinsuppWithin.ext (fun z => ?_)
+  rcases Classical.em (z = g.base x) with hz | hz
+  · subst hz
+    have key : ∀ {a : ↥X},
+        Function.locallyFinsuppWithin.single x r a *
+            (g.residueDegree a : ℤ) ≠ 0 →
+        a = x :=
+      fun ha => eq_of_multiplicity_ne_zero x r (mul_ne_zero_iff.mp ha).1
+    calc pushforward g (Function.locallyFinsuppWithin.single x r) (g.base x)
+        = ∑ᶠ (a : ↥X) (_ : a ∈ g.base ⁻¹' {g.base x}),
+            Function.locallyFinsuppWithin.single x r a *
+              (g.residueDegree a : ℤ) :=
+          pushforward_apply g _ _
+      _ = ∑ a ∈ ({x} : Finset ↥X),
+            Function.locallyFinsuppWithin.single x r a *
+              (g.residueDegree a : ℤ) :=
+          finsum_cond_eq_sum_of_cond_iff _
+            (fun ha => Iff.intro
+              (fun _ => Finset.mem_singleton.mpr (key ha))
+              (fun hmem => Set.mem_preimage.mpr
+                (Set.mem_singleton_iff.mpr
+                  (congrArg g.base (Finset.mem_singleton.mp hmem)))))
+      _ = Function.locallyFinsuppWithin.single x r x *
+            (g.residueDegree x : ℤ) :=
+          Finset.sum_singleton _ x
+      _ = r * (g.residueDegree x : ℤ) :=
+          congrArg₂ HMul.hMul (multiplicity_single x r) rfl
+      _ = Function.locallyFinsuppWithin.single (g.base x)
+            (r * (g.residueDegree x : ℤ)) (g.base x) :=
+          (multiplicity_single (g.base x) (r * (g.residueDegree x : ℤ))).symm
+  · have key : ∀ {a : ↥X},
+        Function.locallyFinsuppWithin.single x r a *
+            (g.residueDegree a : ℤ) ≠ 0 →
+        a = x :=
+      fun ha => eq_of_multiplicity_ne_zero x r (mul_ne_zero_iff.mp ha).1
+    calc pushforward g (Function.locallyFinsuppWithin.single x r) z
+        = ∑ᶠ (a : ↥X) (_ : a ∈ g.base ⁻¹' {z}),
+            Function.locallyFinsuppWithin.single x r a *
+              (g.residueDegree a : ℤ) :=
+          pushforward_apply g _ _
+      _ = ∑ a ∈ (∅ : Finset ↥X),
+            Function.locallyFinsuppWithin.single x r a *
+              (g.residueDegree a : ℤ) :=
+          finsum_cond_eq_sum_of_cond_iff _
+            (fun ha => Iff.intro
+              (fun hmem => absurd
+                (Eq.trans (congrArg g.base (key ha)).symm
+                  (Set.mem_singleton_iff.mp (Set.mem_preimage.mp hmem)))
+                (Ne.symm hz))
+              (fun hmem => absurd hmem (Finset.notMem_empty _)))
+      _ = 0 := Finset.sum_empty
+      _ = Function.locallyFinsuppWithin.single (g.base x)
+            (r * (g.residueDegree x : ℤ)) z :=
+          Eq.symm (Eq.trans Function.locallyFinsuppWithin.single_apply
+            (ite_eq_right hz))
+
 end AlgebraicCycle
 
 end AlgebraicGeometry

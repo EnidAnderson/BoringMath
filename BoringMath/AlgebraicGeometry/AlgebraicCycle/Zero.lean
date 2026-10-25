@@ -61,15 +61,24 @@ theorem IsFinite.add {R : Type*} [AddMonoid R] {D E : AlgebraicCycle X R}
   Set.Finite.subset (Set.Finite.union hD hE) (Function.support_add ↑D ↑E)
 
 -- Reference: W. Fulton, *Intersection Theory*, ch. 1, §1 (a point cycle
+-- is supported at its point).
+-- REVIEW(citation): pin down the exact section in review.
+/-- The support of a point cycle is contained in the singleton of its
+point. -/
+theorem support_single_subset {R : Type*} [Zero R] [DecidableEq X] {x : X}
+    {r : R} :
+    (Function.locallyFinsuppWithin.single x r).support ⊆ {x} :=
+  Set.Subset.trans (Eq.subset (congrArg Function.support
+      Function.locallyFinsuppWithin.coe_single))
+    (Pi.support_single_subset (i := x) (a := r))
+
+-- Reference: W. Fulton, *Intersection Theory*, ch. 1, §1 (a point cycle
 -- `[x]` has support `{x}`).
 -- REVIEW(citation): pin down the exact section in review.
 /-- A point cycle has finite support. -/
 theorem isFinite_single {R : Type*} [Zero R] [DecidableEq X] (x : X) (r : R) :
     IsFinite (Function.locallyFinsuppWithin.single x r) :=
-  Set.Finite.subset (Set.finite_singleton x)
-    (Set.Subset.trans (Eq.subset (congrArg Function.support
-        Function.locallyFinsuppWithin.coe_single))
-      (Pi.support_single_subset (i := x) (a := r)))
+  Set.Finite.subset (Set.finite_singleton x) support_single_subset
 
 -- Reference: W. Fulton, *Intersection Theory*, ch. 1, §1 (the support of
 -- a sum of formal sums is contained in the union of the supports of the
@@ -103,6 +112,16 @@ theorem multiplicity_add {R : Type*} [AddMonoid R] (D E : AlgebraicCycle X R)
 theorem multiplicity_single [DecidableEq X] (x : X) (r : ℤ) :
     Function.locallyFinsuppWithin.single x r x = r :=
   Eq.trans Function.locallyFinsuppWithin.single_apply (ite_eq_left rfl)
+
+-- Reference: W. Fulton, *Intersection Theory*, ch. 1, §1 (a point at
+-- which a point cycle has nonzero multiplicity is the point of the
+-- cycle).
+-- REVIEW(citation): pin down the exact section in review.
+/-- If a point cycle has nonzero multiplicity at a point, that point is
+its point. -/
+theorem eq_of_multiplicity_ne_zero [DecidableEq X] (x : X) (r : ℤ) {a : X}
+    (h : Function.locallyFinsuppWithin.single x r a ≠ 0) : a = x :=
+  Set.mem_singleton_iff.mp (support_single_subset (Function.mem_support.mpr h))
 
 -- Reference: W. Fulton, *Intersection Theory*, ch. 1 (the local degree
 -- of a zero-cycle at a point: the multiplicity weighted by the residue
