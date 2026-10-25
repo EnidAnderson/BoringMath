@@ -6,6 +6,32 @@ Module: `BoringMath/AlgebraicGeometry/AlgebraicCycle/Zero.lean` (owner
 directory: Mathlib's `AlgebraicGeometry/AlgebraicCycle/`, mirroring the
 upstream placement of `Basic.lean` at the pin; see `docs/OWNERSHIP.md`).
 
+**Revision (2026-10-26, peeling and naming decree):** per the human
+referee's standing rules — every eta reduction peeled into its own
+short, named, non-idiosyncratic theorem, named as the mathematical
+literature names the construction — the module was restructured around
+two standard notions:
+
+* the **multiplicity** of a point in a cycle (the coefficient: Fulton
+  ch. 1; `multiplicity_add`, `multiplicity_single`);
+* the **local degree** of a cycle at a point (the multiplicity weighted
+  by the residue degree — the local degree of an extension in algebraic
+  number theory, and the local multiplicity of a finite morphism:
+  `localDegree`, `localDegree_add`, `localDegree_zero`,
+  `localDegree_single`, `localDegree_eq_zero_of_notMem_support`).
+
+The degree is now literally the sum of the local degrees, and
+`degree_add` is a three-line calculation: pointwise additivity of the
+local degrees (`Finset.sum_congr`), linearity of the summation
+(`Finset.sum_add_distrib`), and termwise addition of the two
+restrictions (`congrArg₂` over `HAdd.hAdd`, with the restrictions by
+`Finset.sum_subset` and vanishing off the support). All
+substitution-under-context steps are `congrArg₂` over the named global
+multiplication `HMul.hMul` (Leibniz substitutivity into the first
+factor); no anonymous mathematical lambda remains. Statements are
+unchanged; `degree` keeps its signature (the body is now the sum of
+`localDegree`).
+
 ## Statement
 
 The zero-cycle layer on top of `Mathlib.AlgebraicGeometry.AlgebraicCycle.Basic`
@@ -16,13 +42,19 @@ The zero-cycle layer on top of `Mathlib.AlgebraicGeometry.AlgebraicCycle.Basic`
   (a zero-cycle is a finitely-supported cycle).
 * `isFinite_zero`, `IsFinite.add`, `isFinite_single` — the empty formal
   sum, sums, and point cycles `[x]` are finitely supported.
-* `degree g D s _hs : ℤ` — the degree (trace) of a zero-cycle `D` along a
-  morphism `g : X ⟶ Y`: the sum of the coefficients weighted by the
-  residue degrees `[κ(x) : κ(g x)]` of their points, summed over an
-  explicitly given finite set `s` containing the support. The containing
-  set is carried as explicit data (`Set.Finite.toFinset` is
-  noncomputable at the pin), and the value is independent of the choice
-  because a cycle vanishes off its support (`Function.notMem_support`).
+* `multiplicity_add`, `multiplicity_single` — the multiplicity of a
+  point in a sum of cycles is the sum of the multiplicities; the point
+  cycle `r · [x]` has multiplicity `r` at `x`.
+* `localDegree g D x : ℤ` — the local degree at `x`: the multiplicity
+  of `x` weighted by the residue degree `[κ(x) : κ(g x)]`. With
+  `localDegree_add`, `localDegree_zero`, `localDegree_single`,
+  `localDegree_eq_zero_of_notMem_support` (vanishing off the support).
+* `degree g D s _hs : ℤ` — the degree (trace): the sum of the local
+  degrees over an explicitly given finite set `s` containing the
+  support. The containing set is carried as explicit data
+  (`Set.Finite.toFinset` is noncomputable at the pin), and the value is
+  independent of the choice because local degrees vanish off the
+  support (`Function.notMem_support`).
 * `degree_zero`, `degree_single`, `degree_add` — the degree of the zero
   cycle is zero; the degree of `r · [x]` is `r · [κ(x) : κ(g x)]`; the
   degree is additive.

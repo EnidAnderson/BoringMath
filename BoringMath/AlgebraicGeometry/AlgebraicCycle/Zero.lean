@@ -9,14 +9,16 @@ import Mathlib.AlgebraicGeometry.AlgebraicCycle.Basic
 # Zero-cycles
 
 A zero-cycle is an algebraic cycle with finite support. This module
-introduces the finiteness predicate, the degree (trace) of a cycle along
-a morphism — the sum of the coefficients weighted by the residue degrees
-of their points — and its basic laws: the degree of the zero cycle, of a
-point cycle, and additivity.
+introduces the finiteness predicate, the local degree of a cycle at a
+point along a morphism — the multiplicity of the point weighted by its
+residue degree — the degree of the cycle as the sum of the local degrees
+over an explicitly given finite set containing the support, and the
+basic laws: the local degrees are additive, the local degree of a point
+cycle is its weighted residue degree, and the degree is additive.
 
 The degree is summed over an explicitly given finite set of points
-containing the support; the value is independent of the choice, since a
-cycle vanishes off its support.
+containing the support; the value is independent of the choice, since
+the local degree vanishes off the support.
 
 ## References
 * Stacks Project, *Chow Homology*, tags 02QR–02R9 (algebraic cycles,
@@ -83,19 +85,88 @@ theorem support_add_subset_union {R : Type*} [AddMonoid R] [DecidableEq X]
     (Set.Subset.trans (Set.union_subset_union hs ht)
       (Eq.subset (Finset.coe_union s t).symm))
 
--- Reference: W. Fulton, *Intersection Theory*, ch. 1, §1.4 (degree as the
--- residue-degree-weighted sum of coefficients).
--- REVIEW(citation): pin down the section.
-/-- The **degree** (trace) of a cycle along a morphism `g`, summed over a
-finite set of points containing the support: the sum of the coefficients
-weighted by the residue degrees of their points over `g`.
+-- Reference: W. Fulton, *Intersection Theory*, ch. 1, §1 (the
+-- multiplicities of a formal sum: the multiplicity of a point in a sum
+-- of cycles is the sum of the multiplicities).
+-- REVIEW(citation): pin down the exact section in review.
+/-- **Multiplicities add**: the multiplicity of a point in a sum of
+cycles is the sum of the multiplicities. -/
+theorem multiplicity_add {R : Type*} [AddMonoid R] (D E : AlgebraicCycle X R)
+    (x : X) : (D + E) x = D x + E x :=
+  Pi.add_apply ↑D ↑E x
 
-The residue degree of a point is the rank of its residue field extension,
-which is nonconstructive in general; the degree is therefore
-noncomputable. -/
+-- Reference: W. Fulton, *Intersection Theory*, ch. 1, §1 (the multiplicity
+-- of a point cycle at its point is the coefficient).
+-- REVIEW(citation): pin down the exact section in review.
+/-- **The multiplicity of a point cycle at its point**: the point cycle
+`r · [x]` has multiplicity `r` at `x`. -/
+theorem multiplicity_single [DecidableEq X] (x : X) (r : ℤ) :
+    Function.locallyFinsuppWithin.single x r x = r :=
+  Eq.trans Function.locallyFinsuppWithin.single_apply (ite_eq_left rfl)
+
+-- Reference: W. Fulton, *Intersection Theory*, ch. 1 (the local degree
+-- of a zero-cycle at a point: the multiplicity weighted by the residue
+-- degree, as for a finite morphism of curves).
+-- REVIEW(citation): pin down the section.
+/-- The **local degree** of a cycle at a point along a morphism `g`: the
+multiplicity of the point weighted by the residue degree of the point
+over `g`.
+
+The residue degree of a point is the rank of its residue field
+extension, which is nonconstructive in general; the local degree is
+therefore noncomputable. -/
+noncomputable def localDegree (g : X ⟶ Y) (D : AlgebraicCycle X ℤ) (x : X) :
+    ℤ := D x * (g.residueDegree x : ℤ)
+
+-- Reference: W. Fulton, *Intersection Theory*, ch. 1 (local degrees
+-- are additive).
+-- REVIEW(citation): pin down the section.
+/-- **Local degrees add**: the local degree of a sum of cycles at a
+point is the sum of the local degrees. -/
+theorem localDegree_add (g : X ⟶ Y) (D E : AlgebraicCycle X ℤ) (x : X) :
+    localDegree g (D + E) x = localDegree g D x + localDegree g E x :=
+  Eq.trans (congrArg₂ HMul.hMul (multiplicity_add D E x) rfl)
+    (add_mul (D x) (E x) (g.residueDegree x))
+
+-- Reference: W. Fulton, *Intersection Theory*, ch. 1 (the local degree
+-- of the zero cycle).
+-- REVIEW(citation): pin down the section.
+/-- The local degree of the zero cycle is zero. -/
+theorem localDegree_zero (g : X ⟶ Y) (x : X) :
+    localDegree g (0 : AlgebraicCycle X ℤ) x = 0 :=
+  zero_mul _
+
+-- Reference: W. Fulton, *Intersection Theory*, ch. 1 (the local degree
+-- of a point cycle is the weighted residue degree).
+-- REVIEW(citation): pin down the section.
+/-- The local degree of the point cycle with coefficient `r` at `x` is
+`r` times the residue degree of `x`. -/
+theorem localDegree_single [DecidableEq X] (g : X ⟶ Y) (x : X) (r : ℤ) :
+    localDegree g (Function.locallyFinsuppWithin.single x r) x =
+      r * (g.residueDegree x : ℤ) :=
+  congrArg₂ HMul.hMul (multiplicity_single x r) rfl
+
+-- Reference: W. Fulton, *Intersection Theory*, ch. 1 (a cycle has zero
+-- multiplicity off its support).
+-- REVIEW(citation): pin down the section.
+/-- The local degree vanishes at points outside the support. -/
+theorem localDegree_eq_zero_of_notMem_support (g : X ⟶ Y)
+    (D : AlgebraicCycle X ℤ) {x : X} (hx : x ∉ D.support) :
+    localDegree g D x = 0 :=
+  Eq.trans (congrArg₂ HMul.hMul (Function.notMem_support.mp hx) rfl)
+    (zero_mul _)
+
+-- Reference: W. Fulton, *Intersection Theory*, ch. 1, §1.4 (degree as
+-- the sum of the local degrees).
+-- REVIEW(citation): pin down the section.
+/-- The **degree** (trace) of a cycle along a morphism `g`: the sum of
+the local degrees over a finite set of points containing the support.
+
+The local degree is nonconstructive (the residue degree is the rank of
+a field extension); the degree is therefore noncomputable. -/
 noncomputable def degree (g : X ⟶ Y) (D : AlgebraicCycle X ℤ) (s : Finset X)
     (_hs : D.support ⊆ ↑s) : ℤ :=
-  ∑ x ∈ s, D x * (g.residueDegree x : ℤ)
+  ∑ x ∈ s, localDegree g D x
 
 -- Reference: W. Fulton, *Intersection Theory*, ch. 1, §1.4.
 -- REVIEW(citation): pin down the section.
@@ -103,10 +174,10 @@ noncomputable def degree (g : X ⟶ Y) (D : AlgebraicCycle X ℤ) (s : Finset X)
 theorem degree_zero (g : X ⟶ Y) (s : Finset X)
     (hs : (0 : AlgebraicCycle X ℤ).support ⊆ ↑s) :
     degree g 0 s hs = 0 :=
-  Finset.sum_eq_zero fun _x _ => zero_mul _
+  Finset.sum_eq_zero fun x _ => localDegree_zero g x
 
--- Reference: W. Fulton, *Intersection Theory*, ch. 1, §1.4 (the degree of
--- a point cycle `[x]` is the residue degree of `x`).
+-- Reference: W. Fulton, *Intersection Theory*, ch. 1, §1.4 (the degree
+-- of a point cycle `[x]` is the residue degree of `x`).
 -- REVIEW(citation): pin down the section.
 /-- The degree of the point cycle with coefficient `r` at `x`, summed
 over the singleton `{x}`, is `r` times the residue degree of `x`. -/
@@ -117,10 +188,8 @@ theorem degree_single [DecidableEq X] (g : X ⟶ Y) (x : X) (r : ℤ)
       r * (g.residueDegree x : ℤ) :=
   Eq.trans
     (Finset.sum_singleton
-      (fun y => Function.locallyFinsuppWithin.single x r y *
-        (g.residueDegree y : ℤ)) x)
-    (congrArg (fun v => v * (g.residueDegree x : ℤ))
-      (Eq.trans Function.locallyFinsuppWithin.single_apply (ite_eq_left rfl)))
+      (localDegree g (Function.locallyFinsuppWithin.single x r)) x)
+    (localDegree_single g x r)
 
 -- Reference: W. Fulton, *Intersection Theory*, ch. 1, §1.4 (the degree
 -- is additive: it is a homomorphism of the group of zero-cycles).
@@ -131,35 +200,22 @@ theorem degree_add [DecidableEq X] (g : X ⟶ Y) (D E : AlgebraicCycle X ℤ)
     (s t : Finset X) (hs : D.support ⊆ ↑s) (ht : E.support ⊆ ↑t)
     (h : (D + E).support ⊆ ↑(s ∪ t)) :
     degree g (D + E) (s ∪ t) h = degree g D s hs + degree g E t ht := by
-  change ∑ x ∈ s ∪ t, (D + E) x * (g.residueDegree x : ℤ) =
-    ∑ x ∈ s, D x * (g.residueDegree x : ℤ) +
-      ∑ x ∈ t, E x * (g.residueDegree x : ℤ)
-  calc ∑ x ∈ s ∪ t, (D + E) x * (g.residueDegree x : ℤ)
-      = ∑ x ∈ s ∪ t, (D x + E x) * (g.residueDegree x : ℤ) :=
-        Finset.sum_congr rfl fun x _ =>
-          congrArg (fun v => v * (g.residueDegree x : ℤ)) (Pi.add_apply ↑D ↑E x)
-    _ = ∑ x ∈ s ∪ t, (D x * (g.residueDegree x : ℤ) +
-        E x * (g.residueDegree x : ℤ)) :=
-        Finset.sum_congr rfl fun x _ => add_mul (D x) (E x) (g.residueDegree x)
-    _ = ∑ x ∈ s ∪ t, D x * (g.residueDegree x : ℤ) +
-        ∑ x ∈ s ∪ t, E x * (g.residueDegree x : ℤ) :=
+  change ∑ x ∈ s ∪ t, localDegree g (D + E) x =
+    ∑ x ∈ s, localDegree g D x + ∑ x ∈ t, localDegree g E x
+  calc ∑ x ∈ s ∪ t, localDegree g (D + E) x
+      = ∑ x ∈ s ∪ t, (localDegree g D x + localDegree g E x) :=
+        Finset.sum_congr rfl fun x _ => localDegree_add g D E x
+    _ = ∑ x ∈ s ∪ t, localDegree g D x +
+        ∑ x ∈ s ∪ t, localDegree g E x :=
         Finset.sum_add_distrib
-    _ = ∑ x ∈ s, D x * (g.residueDegree x : ℤ) +
-        ∑ x ∈ s ∪ t, E x * (g.residueDegree x : ℤ) :=
-        congrArg (fun u => u + ∑ x ∈ s ∪ t, E x * (g.residueDegree x : ℤ))
+    _ = ∑ x ∈ s, localDegree g D x + ∑ x ∈ t, localDegree g E x :=
+        congrArg₂ HAdd.hAdd
           (Eq.symm (Finset.sum_subset Finset.subset_union_left
-            fun x _ hx' =>
-              Eq.trans (congrArg (fun v => v * (g.residueDegree x : ℤ))
-                (Function.notMem_support.mp fun hmem => hx' (hs hmem)))
-                (zero_mul _)))
-    _ = ∑ x ∈ s, D x * (g.residueDegree x : ℤ) +
-        ∑ x ∈ t, E x * (g.residueDegree x : ℤ) :=
-        congrArg (fun u => ∑ x ∈ s, D x * (g.residueDegree x : ℤ) + u)
+            fun x _ hx => localDegree_eq_zero_of_notMem_support g D
+              (Set.notMem_subset hs hx)))
           (Eq.symm (Finset.sum_subset Finset.subset_union_right
-            fun x _ hx' =>
-              Eq.trans (congrArg (fun v => v * (g.residueDegree x : ℤ))
-                (Function.notMem_support.mp fun hmem => hx' (ht hmem)))
-                (zero_mul _)))
+            fun x _ hx => localDegree_eq_zero_of_notMem_support g E
+              (Set.notMem_subset ht hx)))
 
 end AlgebraicCycle
 
