@@ -217,6 +217,31 @@ theorem degree_add [DecidableEq X] (g : X ⟶ Y) (D E : AlgebraicCycle X ℤ)
             fun x _ hx => localDegree_eq_zero_of_notMem_support g E
               (Set.notMem_subset ht hx)))
 
+-- Reference: W. Fulton, *Intersection Theory*, ch. 1, §1.4 (the degree
+-- does not depend on the containing set).
+-- REVIEW(citation): pin down the section.
+/-- Enlarging the containing set does not change the degree: summed
+over a larger finite set still containing the support, the degree is
+the same, since the local degree vanishes off the support. -/
+theorem degree_subset (g : X ⟶ Y) (D : AlgebraicCycle X ℤ)
+    {s t : Finset X} (hst : s ⊆ t) (hs : D.support ⊆ ↑s) :
+    degree g D t (Set.Subset.trans hs (Finset.coe_subset.mpr hst)) =
+      degree g D s hs :=
+  Eq.symm (Finset.sum_subset hst fun _x _ hx =>
+    localDegree_eq_zero_of_notMem_support g D (Set.notMem_subset hs hx))
+
+-- Reference: W. Fulton, *Intersection Theory*, ch. 1, §1.4 (the degree
+-- of a zero-cycle is well-defined).
+-- REVIEW(citation): pin down the section.
+open scoped Classical in
+/-- **The degree is well-defined**: any two finite sets containing the
+support give the same degree. -/
+theorem degree_wellDefined (g : X ⟶ Y) (D : AlgebraicCycle X ℤ)
+    {s t : Finset X} (hs : D.support ⊆ ↑s) (ht : D.support ⊆ ↑t) :
+    degree g D s hs = degree g D t ht :=
+  Eq.trans (degree_subset g D Finset.subset_union_left hs).symm
+    (degree_subset g D Finset.subset_union_right ht)
+
 end AlgebraicCycle
 
 end AlgebraicGeometry
