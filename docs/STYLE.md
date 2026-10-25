@@ -104,6 +104,29 @@ Term-level rules:
 A tactic may be added to the whitelist only by a style-guide change approved
 by the human reviewer, with a written justification in this file's history.
 
+### 2.3 Computability discipline
+
+**Prefer computable definitions.** Data parameters (cones, witnesses,
+carriers) are taken **explicitly** rather than through instance-chosen
+data: mathlib's chosen data (`Limits.pullback` under `HasPullbacks`,
+chosen limits generally) is `Classical.choice`-backed and forces
+`noncomputable`. A definition that takes its data as a parameter is
+computable by construction, and more boring besides (explicit >
+instance-chosen).
+
+- `noncomputable` appears only when the nonconstructivity is the
+  mathematical content itself, and each `noncomputable` carries an inline
+  comment naming what forces it.
+- The library bakes no `Classical.choice` into its definitions: callers
+  holding instances (`HasPullbacks C`, etc.) obtain their data at their
+  own call sites.
+- Prop-valued statements and proofs are unaffected (proofs do not
+  compile).
+- Convenience wrappers over chosen data are not added speculatively;
+  a wrapper becomes worth its `noncomputable` only when a consumer
+  exists, and then only as a thin, flagged layer over the computable
+  definition.
+
 ## 3. Naming
 
 Every lemma is named after the standard mathematical theorem it represents,
@@ -238,8 +261,10 @@ For each candidate commit, check:
 4. The proof is direct (tactic-free) where possible; every tactic use is
    justified; every `rw` satisfies the rewriting discipline (§2.1).
 5. The proof is linear, or its nonlinearity is flagged with a reason (§2.2).
-6. Every eta/definitional step is peeled into a named lemma (§5).
-7. Every remaining `sorry` has a peeling plan; no statement was weakened (§7).
-8. The statement is the standard mathematical one, in Mathlib-compatible
+6. The definitions are computable — data taken explicitly, no baked-in
+   choice; any `noncomputable` is content-forced and flagged (§2.3).
+7. Every eta/definitional step is peeled into a named lemma (§5).
+8. Every remaining `sorry` has a peeling plan; no statement was weakened (§7).
+9. The statement is the standard mathematical one, in Mathlib-compatible
    form; the PR note answers: does Mathlib already have it?
-9. The file would be accepted into Mathlib as-is, stylistically.
+10. The file would be accepted into Mathlib as-is, stylistically.
