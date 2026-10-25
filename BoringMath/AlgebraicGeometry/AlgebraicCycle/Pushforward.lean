@@ -5,6 +5,7 @@ Authors: Enid
 -/
 import Mathlib.AlgebraicGeometry.AlgebraicCycle.Basic
 import BoringMath.AlgebraicGeometry.AlgebraicCycle.Zero
+import BoringMath.AlgebraicGeometry.ResidueField.Tower
 
 /-!
 # Pushforward of zero-cycles
@@ -229,6 +230,159 @@ theorem pushforward_single (g : X ⟶ Y) [QuasiCompact g] [DecidableEq ↥X]
             (r * (g.residueDegree x : ℤ)) z :=
           Eq.symm (Eq.trans Function.locallyFinsuppWithin.single_apply
             (ite_eq_right hz))
+
+-- Reference: W. Fulton, *Intersection Theory*, ch. 1 (the pushforward is
+-- functorial: the pushforward along a composite is the composite of the
+-- pushforwards).
+-- REVIEW(citation): pin down the section.
+open scoped Classical in
+/-- **The composition law for the pushforward**: the pushforward along a
+composite is the pushforward of the pushforward. -/
+theorem pushforward_comp {Z : Scheme.{u}} (g : X ⟶ Y) (h : Y ⟶ Z)
+    [QuasiCompact g] [QuasiCompact h] (D : AlgebraicCycle X ℤ) :
+    pushforward (g ≫ h) D = pushforward h (pushforward g D) := by
+  refine Function.locallyFinsuppWithin.ext (fun w => ?_)
+  have hS : ((g ≫ h).base ⁻¹' {w} ∩ D.support).Finite :=
+    finite_support_inter_fiber (g ≫ h) D w
+  have hV : (h.base ⁻¹' {w} ∩ (pushforward g D).support).Finite :=
+    finite_support_inter_fiber h (pushforward g D) w
+  have hTy : ∀ y, (g.base ⁻¹' {y} ∩ D.support).Finite := fun y =>
+    finite_support_inter_fiber g D y
+  -- each coefficient of the pushforward is a finite sum over the fiber
+  have coeff_red : ∀ y, (pushforward g D) y =
+      ∑ x ∈ (hTy y).toFinset, D x * (g.residueDegree x : ℤ) := fun y =>
+    finsum_cond_eq_sum_of_cond_iff _ fun ha => Iff.intro
+      (fun hmem =>
+        (Set.Finite.mem_toFinset (hTy y)).mpr
+          ⟨Set.mem_preimage.mpr
+            (Eq.trans (Set.mem_singleton_iff.mp (Set.mem_preimage.mp hmem))
+              rfl),
+          Function.mem_support.mpr
+            (mul_ne_zero_iff.mp ha).1⟩)
+      (fun hmem => ((Set.Finite.mem_toFinset (hTy y)).mp hmem).1)
+  -- multiplying a coefficient by a weight is a finite weighted fiber sum
+  have fiber_red : ∀ y, (pushforward g D) y * (h.residueDegree y : ℤ) =
+      ∑ x ∈ (hTy y).toFinset,
+        (D x * (g.residueDegree x : ℤ)) * (h.residueDegree y : ℤ) := fun y =>
+    Eq.trans (congrArg₂ HMul.hMul (coeff_red y) rfl) (Finset.sum_mul _ _ _)
+  -- the left side: the composite fiber sum, weighted by the tower
+  have tower : ∀ x, D x * ((g ≫ h).residueDegree x : ℤ) =
+      (D x * (g.residueDegree x : ℤ)) *
+        (h.residueDegree (g.base x) : ℤ) := fun x =>
+    Eq.trans (congrArg₂ HMul.hMul rfl
+      (Eq.trans (congrArg ((Nat.cast (R := ℤ)))
+        (Scheme.Hom.residueDegree_comp g h x))
+        (Nat.cast_mul _ _)))
+      (Eq.trans (congrArg₂ HMul.hMul rfl (mul_comm _ _))
+        (mul_assoc _ _ _).symm)
+  have left_red : (pushforward (g ≫ h) D) w =
+      ∑ x ∈ hS.toFinset, (D x * (g.residueDegree x : ℤ)) *
+        (h.residueDegree (g.base x) : ℤ) := by
+    refine Eq.trans (Eq.trans (pushforward_apply (g ≫ h) D w)
+      (finsum_mem_congr rfl fun x _ => tower x)) ?_
+    refine finsum_cond_eq_sum_of_cond_iff _ fun ha => Iff.intro
+      (fun hmem =>
+        (Set.Finite.mem_toFinset hS).mpr
+          ⟨hmem, Function.mem_support.mpr
+            (mul_ne_zero_iff.mp (mul_ne_zero_iff.mp ha).1).1⟩)
+      (fun hmem => ((Set.Finite.mem_toFinset hS).mp hmem).1)
+  -- the right side: the outer fiber sum, then the inner fiber sums
+  have right_red : (pushforward h (pushforward g D)) w =
+      ∑ y ∈ hV.toFinset, ∑ x ∈ (hTy y).toFinset,
+        (D x * (g.residueDegree x : ℤ)) * (h.residueDegree y : ℤ) := by
+    refine Eq.trans (Eq.trans (pushforward_apply h (pushforward g D) w)
+      (finsum_cond_eq_sum_of_cond_iff _ fun ha => Iff.intro
+        (fun hmem =>
+          (Set.Finite.mem_toFinset hV).mpr
+            ⟨hmem, Function.mem_support.mpr (mul_ne_zero_iff.mp ha).1⟩)
+        (fun hmem => ((Set.Finite.mem_toFinset hV).mp hmem).1))) ?_
+    exact Finset.sum_congr rfl fun y _ => fiber_red y
+  -- the fibers of g over the image of the composite fiber carry the left sum
+  have part : ∑ x ∈ hS.toFinset, (D x * (g.residueDegree x : ℤ)) *
+        (h.residueDegree (g.base x) : ℤ) =
+      ∑ y ∈ hV.toFinset, ∑ x ∈ (hTy y).toFinset,
+        (D x * (g.residueDegree x : ℤ)) * (h.residueDegree y : ℤ) := by
+    have maps_to : ∀ x ∈ hS.toFinset,
+        g.base x ∈ hS.toFinset.image g.base :=
+      fun _ hx => Finset.mem_image_of_mem _ hx
+    have step1 : ∑ x ∈ hS.toFinset, (D x * (g.residueDegree x : ℤ)) *
+          (h.residueDegree (g.base x) : ℤ) =
+        ∑ y ∈ hS.toFinset.image g.base,
+          ∑ x ∈ hS.toFinset.filter (fun a => g.base a = y),
+            (D x * (g.residueDegree x : ℤ)) *
+              (h.residueDegree (g.base x) : ℤ) :=
+      Eq.symm (Finset.sum_fiberwise_of_maps_to maps_to _)
+    -- an image point lies over w
+    have himg : ∀ y, y ∈ hS.toFinset.image g.base → h.base y = w := by
+      intro y hy
+      obtain ⟨x, hx, rfl⟩ := Finset.mem_image.mp hy
+      exact Eq.trans (congrArg h.base rfl)
+        (Set.mem_singleton_iff.mp
+          (Set.mem_preimage.mp ((Set.Finite.mem_toFinset hS).mp hx).1))
+    -- on a fiber of g, the residue degree of the image point is constant,
+    -- and the fiber sum is the coefficient of the pushforward
+    have step2 : ∀ y, y ∈ hS.toFinset.image g.base →
+        ∑ x ∈ hS.toFinset.filter (fun a => g.base a = y),
+            (D x * (g.residueDegree x : ℤ)) *
+              (h.residueDegree (g.base x) : ℤ) =
+          (pushforward g D) y * (h.residueDegree y : ℤ) := by
+      intro y hy
+      have fil_eq : hS.toFinset.filter (fun a => g.base a = y) =
+          (hTy y).toFinset := by
+        refine Finset.ext fun a => ?_
+        refine Iff.trans (Finset.mem_filter) ?_
+        refine Iff.trans ?_ (Set.Finite.mem_toFinset (hTy y)).symm
+        refine Iff.intro (fun hmem => ?_) (fun hmem => ?_)
+        · exact Set.mem_inter
+            (Set.mem_preimage.mpr
+              (Set.mem_singleton_iff.mpr hmem.2))
+            ((Set.Finite.mem_toFinset hS).mp hmem.1).2
+        · refine ⟨(Set.Finite.mem_toFinset hS).mpr
+              (Set.mem_inter ?_ hmem.2), ?_⟩
+          · exact Set.mem_preimage.mpr
+              (Eq.trans (congrArg h.base
+                (Set.mem_singleton_iff.mp (Set.mem_preimage.mp hmem.1)))
+                (himg y hy))
+          · exact Set.mem_preimage.mp hmem.1
+      refine Eq.trans (Finset.sum_congr rfl fun x hx =>
+        congrArg₂ HMul.hMul rfl
+          (congrArg ((Nat.cast (R := ℤ)))
+            (congrArg (h.residueDegree)
+              (Finset.mem_filter.mp hx).2))) ?_
+      refine Eq.trans (Eq.symm (Finset.sum_mul _ _ _)) ?_
+      refine Eq.trans (congrArg₂ HMul.hMul
+        (congrArg (Finset.sum · (fun x => D x * (g.residueDegree x : ℤ)))
+          fil_eq) rfl) ?_
+      exact congrArg₂ HMul.hMul (coeff_red y).symm rfl
+    -- the support of the pushforward lies in the image, and the
+    -- extension to the image vanishes off the support
+    have Vsub : hV.toFinset ⊆ hS.toFinset.image g.base := by
+      intro y hy
+      have hyV := (Set.Finite.mem_toFinset hV).mp hy
+      obtain ⟨x, hx, hxne⟩ := exists_ne_zero_of_finsum_mem_ne_zero
+        (Function.mem_support.mp hyV.2)
+      refine Finset.mem_image.mpr ⟨x, ?_, ?_⟩
+      · refine (Set.Finite.mem_toFinset hS).mpr ⟨?_, ?_⟩
+        · exact Set.mem_preimage.mpr
+            (Eq.trans (congrArg h.base
+              (Set.mem_singleton_iff.mp (Set.mem_preimage.mp hx)))
+              (Set.mem_singleton_iff.mp (Set.mem_preimage.mp hyV.1)))
+        · exact Function.mem_support.mpr (mul_ne_zero_iff.mp hxne).1
+      · exact Set.mem_singleton_iff.mp (Set.mem_preimage.mp hx)
+    have hext : ∑ y ∈ hS.toFinset.image g.base,
+        (pushforward g D) y * (h.residueDegree y : ℤ) =
+      ∑ y ∈ hV.toFinset, (pushforward g D) y * (h.residueDegree y : ℤ) :=
+      Eq.symm (Finset.sum_subset Vsub
+        (fun y hy hyV => Eq.trans (congrArg₂ HMul.hMul
+          (Function.notMem_support.mp (fun hmem => hyV
+            ((Set.Finite.mem_toFinset hV).mpr
+              ⟨Set.mem_preimage.mpr (himg y hy), hmem⟩)))
+          rfl)
+          (zero_mul _)))
+    exact Eq.trans step1
+      (Eq.trans (Finset.sum_congr rfl fun y hy => step2 y hy)
+        (Eq.trans hext (Finset.sum_congr rfl fun y _ => fiber_red y)))
+  exact Eq.trans left_red (Eq.trans part right_red.symm)
 
 end AlgebraicCycle
 
