@@ -55,3 +55,16 @@ named extension for the flat pullback's general form.
   human referee.
 * Stacks Project, tag 0BA8 (a Noetherian scheme has finitely many
   irreducible components).
+
+## Addendum: the isomorphism transport
+
+* `Scheme.fundamentalCycle_of_isIso` — **the fundamental cycle
+  transports along isomorphisms**: the pushforward of the fundamental
+  cycle along an isomorphism is the fundamental cycle of the target.
+  The assembly: the pushforward distributes over the sum of the point
+  cycles (`map_sum` via `pushforwardHom`); each point cycle pushes
+  forward to the point cycle at the image with coefficient one (the
+  point-cycle law `pushforward_single`, and the residue degree of an
+  isomorphism, `residueDegree_of_isIso`); and the generic-point finsets
+  correspond (the image of the source's finset is the target's, by
+  `image_genericPoints_of_isIso`).
