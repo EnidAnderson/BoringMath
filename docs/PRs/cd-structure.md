@@ -54,11 +54,39 @@ but provides no cd-structure API.
   pin from Riou's file: `Square C`, `sq.f₂₄`, `sq.f₃₄`, `sq.X₄`,
   `Sieve.ofTwoArrows`, `J.MayerVietorisSquare`, `S.toSquare`,
   `S.SheafCondition`, `S.sheafCondition_of_sheaf`, `Sheaf J (Type v)`,
-  `HasWeakSheafify J (Type v)`. The two construction routes named in the
-  peeling plan (`Coverage.toGrothendieckTopology`; the complete-lattice
-  structure on `GrothendieckTopology C`) are UNVERIFIED at the pin: the
-  prover must verify them before use, or propose an honest alternative
-  route.
+  `HasWeakSheafify J (Type v)`.
+
+### Verification record (coding agent, 2026-10-25)
+
+* **Build**: `lake build` — `Build completed successfully (1777 jobs)`;
+  the only warnings for this module are its three deliberate sorries
+  (at 89:4, 112:8, 127:8). The brain-drafted proof
+  (`exists_mayerVietorisSquare_and_sheafCondition`) compiles as written:
+  `obtain` + `exact`, linear, no banned tactics.
+* **check-style.sh**: `0 violation(s)`.
+* **Peeling-route verification (both routes now GOLD at the pin)**:
+  route (1) is `Coverage.toGrothendieck` — the brain's name
+  `Coverage.toGrothendieckTopology` does not exist at the pin — with the
+  saturation lemma `Coverage.mem_toGrothendieck_sieves_of_superset`
+  (`Sites/Coverage.lean:335`) and the bridge
+  `Coverage.toGrothendieck_eq_sInf` (:299); route (2) confirmed:
+  `instance : CompleteLattice (GrothendieckTopology C)`
+  (`Sites/Grothendieck.lean:305`). Peeling plans updated with the
+  verified names.
+* **Two elaborability defects found and fixed (statements otherwise kept
+  as drafted)**:
+  1. `IsMayerVietoris` had `J` as a section-implicit variable; the
+     application `D.IsMayerVietoris` in the theorem then had to synthesize
+     the def's `[HasWeakSheafify ?J (Type v)]` argument with `J` a
+     metavariable, which the instance gate refuses ("stuck"). Fixed by
+     making the signature explicit: `IsMayerVietoris (D) (J)
+     [HasWeakSheafify J (Type v)]`, usage `D.IsMayerVietoris J`. All
+     declarations now carry their own explicit binders.
+  2. `ofCdStructure`'s `sorry` body never mentioned `D`, so auto-binding
+     silently dropped the section variable `D` from the signature, and the
+     two characterizing theorems failed to apply it. Fixed with an
+     explicit `(D : CdStructure C)` binder (the unused-variable linter
+     does not fire for sorry'd definitions — verified).
 * Deliberately out of scope (next slices): Voevodsky's completeness and
   regularity predicates (`IsComplete`, `IsRegular`) — they need a Square
   pullback API and a literature pin-down; the schemes-level half
