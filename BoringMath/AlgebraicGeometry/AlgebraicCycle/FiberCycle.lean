@@ -103,6 +103,53 @@ theorem fiberCycle_apply_of_ne [IsNoetherian (Scheme.Hom.fiber f P)]
     hx (Set.mem_singleton_iff.mp
       (support_fiberCycle_subset_preimage f P hmem))
 
+-- Reference: W. Fulton, *Intersection Theory*, ch. 1 (the multiplicity of
+-- the flat pullback of a point cycle: the residue degrees of the generic
+-- points of the fiber over the point).
+-- REVIEW(citation): pin down the section.
+open scoped Classical in
+/-- **The multiplicity of the fiber cycle**: the coefficient of the
+fiber cycle at a point is the sum over the generic points of the fiber
+over the point of the residue degrees. -/
+theorem fiberCycle_multiplicity [IsNoetherian (Scheme.Hom.fiber f P)]
+    (z : ↥X) :
+    fiberCycle f P z =
+      ∑ᶠ (ξ : ↥(Scheme.Hom.fiber f P))
+        (_ : (f.fiberι P).base ξ = z),
+        (if ξ ∈ genericPoints ↥(Scheme.Hom.fiber f P)
+          then ((f.fiberι P).residueDegree ξ : ℤ) else 0) := by
+  have hg : (genericPoints ↥(Scheme.Hom.fiber f P) : Set ↥(Scheme.Hom.fiber f P)).Finite :=
+    genericPoints.finite (α := ↥(Scheme.Hom.fiber f P))
+      (finite_irreducibleComponents_of_isNoetherian (X := Scheme.Hom.fiber f P))
+  refine Eq.trans (pushforward_apply _ _ _) ?_
+  refine finsum_mem_congr rfl fun ξ _ => ?_
+  rcases Classical.em
+      (ξ ∈ Scheme.genericPointsFinset (Scheme.Hom.fiber f P)) with hmem | hmem
+  · calc Scheme.fundamentalCycle (Scheme.Hom.fiber f P) ξ *
+          ((f.fiberι P).residueDegree ξ : ℤ)
+        = (1 : ℤ) * ((f.fiberι P).residueDegree ξ : ℤ) := by
+          refine congrArg₂ HMul.hMul ?_ rfl
+          refine Eq.trans (Scheme.fundamentalCycle_apply (Scheme.Hom.fiber f P) ξ)
+            (ite_eq_left hmem)
+      _ = ((f.fiberι P).residueDegree ξ : ℤ) := one_mul _
+      _ = (if ξ ∈ genericPoints ↥(Scheme.Hom.fiber f P)
+            then ((f.fiberι P).residueDegree ξ : ℤ) else 0) :=
+          Eq.symm (ite_eq_left ((Set.Finite.mem_toFinset hg).mp hmem))
+  · calc Scheme.fundamentalCycle (Scheme.Hom.fiber f P) ξ *
+          ((f.fiberι P).residueDegree ξ : ℤ)
+        = (0 : ℤ) * ((f.fiberι P).residueDegree ξ : ℤ) := by
+          refine congrArg₂ HMul.hMul ?_ rfl
+          refine Eq.trans (Scheme.fundamentalCycle_apply (Scheme.Hom.fiber f P) ξ)
+            (ite_eq_right hmem)
+      _ = (0 : ℤ) := zero_mul _
+      _ = (if ξ ∈ genericPoints ↥(Scheme.Hom.fiber f P)
+            then ((f.fiberι P).residueDegree ξ : ℤ) else 0) :=
+          Eq.symm (ite_eq_right
+            (show ¬(ξ ∈ genericPoints ↥(Scheme.Hom.fiber f P)) from fun hmem' => by
+              have hfin : ξ ∈ Scheme.genericPointsFinset (Scheme.Hom.fiber f P) :=
+                (Set.Finite.mem_toFinset hg).mpr hmem'
+              exact hmem hfin))
+
 end AlgebraicCycle
 
 end AlgebraicGeometry

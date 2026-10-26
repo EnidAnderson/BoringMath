@@ -49,3 +49,15 @@ mirroring `Basic.lean` at the pin; the substrate is
   be pinned by the human referee.
 * Stacks Project, tag 02R4 (the flat pullback of cycles).
   REVIEW(citation): exact tag to be pinned.
+
+## Addition: the multiplicity of the fiber cycle (PR #87)
+
+* `AlgebraicCycle.fiberCycle_multiplicity` — **the multiplicity of the
+  fiber cycle**: the coefficient of the fiber cycle at a point is the sum
+  over the points of the fiber over it of the residue degrees, counted
+  at the generic points of the fiber: at a generic point of the fiber
+  the coefficient is the residue degree of the fiber embedding, and
+  elsewhere zero. Via `pushforward_apply` and the coefficient law of the
+  fundamental cycle (`fundamentalCycle_apply`), summed pointwise
+  (`finsum_mem_congr`); the generic points are recognized by the
+  finset-form of the fundamental cycle's support.
