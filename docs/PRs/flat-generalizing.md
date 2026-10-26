@@ -18,6 +18,17 @@ the pin; see `docs/OWNERSHIP.md`).
   the spectra of a flat ring map is generalizing
   (`RingHom.Flat.generalizingMap_comap`, via the flatness of the
   spectrum map `Flat.SpecMap_iff`).
+* `AlgebraicGeometry.exists_specializes_of_flat_affine` — **a flat
+  morphism of affine schemes lifts specializations**: for a flat
+  morphism `f : X ⟶ Y` between affine schemes, a point `x` of the
+  source, and a specialization `y' ⤳ f x` in the target, there is a
+  point `x'` of the source with `x' ⤳ x` over `y'`. The flatness of the
+  map of the rings of sections is the `Flat` class field at the whole
+  spaces (`Flat.flat_appLE`, via `Scheme.Hom.app_eq_appLE`); the lifting
+  is the spectrum case (`exists_specializes_of_flat_specMap`), and the
+  points transport along the isomorphisms with the spectra of the rings
+  of sections (`Scheme.isoSpec_hom_naturality`, `Scheme.isoSpec`'s
+  `hom_inv_id`/`inv_hom_id` at points).
 
 ## Notes
 
