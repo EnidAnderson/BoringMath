@@ -44,6 +44,17 @@ Given a cartesian square `IsPullback fst snd f g` (with `fst : P ⟶ X`,
   (`Scheme.exists_preimage_of_isPullback`; the agreement of the two
   points of the spectra of the residue fields is the uniqueness of the
   point of the spectrum of a field).
+* `AlgebraicGeometry.mem_genericPoints_fiberBaseChange` — **the
+  base-change map of the fibers carries generic points to generic
+  points**: the image of a generic point of an irreducible component of
+  the fiber of the vertical morphism is a generic point of an
+  irreducible component of the fiber of the given morphism. The image
+  point lies in an irreducible component, whose generic point
+  specializes to it (`genericPoints.ofComponent`,
+  `IsGenericPoint.specializes`); the flat base-change map lifts the
+  specialization (`exists_specializes_of_flat`), and the lifted
+  specialization into a generic point is the generic point
+  (`eq_of_specializes_of_mem_genericPoints`).
 
 ## Notes
 
