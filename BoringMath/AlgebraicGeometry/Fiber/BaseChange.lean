@@ -3,6 +3,8 @@ Copyright (c) 2026 Enid. All rights reserved.
 Released under the Hippocratic Mathematics License v1.0, as described in the file LICENSE.
 Authors: Enid
 -/
+import BoringMath.AlgebraicGeometry.Morphisms.Flat.Generalizing
+import BoringMath.Topology.Sober.GenericPoints
 import Mathlib.AlgebraicGeometry.Fiber
 import Mathlib.AlgebraicGeometry.Morphisms.Flat
 
@@ -127,5 +129,39 @@ theorem surjective_fiberBaseChange (h : IsPullback fst snd f g) (y : Y) :
     (isPullback_fiberBaseChange h y) ξ
     (IsLocalRing.closedPoint (Y.residueField y)) hc
   exact ⟨p, hp⟩
+
+-- Reference: [EGA IV], ch. 2 (the base change by a field extension
+-- preserves generic points of irreducible components).
+-- REVIEW(citation): pin down the section.
+/-- **The base-change map of the fibers carries generic points to
+generic points**: the image of a generic point of an irreducible
+component of the fiber of the vertical morphism is a generic point of an
+irreducible component of the fiber of the given morphism. The image
+point lies in an irreducible component; the generic point of that
+component specializes to the image point; the flat base-change map lifts
+the specialization, and the lifted specialization into a generic point
+is the generic point. -/
+theorem mem_genericPoints_fiberBaseChange (h : IsPullback fst snd f g)
+    (y : Y) {η : ↥(Scheme.Hom.fiber snd y)}
+    (hη : η ∈ genericPoints ↥(Scheme.Hom.fiber snd y)) :
+    (fiberBaseChange h y).base η ∈
+      genericPoints ↥(Scheme.Hom.fiber f (g y)) := by
+  have hspec : (genericPoints.ofComponent
+      (⟨irreducibleComponent ((fiberBaseChange h y).base η),
+        irreducibleComponent_mem_irreducibleComponents _⟩ :
+        irreducibleComponents ↥(Scheme.Hom.fiber f (g y)))).1 ⤳
+      (fiberBaseChange h y).base η :=
+    (genericPoints.isGenericPoint_ofComponent _).specializes mem_irreducibleComponent
+  obtain ⟨ρ, hρspec, hρimg⟩ :=
+    exists_specializes_of_flat (fiberBaseChange h y) hspec
+  have hρε : ρ = η :=
+    eq_of_specializes_of_mem_genericPoints hη hρspec
+  exact Eq.subst (motive := fun q =>
+      q ∈ genericPoints ↥(Scheme.Hom.fiber f (g y)))
+    (Eq.trans (congrArg (fiberBaseChange h y).base hρε.symm) hρimg).symm
+    (genericPoints.ofComponent
+      (⟨irreducibleComponent ((fiberBaseChange h y).base η),
+        irreducibleComponent_mem_irreducibleComponents _⟩ :
+        irreducibleComponents ↥(Scheme.Hom.fiber f (g y)))).2
 
 end AlgebraicGeometry
