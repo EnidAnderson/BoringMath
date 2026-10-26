@@ -3,6 +3,8 @@ Copyright (c) 2026 Enid. All rights reserved.
 Released under the Hippocratic Mathematics License v1.0, as described in the file LICENSE.
 Authors: Enid
 -/
+import BoringMath.Topology.Order.Opens
+import Mathlib.AlgebraicGeometry.AffineScheme
 import Mathlib.AlgebraicGeometry.Morphisms.Flat
 
 /-!
@@ -74,5 +76,37 @@ theorem exists_specializes_of_flat_affine {X Y : Scheme.{u}} (f : X ⟶ Y)
         (Y.isoSpec.hom_inv_id))) ?_
     refine Eq.trans (congrArg (Y.isoSpec).inv.base h1) ?_
     exact congrArg (fun φ => φ.base y') (Y.isoSpec.hom_inv_id)
+
+-- Reference: [EGA IV], ch. 2 (going down for flat morphisms: flat
+-- morphisms of schemes lift specializations of points).
+-- REVIEW(citation): pin down the section.
+/-- **A flat morphism of schemes lifts specializations**: for a flat
+morphism, every specialization of the image of a point lifts to a
+specialization of the point. The specialization pair lies in affine
+opens — the specializing point lies in every open of the image point —
+and the restriction of the morphism to the affine opens is flat. -/
+theorem exists_specializes_of_flat {X Y : Scheme.{u}} (f : X ⟶ Y) [Flat f]
+    {x : X} {y' : Y} (h : y' ⤳ f x) : ∃ x' : X, x' ⤳ x ∧ f x' = y' := by
+  obtain ⟨U, hUaff, hfU, -⟩ := exists_isAffineOpen_mem_and_subset
+    (x := f x) (U := (⊤ : Y.Opens)) (Set.mem_univ (f x))
+  have hy'U : y' ∈ U := Specializes.mem_open h U.isOpen hfU
+  have hxpre : x ∈ f ⁻¹ᵁ U := hfU
+  obtain ⟨W', hW'aff, hxW', hsub⟩ := exists_isAffineOpen_mem_and_subset
+    (x := x) (U := f ⁻¹ᵁ U) hxpre
+  have hUaff' : IsAffine U.toScheme := hUaff
+  have hW'aff' : IsAffine W'.toScheme := hW'aff
+  have hle : W' ≤ f ⁻¹ᵁ U := SetLike.coe_subset_coe.mpr hsub
+  have hflat : Flat (f.resLE U W' hle) := inferInstance
+  have himg : (f.resLE U W' hle).base ⟨x, hxW'⟩ = ⟨f x, hfU⟩ :=
+    Subtype.ext (Scheme.Hom.coe_resLE_apply f hle ⟨x, hxW'⟩)
+  have hspec : (⟨y', hy'U⟩ : U.toScheme) ⤳ (f.resLE U W' hle).base ⟨x, hxW'⟩ :=
+    Eq.subst (motive := fun q => (⟨y', hy'U⟩ : U.toScheme) ⤳ q) himg.symm
+      ((TopologicalSpace.Opens.specializes_iff U).mpr h)
+  obtain ⟨x'₀, hx'₀spec, hx'₀img⟩ :=
+    exists_specializes_of_flat_affine (f.resLE U W' hle) hspec
+  refine ⟨x'₀.1, ?_, ?_⟩
+  · exact (TopologicalSpace.Opens.specializes_iff W').mp hx'₀spec
+  · exact Eq.trans (Scheme.Hom.coe_resLE_apply f _ x'₀).symm
+      (congrArg Subtype.val hx'₀img)
 
 end AlgebraicGeometry
