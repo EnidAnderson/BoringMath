@@ -29,6 +29,17 @@ the pin; see `docs/OWNERSHIP.md`).
   points transport along the isomorphisms with the spectra of the rings
   of sections (`Scheme.isoSpec_hom_naturality`, `Scheme.isoSpec`'s
   `hom_inv_id`/`inv_hom_id` at points).
+* `AlgebraicGeometry.exists_specializes_of_flat` — **a flat morphism of
+  schemes lifts specializations** (going down): for a flat morphism
+  `f : X ⟶ Y`, a point `x` of the source, and a specialization
+  `y' ⤳ f x` in the target, there is a point `x'` of the source with
+  `x' ⤳ x` over `y'`. The specialization pair lies in affine opens —
+  the specializing point lies in every open of the image point
+  (`Specializes.mem_open`), and the basis of affine opens supplies the
+  neighborhoods (`exists_isAffineOpen_mem_and_subset`) — the
+  restriction to the affine opens is flat (`Flat` of `resLE`), the
+  lifting is the affine case, and the specialization and the image
+  transport back (`Opens.specializes_iff`, `coe_resLE_apply`).
 
 ## Notes
 
