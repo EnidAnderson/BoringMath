@@ -126,6 +126,10 @@ theorem map_add (f : X ⟶ Y) [QuasiCompact f] {N : Type*} [DecidableEq N]
 -- Reference: Stacks Project, Chow Homology, Def. 42.12.1, tag 02R4
 -- (`f_* [Z] = deg(Z/f(Z)) [f(Z)]`: the pushforward of a point cycle is the
 -- point cycle at the image, weighted by the residue degree).
+-- NOTE: choice-tainted at the pin (`Classical.em` below on a decidable
+-- point equality; `decEq` is shadowed by `Classical.decEq` under the
+-- Mathlib import). Flagged in docs/AUDITS/2026-10-30-choice-audit-own-code.md;
+-- the tree-wide extension of the choice-free law is a human call.
 open scoped Classical in
 /-- The map of a point cycle is the point cycle at the image point, with
 the coefficient weighted by `mapCoeff` at the point. -/
@@ -247,6 +251,10 @@ theorem mapCoeff_comp {Z : Scheme.{u}} (g : X ⟶ Y) (h : Y ⟶ Z)
 -- `AlgebraicCycle.map` docstring).
 -- W. Fulton, *Intersection Theory*, ch. 1, §1.3 (push-forward is
 -- functorial). REVIEW(citation): pin down the section in review.
+-- NOTE: `map_comp` still needs `open scoped Classical` below: its fiber
+-- filters decide point equality, and the theorem deliberately carries no
+-- `[DecidableEq ↥Y]` hypothesis (adding one would weaken the statement).
+-- Choice-tainted at the pin; flagged in docs/AUDITS/2026-10-30-choice-audit-own-code.md.
 open scoped Classical in
 /-- **The composition law for the weighted map**: the map along a
 composite is the map of the map, provided the middle weight agrees with
