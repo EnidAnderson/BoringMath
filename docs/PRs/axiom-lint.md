@@ -1,7 +1,9 @@
 # Candidate PR: axiom lint (`pr/formal-periods-axiom-lint`)
 
-Tickets: P.0.1 (#102, the lint core) and P.0.2 (#103, the taint probes),
-both leaves of P.0 (#92), both level-0.
+Tickets: P.0.1 (#102, the lint core), P.0.2 (#103, the taint probes),
+P.0.3 (#104, the ledger export) — leaves of P.0 (#92), all level-0 once
+P.0.1 landed. The P.0.4 (#105) pin-run report is filed separately under
+`docs/AUDITS/2026-10-30-axiom-lint-pin-run.md`.
 
 ## Statement
 
@@ -22,6 +24,13 @@ Plus one quarantined probe file `probes/AxiomLintProbes.lean` (outside the
 `BoringMath.+` glob, so excluded from the build target; run by hand with
 `lake env lean`): a deliberate `sorry` probe, a `Classical.em` probe, a
 user-`axiom` probe, and a clean control, each linted at the bottom.
+
+And one new module `BoringMath/FormalPeriods/AxiomLedger.lean` (P.0.3):
+`declarationConstants` (used constants of a declaration's type and value),
+`LedgerEntry` / `ledgerEntryOf` (grade + dependency row), `dependentsOf`
+(reverse edges = the conjecture graph), and the `#lint_ledger a, b, c`
+command rendering the machine-generated LEDGER block between
+`LEDGER:BEGIN`/`LEDGER:END` markers.
 
 ## Literature
 
@@ -93,6 +102,25 @@ replacements (P.1 basis-as-structure, explicit finite (co)limits in P.3)
 are needed, not optional. Also confirmed: at v4.35.0-rc3 `native_decide`
 mints a per-declaration axiom `<decl>._native.native_decide.ax_…`, which
 the grader's non-builtin-axiom rule bans automatically.
+
+## Ledger verification (P.0.3, machine-checked at the pin)
+
+`lake build BoringMath.FormalPeriods.AxiomLedger` builds warning-clean;
+`scripts/check-style.sh` 0 violations. `#lint_ledger` on a scratch scope
+(`scratchSorry` sorry'd, `scratchUser` proved from it, `scratchClean`,
+`BoringMath.eta`, `CategoryTheory.Limits.HasLimit`,
+`Module.Free.chooseBasis`) prints:
+
+* `scratchUser` — SORRY-TAINTED, depends on `…, scratchSorry`;
+* `scratchSorry` — dependents in scope: `scratchUser` (the conjecture
+  graph edge is found automatically);
+* `BoringMath.eta` — CLEAN; `HasLimit` and `chooseBasis` — CHOICE-TAINTED,
+  with `chooseBasis`'s dependency set visibly containing `Exists.choose`
+  and `Nonempty.some`.
+
+One pin finding: `ConstantInfo.value?` is `none` for theorems at
+v4.35.0-rc3, so `declarationConstants` matches on the `ConstantInfo`
+constructors (`.thmInfo`/`.defnInfo`/`.opaqueInfo`) instead.
 
 ## Review notes
 
