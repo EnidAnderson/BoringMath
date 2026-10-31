@@ -567,6 +567,269 @@ theorem rrefState_step_none {r j : ℕ} {A : FreeMatrix K m n} (hj : j < n)
   · intro a ha
     exact Nat.lt_of_lt_of_le (hR3 a ha) (Nat.le_succ j)
 
+-- Reference: Mines–Richman–Ruitenburg 2008, Pt. II Ch. 6 (the pivot search
+-- returns the first row of the searched range where the predicate holds).
+/-- If the predicate holds at `i` and fails at every earlier row of the
+searched range, the search returns `i`. -/
+theorem findPivotRow_eq_some_of_first {m : ℕ} {p : Fin m → Bool} {t lo : ℕ} {i : Fin m}
+    (hle : lo ≤ i.val) (hib : i.val < lo + t) (hp : p i = true)
+    (hfirst : ∀ i' : Fin m, lo ≤ i'.val → i'.val < i.val → p i' = false) :
+    findPivotRow p t lo = some i := by
+  induction t generalizing lo with
+  | zero => exact absurd (Nat.lt_of_le_of_lt hle hib) (Nat.lt_irrefl lo)
+  | succ t ih =>
+      -- rw [findPivotRow_succ]: fully instantiated, unique occurrence in the goal.
+      rw [findPivotRow_succ]
+      rcases Nat.lt_or_ge lo m with hlt | hge
+      · -- rw [dite_eq_left hlt]: `lo < m` holds; single `dite` occurrence.
+        rw [dite_eq_left hlt]
+        cases (inferInstance : Decidable (p ⟨lo, hlt⟩ = true)) with
+        | isTrue hp0 =>
+            -- rw [ite_eq_left hp0]: single `ite` occurrence; the hit is at `lo`.
+            rw [ite_eq_left hp0]
+            rcases Nat.lt_or_ge lo i.val with hlt2 | hge2
+            · exfalso
+              have hf := hfirst ⟨lo, hlt⟩ (Nat.le_refl lo) hlt2
+              -- rw [hp0] at hf: fully instantiated, unique occurrence; `true = false`.
+              rw [hp0] at hf
+              exact absurd hf.symm Bool.false_ne_true
+            · -- `lo = i.val`, hence `⟨lo, hlt⟩ = i`.
+              have heq : (⟨lo, hlt⟩ : Fin m) = i :=
+                Fin.eq_of_val_eq (Nat.le_antisymm hle hge2)
+              -- rw [heq]: rule `⟨lo, hlt⟩ = i`, fully instantiated; unique occurrence.
+              rw [heq]
+        | isFalse hp0 =>
+            -- rw [ite_eq_right hp0]: single `ite` occurrence; recurse from `lo+1`.
+            rw [ite_eq_right hp0]
+            rcases Nat.lt_or_ge lo i.val with hlt2 | hge2
+            · refine ih (lo := lo+1) ?_ ?_ ?_
+              · exact Nat.succ_le_of_lt hlt2
+              · have h2 : lo+(t+1) = (lo+1)+t := Nat.add_right_comm lo t 1
+                -- rw [h2] at hib: fully instantiated, unique occurrence.
+                rw [h2] at hib
+                exact hib
+              · intro i' hle' hlt'
+                exact hfirst i' (Nat.le_trans (Nat.le_succ lo) hle') hlt'
+            · exfalso
+              have heq : (⟨lo, hlt⟩ : Fin m) = i :=
+                Fin.eq_of_val_eq (Nat.le_antisymm hle hge2)
+              -- rw [heq] at hp0: rule `⟨lo, hlt⟩ = i`; unique occurrence in `hp0`.
+              rw [heq] at hp0
+              exact hp0 hp
+      · -- `m ≤ lo`: then `i.val < m ≤ lo ≤ i.val` is absurd.
+        rw [dite_eq_right (Nat.not_lt.mpr hge)]
+        exact absurd (Nat.lt_of_le_of_lt hle (Nat.lt_of_lt_of_le i.isLt hge))
+          (Nat.lt_irrefl lo)
+
+-- Reference: Mines–Richman–Ruitenburg 2008, Pt. II Ch. 6 (the search reads
+-- only the prefix of the range that it examines).
+/-- If `p` and `q` agree on the rows of the searched range below `b`, and the
+search for `p` hits `i` below `b` within its fuel, the search for `q` hits
+the same `i`. -/
+theorem findPivotRow_congr_before {m : ℕ} {p q : Fin m → Bool} {t lo b : ℕ}
+    (h : ∀ i' : Fin m, lo ≤ i'.val → i'.val < b → p i' = q i')
+    {i : Fin m} (hi : findPivotRow p t lo = some i) (hib : i.val < b)
+    (hbt : b ≤ lo + t) :
+    findPivotRow q t lo = some i := by
+  induction t generalizing lo with
+  | zero =>
+      -- rw [findPivotRow_zero] at hi: fully instantiated; `none = some i` is absurd.
+      rw [findPivotRow_zero] at hi
+      cases hi
+  | succ t ih =>
+      have hspec := findPivotRow_some_spec hi
+      -- rw [findPivotRow_succ] at hi ⊢: fully instantiated, unique occurrences.
+      rw [findPivotRow_succ] at hi ⊢
+      rcases Nat.lt_or_ge lo m with hlt | hge
+      · -- rw [dite_eq_left hlt] at hi ⊢: `lo < m`; single `dite` occurrences.
+        rw [dite_eq_left hlt] at hi ⊢
+        have hlob : lo < b := Nat.lt_of_le_of_lt hspec.1 hib
+        cases (inferInstance : Decidable (p ⟨lo, hlt⟩ = true)) with
+        | isTrue hp0 =>
+            -- rw [ite_eq_left hp0] at hi: single `ite` occurrence in `hi`.
+            rw [ite_eq_left hp0] at hi
+            injection hi with hval
+            subst hval
+            have hq : q ⟨lo, hlt⟩ = true := by
+              -- rw [← h ⟨lo, hlt⟩ (Nat.le_refl lo) hlob]: `q ⟨lo, hlt⟩` occurs once.
+              rw [← h ⟨lo, hlt⟩ (Nat.le_refl lo) hlob]
+              exact hp0
+            -- rw [ite_eq_left hq]: single `ite` occurrence in the goal.
+            rw [ite_eq_left hq]
+        | isFalse hp0 =>
+            -- rw [ite_eq_right hp0] at hi: single `ite` occurrence in `hi`.
+            rw [ite_eq_right hp0] at hi
+            -- rw [← h ⟨lo, hlt⟩ (Nat.le_refl lo) hlob]: `q ⟨lo, hlt⟩` occurs once.
+            rw [← h ⟨lo, hlt⟩ (Nat.le_refl lo) hlob]
+            -- rw [ite_eq_right hp0]: single `ite` occurrence in the goal.
+            rw [ite_eq_right hp0]
+            have h2 : lo+(t+1) = (lo+1)+t := Nat.add_right_comm lo t 1
+            -- rw [h2] at hbt: fully instantiated, unique occurrence.
+            rw [h2] at hbt
+            have h' : ∀ i' : Fin m, (lo+1) ≤ i'.val → i'.val < b → p i' = q i' :=
+              fun i' hle' hlt' => h i' (Nat.le_trans (Nat.le_succ lo) hle') hlt'
+            exact ih h' hi hbt
+      · -- `m ≤ lo`: the search for `p` finds nothing, contradicting `hi`.
+        rw [dite_eq_right (Nat.not_lt.mpr hge)] at hi
+        cases hi
+
+-- Reference: definitional peel of `matLeadingCol` at a `some` search result.
+/-- If the leading-column search of row `a` finds column `c`, the leading
+column is `c.val`. -/
+theorem matLeadingCol_eq_some {A : FreeMatrix K m n} {a : Fin m} {c : Fin n}
+    (h : findPivotRow (fun c => if A a c ≠ 0 then true else false) n 0 = some c) :
+    matLeadingCol A a = c.val := by
+  -- unfold matLeadingCol: explicit constant; rw [h]: unique occurrence, and
+  -- `match some c …` then reduces to `c.val = c.val`.
+  unfold matLeadingCol
+  rw [h]
+
+-- Reference: definitional peel of `matLeadingCol` at a `none` search result.
+/-- If the leading-column search of row `a` finds nothing, the row is zero
+and the leading column is `n`. -/
+theorem matLeadingCol_eq_none {A : FreeMatrix K m n} {a : Fin m}
+    (h : findPivotRow (fun c => if A a c ≠ 0 then true else false) n 0 = none) :
+    matLeadingCol A a = n := by
+  -- unfold matLeadingCol: explicit constant; rw [h]: unique occurrence, and
+  -- `match none …` then reduces to `n = n`.
+  unfold matLeadingCol
+  rw [h]
+
+-- Reference: Mines–Richman–Ruitenburg 2008, Pt. II Ch. 6 (a leading column
+-- inside a prefix is found by the search).
+/-- If the leading column of row `a` lies below `j ≤ n`, the leading-column
+search returns the corresponding column. -/
+theorem matLeadingCol_some_of_lt {A : FreeMatrix K m n} {a : Fin m} {j : ℕ}
+    (hj : j ≤ n) (h : matLeadingCol A a < j) :
+    ∃ c : Fin n, findPivotRow (fun c => if A a c ≠ 0 then true else false) n 0 = some c ∧
+      c.val = matLeadingCol A a := by
+  cases hp : findPivotRow (fun c => if A a c ≠ 0 then true else false) n 0 with
+  | none =>
+      have hn : matLeadingCol A a = n := matLeadingCol_eq_none hp
+      -- rw [hn] at h: fully instantiated, unique occurrence; gives `n < j`.
+      rw [hn] at h
+      exact absurd h (Nat.not_lt.mpr hj)
+  | some c => exact ⟨c, Eq.refl _, (matLeadingCol_eq_some hp).symm⟩
+
+-- Reference: Mines–Richman–Ruitenburg 2008, Pt. II Ch. 6 (the leading column
+-- is determined by the prefix of columns below it).
+/-- If `A` and `B` agree on row `a` at every column below `j`, and the leading
+column of `A a` is below `j ≤ n`, then `B a` has the same leading column. -/
+theorem matLeadingCol_eq_of_agree_before {A B : FreeMatrix K m n} {a : Fin m} {j : ℕ}
+    (hj : j ≤ n) (h : ∀ c : Fin n, c.val < j → A a c = B a c)
+    (hk : matLeadingCol A a < j) :
+    matLeadingCol B a = matLeadingCol A a := by
+  obtain ⟨c, hc, hcv⟩ := matLeadingCol_some_of_lt hj hk
+  have hcvj : c.val < j := by
+    -- rw [hcv]: `c.val` occurs once in the goal.
+    rw [hcv]
+    exact hk
+  have hcong : ∀ i : Fin n, 0 ≤ i.val → i.val < j →
+      (if A a i ≠ 0 then true else false) = (if B a i ≠ 0 then true else false) := by
+    intro i _ hi
+    have heqi := h i hi
+    -- rw [heqi]: `A a i` occurs once in the goal; the sides become identical.
+    rw [heqi]
+  have hbt : j ≤ 0 + n := by
+    -- rw [Nat.zero_add]: `0 + n` occurs once in the goal.
+    rw [Nat.zero_add]
+    exact hj
+  have hhit := findPivotRow_congr_before hcong hc hcvj hbt
+  -- rw [matLeadingCol_eq_some hhit]: unique occurrence of `matLeadingCol B a`.
+  rw [matLeadingCol_eq_some hhit]
+  -- rw [matLeadingCol_eq_some hc]: unique occurrence of `matLeadingCol A a`.
+  rw [matLeadingCol_eq_some hc]
+
+-- Reference: Mines–Richman–Ruitenburg 2008, Pt. II Ch. 6 (a row vanishing
+-- before column `j` and nonzero at `j` has leading column `j`).
+/-- If row `a` vanishes at every column below `j < n` and is nonzero at
+column `j`, its leading column is `j`. -/
+theorem matLeadingCol_eq_of_zero_before {A : FreeMatrix K m n} {a : Fin m} {j : ℕ}
+    (hj : j < n) (hzero : ∀ c : Fin n, c.val < j → A a c = 0)
+    (hne : A a ⟨j, hj⟩ ≠ 0) :
+    matLeadingCol A a = j := by
+  have hp : (fun c => if A a c ≠ 0 then true else false) ⟨j, hj⟩ = true :=
+    pivotBool_true hne
+  have hfirst : ∀ i' : Fin n, 0 ≤ i'.val → i'.val < j →
+      (fun c => if A a c ≠ 0 then true else false) i' = false := by
+    intro i' _ hi'
+    exact pivotBool_false (hzero i' hi')
+  have hib : (⟨j, hj⟩ : Fin n).val < 0 + n := by
+    -- rw [Nat.zero_add]: `0 + n` occurs once in the goal.
+    rw [Nat.zero_add]
+    exact hj
+  have hsearch : findPivotRow (fun c => if A a c ≠ 0 then true else false) n 0
+      = some ⟨j, hj⟩ :=
+    findPivotRow_eq_some_of_first (Nat.zero_le j) hib hp hfirst
+  have hs := matLeadingCol_eq_some hsearch
+  -- rw [hs]: unique occurrence of `matLeadingCol A a`; then `↑⟨j, hj⟩ = j`.
+  rw [hs]
+
+-- Reference: definitional peel of the swap-then-scale at the pivot row.
+omit [DecidableEq K] in
+/-- Scaling the swapped-in pivot row at the pivot row multiplies the old row
+`i` entry by `s`. -/
+theorem rrefStep_swap_scale_self (A : FreeMatrix K m n) (r' i : Fin m) (s : K)
+    (c' : Fin n) :
+    matRowScale (matRowSwap A r' i) r' s r' c' = s * A i c' := by
+  -- rw [matRowScale_self …]: fully instantiated, unique occurrence of the scale.
+  rw [matRowScale_self (matRowSwap A r' i) r' s c']
+  -- rw [matRowSwap_left …]: fully instantiated, unique occurrence of the swap.
+  rw [matRowSwap_left A r' i c']
+
+-- Reference: Mines–Richman–Ruitenburg 2008, Pt. II Ch. 6; peel of the
+-- composed pivot step at the new pivot row, before the pivot column.
+omit [DecidableEq K] in
+/-- After the pivot step, the new pivot row vanishes at every column before
+the pivot column (the swapped-in row vanished there). -/
+theorem rrefStepMat_pivot_row_before (A : FreeMatrix K m n) (r' i : Fin m) (s : K)
+    (c c' : Fin n) (hzero : A i c' = 0) :
+    matRowElim (matRowScale (matRowSwap A r' i) r' s) r' c r' c' = 0 := by
+  -- rw [matRowElim_self …]: the elimination fixes the pivot row.
+  rw [matRowElim_self (matRowScale (matRowSwap A r' i) r' s) r' c c']
+  -- rw [rrefStep_swap_scale_self …]: swap+scale at the pivot row.
+  rw [rrefStep_swap_scale_self A r' i s c']
+  -- rw [hzero, mul_zero]: `A i c' = 0`, then `s * 0 = 0`.
+  rw [hzero, mul_zero]
+
+-- Reference: Mines–Richman–Ruitenburg 2008, Pt. II Ch. 6 (normalizing the
+-- pivot to `1`); peel of the composed pivot step at the pivot entry.
+omit [DecidableEq K] in
+/-- After the pivot step, the pivot entry is `1`. -/
+theorem rrefStepMat_pivot_row_at (hinv : ∀ a : K, a ≠ 0 → invK a * a = 1)
+    (A : FreeMatrix K m n) (r' i : Fin m) (c : Fin n) (hne : A i c ≠ 0) :
+    matRowElim (matRowScale (matRowSwap A r' i) r' (invK (A i c))) r' c r' c = 1 := by
+  -- rw [matRowElim_self …]: the elimination fixes the pivot row.
+  rw [matRowElim_self (matRowScale (matRowSwap A r' i) r' (invK (A i c))) r' c c]
+  exact rrefStep_pivot_one invK hinv A r' i c hne
+
+-- Reference: Mines–Richman–Ruitenburg 2008, Pt. II Ch. 6 (the pivot step
+-- fixes every other row on the columns before the pivot column).
+omit [DecidableEq K] in
+/-- After the pivot step, every row other than the pivot row agrees with the
+original matrix at every column before the pivot column. -/
+theorem rrefStepMat_off_pivot_before (A : FreeMatrix K m n) (r' i a : Fin m) (s : K)
+    (c c' : Fin n) (ha : a ≠ r') (hzero : A i c' = 0) (hzeror : A r' c' = 0) :
+    matRowElim (matRowScale (matRowSwap A r' i) r' s) r' c a c' = A a c' := by
+  -- rw [matRowElim_other …]: the elimination at an off-pivot row.
+  rw [matRowElim_other (matRowScale (matRowSwap A r' i) r' s) r' a ha c c']
+  -- rw [rrefStep_swap_scale_self …, hzero, mul_zero, mul_zero, sub_zero]: the
+  -- pivot row entry at `c'` is `s * 0 = 0`, so the subtraction removes nothing.
+  rw [rrefStep_swap_scale_self A r' i s c', hzero, mul_zero, mul_zero, sub_zero]
+  -- rw [matRowScale_other …]: the scale fixes the off-pivot row.
+  rw [matRowScale_other (matRowSwap A r' i) r' a ha s c']
+  cases (inferInstance : Decidable (a = i)) with
+  | isTrue h =>
+      -- rw [h] at ha ⊢: rule `a = i`, fully instantiated; unique occurrences.
+      rw [h] at ha ⊢
+      -- rw [matRowSwap_right …]: the swap sends row `i` to the old row `r'`.
+      rw [matRowSwap_right A r' i ha c']
+      -- rw [hzeror, hzero]: both entries are `0`.
+      rw [hzeror, hzero]
+  | isFalse haI =>
+      -- rw [matRowSwap_other …]: the swap fixes row `a`.
+      rw [matRowSwap_other A r' i a ha haI]
+
 -- Reference: Mines–Richman–Ruitenburg 2008, Pt. II Ch. 6 (the pivot step
 -- preserves the invariant); Hörmann arXiv:2106.03803 Remark 3.3 (program
 -- context).
@@ -579,22 +842,172 @@ theorem rrefState_step_pivot (hinv : ∀ a : K, a ≠ 0 → invK a * a = 1) {r j
       (matRowElim
         (matRowScale (matRowSwap A ⟨r, hr⟩ i) ⟨r, hr⟩ (invK (A i ⟨j, hj⟩)))
         ⟨r, hr⟩ ⟨j, hj⟩) := by
-  -- TEMPORARY SORRY: the pointwise verification of the six invariant
-  -- components has not been instantiated yet.
-  -- PEELING PLAN: with `r' = ⟨r, hr⟩`, `c = ⟨j, hj⟩`, `A1 = matRowSwap A r' i`,
-  -- `A2 = matRowScale A1 r' (invK (A i c))`, `A3 = matRowElim A2 r' c`:
-  -- (i) `rrefStep_pivot_one hinv` gives `A2 r' c = 1`;
-  -- (ii) `matRowElim_pivot_zero` gives `A3 a c = 0` for `a ≠ r'`;
-  -- (iii) for columns `c' < j`, `A2 r' c' = 0` (row `i` vanished on columns
-  -- `< j` by `RrefState.1` since `r ≤ i.val`), so `matRowElim_other` shows
-  -- `A3` agrees with `A2` there, and `matRowSwap_*`/`matRowScale_other`
-  -- show `A2` agrees with `A` off row `r'` — this preserves components 1, 4,
-  -- 5, 6 and identifies the leading column of the new pivot row `r'` as
-  -- `j` (`matLeadingCol` of a row vanishing before `j` with `A3 r' c = 1`);
-  -- (iv) the new pivot row is nonzero (`A3 r' c = 1`), old pivot rows keep
-  -- leading column `< j < j+1`, and pivots strictly increase since old
-  -- pivots are `< j`.
-  sorry
+  rcases hs with ⟨hR1, hR2, hR3, hR4, hR5, hR6⟩
+  -- Name the three intermediate matrices: `A1` = swap, `A2` = scale, `A3` = elim.
+  generalize hA1 : matRowSwap A ⟨r, hr⟩ i = A1
+  generalize hA2 : matRowScale A1 ⟨r, hr⟩ (invK (A i ⟨j, hj⟩)) = A2
+  generalize hA3 : matRowElim A2 ⟨r, hr⟩ ⟨j, hj⟩ = A3
+  have hp1 : A2 ⟨r, hr⟩ ⟨j, hj⟩ = 1 := by
+    -- rw [← hA2, ← hA1]: unfold the generalizations; unique occurrences of `A2`, `A1`.
+    rw [← hA2, ← hA1]
+    exact rrefStep_pivot_one invK hinv A ⟨r, hr⟩ i ⟨j, hj⟩ hne
+  have hA3rc : A3 ⟨r, hr⟩ ⟨j, hj⟩ = 1 := by
+    -- rw [← hA3, ← hA2, ← hA1]: unfold; unique occurrences of `A3`, `A2`, `A1`.
+    rw [← hA3, ← hA2, ← hA1]
+    exact rrefStepMat_pivot_row_at invK hinv A ⟨r, hr⟩ i ⟨j, hj⟩ hne
+  have hA3r_before : ∀ c' : Fin n, c'.val < j → A3 ⟨r, hr⟩ c' = 0 := by
+    intro c' hc'
+    -- rw [← hA3, ← hA2, ← hA1]: unfold; unique occurrences.
+    rw [← hA3, ← hA2, ← hA1]
+    exact rrefStepMat_pivot_row_before A ⟨r, hr⟩ i (invK (A i ⟨j, hj⟩)) ⟨j, hj⟩ c'
+      (hR1 i hle c' hc')
+  have hA3off_at : ∀ a : Fin m, a ≠ ⟨r, hr⟩ → A3 a ⟨j, hj⟩ = 0 := by
+    intro a ha
+    -- rw [← hA3]: unique occurrence of `A3` in the goal.
+    rw [← hA3]
+    exact matRowElim_pivot_zero A2 ⟨r, hr⟩ a ha ⟨j, hj⟩ hp1
+  have hA3off_before : ∀ a : Fin m, a ≠ ⟨r, hr⟩ → ∀ c' : Fin n, c'.val < j →
+      A3 a c' = A a c' := by
+    intro a ha c' hc'
+    -- rw [← hA3, ← hA2, ← hA1]: unfold; unique occurrences.
+    rw [← hA3, ← hA2, ← hA1]
+    exact rrefStepMat_off_pivot_before A ⟨r, hr⟩ i a (invK (A i ⟨j, hj⟩)) ⟨j, hj⟩ c' ha
+      (hR1 i hle c' hc') (hR1 ⟨r, hr⟩ (Nat.le_refl r) c' hc')
+  have hne_of_lt : ∀ a : Fin m, a.val < r → a ≠ ⟨r, hr⟩ := by
+    intro a ha h
+    -- rw [h] at ha: rule `a = ⟨r, hr⟩`, fully instantiated; unique occurrence.
+    rw [h] at ha
+    exact absurd ha (Nat.lt_irrefl r)
+  have hne_of_ge : ∀ a : Fin m, r+1 ≤ a.val → a ≠ ⟨r, hr⟩ := by
+    intro a ha h
+    -- rw [h] at ha: rule `a = ⟨r, hr⟩`, fully instantiated; unique occurrence.
+    rw [h] at ha
+    exact absurd ha (Nat.not_succ_le_self r)
+  have hlc_r' : matLeadingCol A3 ⟨r, hr⟩ = j := by
+    have hne3 : A3 ⟨r, hr⟩ ⟨j, hj⟩ ≠ 0 := by
+      intro h
+      -- rw [hA3rc] at h: fully instantiated, unique occurrence; gives `1 = 0`.
+      rw [hA3rc] at h
+      exact absurd h one_ne_zero
+    exact matLeadingCol_eq_of_zero_before hj hA3r_before hne3
+  have hlc_old : ∀ a : Fin m, a.val < r → matLeadingCol A3 a = matLeadingCol A a := by
+    intro a hlt
+    exact matLeadingCol_eq_of_agree_before (Nat.le_of_lt hj)
+      (fun c' hc' => (hA3off_before a (hne_of_lt a hlt) c' hc').symm) (hR3 a hlt)
+  refine ⟨?_, ?_, ?_, ?_, ?_, ?_⟩
+  · -- Rows at or below `r+1` vanish on columns `< j+1`.
+    intro a ha c' hc'
+    rcases Nat.lt_or_ge c'.val j with hlt | hge
+    · -- rw [hA3off_before …]: `A3 a c'` occurs once in the goal.
+      rw [hA3off_before a (hne_of_ge a ha) c' hlt]
+      exact hR1 a (Nat.le_trans (Nat.le_succ r) ha) c' hlt
+    · have hval : c'.val = j := Nat.le_antisymm (Nat.le_of_lt_succ hc') hge
+      have hceq : c' = ⟨j, hj⟩ := Fin.eq_of_val_eq hval
+      -- rw [hceq]: rule `c' = ⟨j, hj⟩`, fully instantiated; unique occurrence.
+      rw [hceq]
+      exact hA3off_at a (hne_of_ge a ha)
+  · -- Rows `< r+1` are nonzero: old pivot rows keep their `1`, the new
+    -- pivot row has `A3 ⟨r, hr⟩ ⟨j, hj⟩ = 1`.
+    intro a ha
+    rcases Nat.lt_or_ge a.val r with hlt | hge
+    · have hk := hR3 a hlt
+      have hkn : matLeadingCol A a < n := Nat.lt_trans hk hj
+      have h1 : A a ⟨matLeadingCol A a, hkn⟩ = 1 :=
+        hR4 a hlt ⟨matLeadingCol A a, hkn⟩ (Fin.val_mk hkn).symm
+      intro hzero
+      have h0 := hzero ⟨matLeadingCol A a, hkn⟩
+      -- rw [hA3off_before …] at h0: `A3 a ⟨…⟩` occurs once in `h0`.
+      rw [hA3off_before a (hne_of_lt a hlt) ⟨matLeadingCol A a, hkn⟩ hk] at h0
+      -- rw [h1] at h0: `A a ⟨…⟩` occurs once in `h0`; gives `1 = 0`.
+      rw [h1] at h0
+      exact absurd h0 one_ne_zero
+    · have haveq : a = ⟨r, hr⟩ :=
+        Fin.eq_of_val_eq (Nat.le_antisymm (Nat.le_of_lt_succ ha) hge)
+      -- rw [haveq]: rule `a = ⟨r, hr⟩`, fully instantiated; unique occurrence.
+      rw [haveq]
+      intro hzero
+      have h0 := hzero ⟨j, hj⟩
+      -- rw [hA3rc] at h0: fully instantiated, unique occurrence; gives `1 = 0`.
+      rw [hA3rc] at h0
+      exact absurd h0 one_ne_zero
+  · -- Leading columns of rows `< r+1` are `< j+1`.
+    intro a ha
+    rcases Nat.lt_or_ge a.val r with hlt | hge
+    · -- rw [hlc_old a hlt]: unique occurrence of `matLeadingCol A3 a`.
+      rw [hlc_old a hlt]
+      exact Nat.lt_trans (hR3 a hlt) (Nat.lt_succ_self j)
+    · have haveq : a = ⟨r, hr⟩ :=
+        Fin.eq_of_val_eq (Nat.le_antisymm (Nat.le_of_lt_succ ha) hge)
+      -- rw [haveq, hlc_r']: unique occurrences in the goal.
+      rw [haveq, hlc_r']
+      exact Nat.lt_succ_self j
+  · -- Pivot entries of rows `< r+1` are `1`.
+    intro a ha c' hlc
+    rcases Nat.lt_or_ge a.val r with hlt | hge
+    · -- rw [hlc_old a hlt] at hlc: unique occurrence in `hlc`.
+      rw [hlc_old a hlt] at hlc
+      have hc'j : c'.val < j := by
+        -- rw [← hlc]: `c'.val` occurs once in the goal.
+        rw [← hlc]
+        exact hR3 a hlt
+      -- rw [hA3off_before …]: `A3 a c'` occurs once in the goal.
+      rw [hA3off_before a (hne_of_lt a hlt) c' hc'j]
+      exact hR4 a hlt c' hlc
+    · have haveq : a = ⟨r, hr⟩ :=
+        Fin.eq_of_val_eq (Nat.le_antisymm (Nat.le_of_lt_succ ha) hge)
+      -- rw [haveq, hlc_r'] at hlc: unique occurrences; gives `j = c'.val`.
+      rw [haveq, hlc_r'] at hlc
+      have hceq : c' = ⟨j, hj⟩ := Fin.eq_of_val_eq hlc.symm
+      -- rw [haveq, hceq]: unique occurrences in the goal.
+      rw [haveq, hceq]
+      exact hA3rc
+  · -- Leading columns strictly increase on rows `< r+1`.
+    intro a b ha hb hab
+    rcases Nat.lt_or_ge a.val r with halt | hage
+    · rcases Nat.lt_or_ge b.val r with hblt | hbge
+      · -- rw [hlc_old …]: unique occurrences in the goal.
+        rw [hlc_old a halt, hlc_old b hblt]
+        exact hR5 a b halt hblt hab
+      · have hbq : b = ⟨r, hr⟩ :=
+          Fin.eq_of_val_eq (Nat.le_antisymm (Nat.le_of_lt_succ hb) hbge)
+        -- rw [hlc_old a halt, hbq, hlc_r']: unique occurrences in the goal.
+        rw [hlc_old a halt, hbq, hlc_r']
+        exact hR3 a halt
+    · have haq : a = ⟨r, hr⟩ :=
+        Fin.eq_of_val_eq (Nat.le_antisymm (Nat.le_of_lt_succ ha) hage)
+      -- rw [haq] at hab: rule `a = ⟨r, hr⟩`; unique occurrence in `hab`.
+      rw [haq] at hab
+      exact absurd (Nat.lt_of_lt_of_le hab (Nat.le_of_lt_succ hb)) (Nat.lt_irrefl r)
+  · -- Pivot columns are cleared in every other row.
+    intro a ha b hne' c' hlc
+    rcases Nat.lt_or_ge a.val r with halt | hage
+    · -- rw [hlc_old a halt] at hlc: unique occurrence in `hlc`.
+      rw [hlc_old a halt] at hlc
+      have hc'j : c'.val < j := by
+        -- rw [← hlc]: `c'.val` occurs once in the goal.
+        rw [← hlc]
+        exact hR3 a halt
+      rcases Nat.lt_or_ge b.val r with hblt | hbge
+      · -- rw [hA3off_before …]: `A3 b c'` occurs once in the goal.
+        rw [hA3off_before b (hne_of_lt b hblt) c' hc'j]
+        exact hR6 a halt b hne' c' hlc
+      · rcases Nat.lt_or_ge b.val (r+1) with hblt1 | hbge1
+        · have hbq : b = ⟨r, hr⟩ :=
+            Fin.eq_of_val_eq (Nat.le_antisymm (Nat.le_of_lt_succ hblt1) hbge)
+          -- rw [hbq]: rule `b = ⟨r, hr⟩`; unique occurrence in the goal.
+          rw [hbq]
+          exact hA3r_before c' hc'j
+        · -- rw [hA3off_before …]: `A3 b c'` occurs once in the goal.
+          rw [hA3off_before b (hne_of_ge b hbge1) c' hc'j]
+          exact hR1 b (Nat.le_trans (Nat.le_succ r) hbge1) c' hc'j
+    · have haq : a = ⟨r, hr⟩ :=
+        Fin.eq_of_val_eq (Nat.le_antisymm (Nat.le_of_lt_succ ha) hage)
+      -- rw [haq, hlc_r'] at hlc: unique occurrences; gives `j = c'.val`.
+      rw [haq, hlc_r'] at hlc
+      have hceq : c' = ⟨j, hj⟩ := Fin.eq_of_val_eq hlc.symm
+      -- rw [hceq]: rule `c' = ⟨j, hj⟩`; unique occurrence in the goal.
+      rw [hceq]
+      exact hA3off_at b (fun h => hne' (haq.trans h.symm))
 
 -- Reference: Mines–Richman–Ruitenburg 2008, Pt. II Ch. 6 (the induction on
 -- the loop); Hörmann arXiv:2106.03803 Remark 3.3 (program context).
@@ -726,6 +1139,17 @@ def matToLists (A : FreeMatrix K m n) : List (List K) :=
 #lint_axioms BoringMath.rrefAux_pivot_some
 #lint_axioms BoringMath.rrefAux_pivot_none
 #lint_axioms BoringMath.rrefState_step_none
+#lint_axioms BoringMath.findPivotRow_eq_some_of_first
+#lint_axioms BoringMath.findPivotRow_congr_before
+#lint_axioms BoringMath.matLeadingCol_eq_some
+#lint_axioms BoringMath.matLeadingCol_eq_none
+#lint_axioms BoringMath.matLeadingCol_some_of_lt
+#lint_axioms BoringMath.matLeadingCol_eq_of_agree_before
+#lint_axioms BoringMath.matLeadingCol_eq_of_zero_before
+#lint_axioms BoringMath.rrefStep_swap_scale_self
+#lint_axioms BoringMath.rrefStepMat_pivot_row_before
+#lint_axioms BoringMath.rrefStepMat_pivot_row_at
+#lint_axioms BoringMath.rrefStepMat_off_pivot_before
 #lint_axioms BoringMath.rrefState_step_pivot
 #lint_axioms BoringMath.rrefAux_state
 #lint_axioms BoringMath.rref_isRref

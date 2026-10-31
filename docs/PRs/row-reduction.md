@@ -5,7 +5,7 @@ Ticket: P.2.1 (#108), leaf of P.2 (#94). Built on P.1.1 (`FreeMod`, landed).
 
 ## Statement
 
-One new module `BoringMath/FormalPeriods/RowReduction.lean` (47 declarations):
+One new module `BoringMath/FormalPeriods/RowReduction.lean` (58 declarations):
 
 * `FreeMatrix K m n` — abbrev for `Fin m → Fin n → K`, a matrix in `FreeMod`
   coordinates (array form of a map `FreeMod K n → FreeMod K m`).
@@ -25,8 +25,12 @@ One new module `BoringMath/FormalPeriods/RowReduction.lean` (47 declarations):
   at the bottom, pivot entries `1`, strictly increasing pivot columns, pivot
   columns cleared in all other rows), and the loop invariant `RrefState`.
 * Correctness peels: `rrefState_zero`, `rrefState_isRref_of_done`,
-  `rrefState_step_none` (proved), `rrefState_step_pivot` (sorry, see below),
-  `rrefAux_state` (the invariant induction, proved modulo the step lemma),
+  `rrefState_step_none`, `rrefState_step_pivot` (both proved; the pivot step
+  via the search/leading-column peels `findPivotRow_eq_some_of_first`,
+  `findPivotRow_congr_before`, `matLeadingCol_eq_some/_eq_none/_some_of_lt/
+  _eq_of_agree_before/_eq_of_zero_before` and the pointwise peels
+  `rrefStep_swap_scale_self`, `rrefStepMat_pivot_row_before/_pivot_row_at/
+  off_pivot_before`), `rrefAux_state` (the invariant induction),
   `rref_isRref : IsRref (rref invK A)`.
 * Smoke test: `smokeMat` (3×3 over `ℚ`) with `#eval` displays — input
   `[[2,4,6],[1,3,5],[0,1,4]]`, output (RREF) `[[1,0,0],[0,1,0],[0,0,1]]`.
@@ -76,16 +80,15 @@ on `Nat.decLt`, `DecidableEq K`, `Bool` tests) — no `Decidable` instance over
 
 ## Verification (machine-checked at the pin, v4.35.0-rc3)
 
-* `lake build BoringMath.FormalPeriods.RowReduction` — succeeds; the only
-  warning is the single deliberate `declaration uses 'sorry'`
-  (`rrefState_step_pivot`).
+* `lake build BoringMath.FormalPeriods.RowReduction` — succeeds,
+  warning-clean (no `sorry` anywhere in the module).
 * `bash scripts/check-style.sh BoringMath/FormalPeriods/RowReduction.lean` —
-  **0 violations**, 1 sorry (informational).
-* `#lint_axioms` on all 47 declarations (printed at the end of the module):
-  **44 CLEAN** (`[propext, Quot.sound]` or no axioms); 3 `sorryTainted`
-  (`rrefState_step_pivot`, and `rrefAux_state` / `rref_isRref` which use it);
-  **0 `choiceTainted`, 0 `banned`** — no `Classical.choice`, no `sorryAx` on
-  the algorithm core.
+  **0 violations**, 0 sorries.
+* `#lint_axioms` on all 58 declarations (printed at the end of the module):
+  **58 CLEAN** (`[propext, Quot.sound]`, `[propext]`, or no axioms);
+  **0 `sorryTainted`, 0 `choiceTainted`, 0 `banned`** — no `sorryAx`, no
+  `Classical.choice` anywhere, including `rrefState_step_pivot`,
+  `rrefAux_state`, `rref_isRref`.
 * `#eval matToLists smokeMat` → `[[2, 4, 6], [1, 3, 5], [0, 1, 4]]`;
   `#eval matToLists (rref (K := ℚ) (fun a => a⁻¹) smokeMat)` →
   `[[1, 0, 0], [0, 1, 0], [0, 0, 1]]`. (`decide`-evaluable in the
@@ -94,20 +97,40 @@ on `Nat.decLt`, `DecidableEq K`, `Bool` tests) — no `Decidable` instance over
   marks `Rat.mul`/`Rat.inv` `@[irreducible]`, which is unrelated to this
   module — `#eval` demonstrates the computation.)
 
-## Remaining sorry and peeling plan
+## Closed: `rrefState_step_pivot` (peeling record)
 
-`rrefState_step_pivot` (one sorry): one pivot step preserves `RrefState`.
-Plan recorded inline: with `A3 = matRowElim (matRowScale (matRowSwap A r' i)
-r' (invK (A i c))) r' c`, use `rrefStep_pivot_one` (`A2 r' c = 1`),
-`matRowElim_pivot_zero` (column `c` cleared off row `r'`), and for columns
-`c' < j` the fact that `A2 r' c' = 0` (row `i` vanished before `j` by
-`RrefState.1`), so `A3` agrees with `A` on all columns `< j` off row `r'`;
-this needs a "leading column is determined by a prefix" lemma
-(`matLeadingCol` congruence via `findPivotRow` specs) to transport components
-2–6 of `RrefState` from `A` to `A3`, plus the new pivot row `r'` having
-leading column `j`. Next peels: `findPivotRow_congr_before` (searches agree
-when predicates agree on the searched range) and
-`matLeadingCol_eq_of_agree_before`.
+The single sorry is closed; the module is sorry-free. The inline peeling
+plan was implemented as named lemmas, all proved honestly:
+
+* `findPivotRow_eq_some_of_first` — if the predicate holds at `i` and fails
+  at every earlier row of the searched range, the search returns `i`.
+* `findPivotRow_congr_before` — if `p`, `q` agree on the searched rows below
+  `b` and the search for `p` hits `i < b` within its fuel, the search for `q`
+  hits the same `i` (the search only reads the prefix it examines).
+* `matLeadingCol_eq_some` / `matLeadingCol_eq_none` / `matLeadingCol_some_of_lt`
+  — definitional peels of `matLeadingCol` at `some`/`none`, and extraction
+  of the found column from a leading column below `j ≤ n`.
+* `matLeadingCol_eq_of_agree_before` — `A`, `B` agreeing on row `a` at all
+  columns `< j`, with `matLeadingCol A a < j ≤ n`, have the same leading
+  column there (via `findPivotRow_congr_before`).
+* `matLeadingCol_eq_of_zero_before` — a row vanishing before `j < n` and
+  nonzero at `j` has leading column exactly `j` (via
+  `findPivotRow_eq_some_of_first`).
+* `rrefStep_swap_scale_self`, `rrefStepMat_pivot_row_before`,
+  `rrefStepMat_pivot_row_at`, `rrefStepMat_off_pivot_before` — pointwise
+  peels of the composed step `A3 = matRowElim (matRowScale (matRowSwap A r'
+  i) r' (invK (A i c))) r' c`: the pivot row vanishes before `c` and is `1`
+  at `c` (`rrefStep_pivot_one`), column `c` is cleared off row `r'`
+  (`matRowElim_pivot_zero`), and every other row agrees with `A` on all
+  columns `< j`.
+
+`rrefState_step_pivot` then verifies the six `RrefState` components at
+`(r+1, j+1)` directly: rows `≥ r+1` vanish on columns `< j+1` (agreement +
+`RrefState.1`, and the cleared pivot column), old pivot rows keep their
+leading column and their `1` (`matLeadingCol_eq_of_agree_before` +
+agreement), the new pivot row `r'` has leading column `j`
+(`matLeadingCol_eq_of_zero_before`), and pivot columns strictly increase and
+are cleared in all other rows.
 
 ## Review notes
 
