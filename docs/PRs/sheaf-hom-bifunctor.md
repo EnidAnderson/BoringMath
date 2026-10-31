@@ -114,3 +114,47 @@ Riou's `Mathlib/CategoryTheory/Sites/SheafHom.lean` (which it imports).
   (2) Peel (c) is already an `inferInstance` in Mathlib — is stating it here
   plus `sheafHom_iso_internalHom` the right scope, or should the instance be
   dropped and only the internal-hom identification kept?
+
+## Progress note (peeling of the 14 deliberate sorries, ticket #41)
+
+All 14 sorries of commit `fe53dfd` are now peeled; the module builds
+warning-clean with **0 sorries** and `scripts/check-style.sh` reports
+**0 violations** (all lines ≤ 100 columns).
+
+New named lemmas added in the module (each with `-- Reference:` + docstring):
+
+* Peel (a): `whiskerLeft_overMap_op_whiskerLeft_overForget_op` and
+  `overMapPullback_map_overPullback_map` (primitive `rfl` coherences for
+  `Over.map`/`Over.forget` and `overMapPullback`/`overPullback`, the latter
+  via `sheafPushforwardContinuousComp` being an `Iso.refl`);
+  `sheafHomPostcomp_id` / `_comp`, `sheafHomPrecomp_id` / `_comp`,
+  `sheafHom_interchange` (the interchange law). The two presheaf naturality
+  fields, the presheaf-bifunctor `map` naturality, the two sheaf naturality
+  fields, `sheafHomFunctor.map_id` / `map_comp`, and the three
+  `sheafHomBifunctor` fields are all proved from these via
+  `ConcreteCategory.ext_apply`, `NatTrans.ext`, `DFunLike.ext`,
+  `ObjectProperty.hom_ext`, `Functor.map_id` / `map_comp`,
+  `Functor.whiskerLeft_comp`, and `Category.assoc`.
+* Peel (b): `sheafProdIsoTensor` (`X ⨯ F ≅ X ⊗ F`, pointwise for sheaves of
+  types) with its four `fst`/`snd` fac lemmas and `sheafProdMap_app`
+  (pointwise formula for the transported `prod.map f (𝟙 F)`);
+  `sheafHomCurryTensor` / `sheafHomCurrySection` / `sheafHomCurryVal` /
+  `sheafHomUncurryVal` (the pointwise currying/uncurrying at presheaf level,
+  routed through `sheafHom'Iso` so that `presheafHom_map_app` and
+  `presheafHom_map_app_op_mk_id` apply); `sheafHomCurry` / `sheafHomUncurry`;
+  the round trips `sheafHomUncurryVal_curry`, `sheafHomUncurry_curry`,
+  `sheafHomCurryVal_uncurry`, `sheafHomCurry_uncurry`; the naturalities
+  `sheafHomUncurryVal_naturality_left`, `sheafHomUncurry_naturality_left`,
+  `sheafHomCurryVal_naturality_right`, `sheafHomCurry_naturality_right`;
+  `sheafHomProdHomEquiv` (now `noncomputable`, since the chosen products enter)
+  and `sheafHomAdjunction` (both `CoreHomEquiv` naturality fields proved).
+* Peel (c): `prodWithIsoTensorLeft` (`prodWith F ≅ tensorLeft F` via
+  `Limits.prod.braiding` + `tensorLeftIsoProd`), and
+  `sheafHom_iso_internalHom` via `Adjunction.ofNatIsoLeft` +
+  `Adjunction.rightAdjointUniq` against `(MonoidalClosed.closed F).adj`.
+
+Notes: `sheafHomProdHomEquiv`, `sheafHomCurry`, `sheafHomUncurry` are now
+`noncomputable` (content-forced: the chosen binary products enter through
+`sheafProdIsoTensor`); each carries an inline comment saying so. One
+justified `rw` (`natIso_hom_inv_app_apply`) uses a fully instantiated rule
+with a uniqueness comment, per STYLE §2.1.
