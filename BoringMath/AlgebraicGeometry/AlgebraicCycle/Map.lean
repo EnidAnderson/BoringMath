@@ -255,6 +255,8 @@ theorem mapCoeff_comp {Z : Scheme.{u}} (g : X ⟶ Y) (h : Y ⟶ Z)
 -- filters decide point equality, and the theorem deliberately carries no
 -- `[DecidableEq ↥Y]` hypothesis (adding one would weaken the statement).
 -- Choice-tainted at the pin; flagged in docs/AUDITS/2026-10-30-choice-audit-own-code.md.
+-- Reference: [program] C.0.b map API (composition law), anchored in the
+-- AlgebraicCycle pushforward composition; see docs/AUDITS/2026-10-30-choice-audit-own-code.md.
 open scoped Classical in
 /-- **The composition law for the weighted map**: the map along a
 composite is the map of the map, provided the middle weight agrees with
