@@ -3,6 +3,7 @@ Copyright (c) 2026 Enid. All rights reserved.
 Released under the Hippocratic Mathematics License v1.0, as described in the file LICENSE.
 Authors: Enid
 -/
+import Mathlib.Algebra.Field.ZMod
 import Mathlib.GroupTheory.Subgroup.Simple
 import Mathlib.GroupTheory.SpecificGroups.Cyclic
 import Mathlib.GroupTheory.SpecificGroups.Alternating.Simple
@@ -69,6 +70,16 @@ theorem finite_comm_simple_iff_prime_card {G : Type*} [CommGroup G] [Finite G] :
     IsSimpleGroup G ↔ (Nat.card G).Prime :=
   ⟨fun h => @IsSimpleGroup.prime_card G _ h,
     fun h => @isSimpleGroup_of_prime_card G _ (Nat.card G) ⟨h⟩ rfl⟩
+
+-- Reference: mathlib pin v4.35.0-rc3, `Cyclic.lean` (`IsSimpleGroup.isCyclic`,
+-- `IsSimpleGroup.prime_card`, `zmodCyclicMulEquiv`); [GLS] Number 1, §1.
+/-- **Sector A to isomorphism level (proved)**: a finite simple abelian group
+is isomorphic to `Multiplicative (ZMod p)` for a prime `p` (its order). -/
+theorem finite_simple_abelian_classification {G : Type*} [CommGroup G] [Finite G]
+    [IsSimpleGroup G] :
+    ∃ p : ℕ, p.Prime ∧ Nat.card G = p ∧ Nonempty (G ≃* Multiplicative (ZMod p)) :=
+  ⟨Nat.card G, IsSimpleGroup.prime_card, rfl,
+    ⟨(zmodCyclicMulEquiv (inferInstance : IsCyclic G)).symm⟩⟩
 
 /-! ## Sector B: alternating — consumed from mathlib at the pin -/
 
@@ -147,6 +158,28 @@ theorem card_PSL_finiteField_mul_card_rootsOfUnity {n : ℕ} [NeZero n] {𝔽 : 
       (Fintype.card_fin n)
       (Nat.card_congr (Matrix.SpecialLinearGroup.center_equiv_rootsOfUnity' (0 : Fin n)).toEquiv)
   exact (congrArg (fun x => Nat.card (PSL(n, 𝔽)) * x) h3).symm.trans (h1.trans h2)
+
+-- Reference: mathlib pin v4.35.0-rc3, `Matrix.card_SL_field` + `ZMod.card` +
+-- `Fin.prod_univ_two`; [ATLAS]/[Wilson]: `|SL(2,2)| = 6`. The product and the
+-- division are literal `Nat` computations, closed by `rfl`.
+/-- **Exception order `|SL(2, F_2)| = 6`** (proved; `PSL(2,2)` has trivial
+center, so `|PSL(2,2)| = 6` too — the `S_3` exception of sector C). -/
+theorem card_SL_2_2 [Fact (Nat.Prime 2)] [NeZero 2] :
+    Nat.card (SpecialLinearGroup (Fin 2) (ZMod 2)) = 6 :=
+  (Matrix.card_SL_field (𝔽 := ZMod 2) (n := 2)).trans
+    ((congrArg (fun c => (∏ i : Fin 2, (c ^ 2 - c ^ (i : ℕ))) / (c - 1)) (ZMod.card 2)).trans
+      ((congrArg (fun P => P / (2 - 1))
+        (Fin.prod_univ_two fun i : Fin 2 => (2:ℕ)^2 - (2:ℕ)^(i:ℕ))).trans rfl))
+
+-- Reference: as `card_SL_2_2`; `|SL(2,3)| = 24`, so `|PSL(2,3)| = 12` (center
+-- of order 2) — the `A_4` exception of sector C.
+/-- **Exception order `|SL(2, F_3)| = 24`** (proved). -/
+theorem card_SL_2_3 [Fact (Nat.Prime 3)] [NeZero 3] :
+    Nat.card (SpecialLinearGroup (Fin 2) (ZMod 3)) = 24 :=
+  (Matrix.card_SL_field (𝔽 := ZMod 3) (n := 2)).trans
+    ((congrArg (fun c => (∏ i : Fin 2, (c ^ 2 - c ^ (i : ℕ))) / (c - 1)) (ZMod.card 3)).trans
+      ((congrArg (fun P => P / (3 - 1))
+        (Fin.prod_univ_two fun i : Fin 2 => (3:ℕ)^2 - (3:ℕ)^(i:ℕ))).trans rfl))
 
 -- Reference: [Wilson] ch. 5 (Iwasawa's criterion applied to `SL(n,q)` acting on
 -- projective space); mathlib pin v4.35.0-rc3,
