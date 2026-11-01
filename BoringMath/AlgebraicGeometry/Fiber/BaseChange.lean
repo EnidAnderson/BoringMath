@@ -4,6 +4,7 @@ Released under the Hippocratic Mathematics License v1.0, as described in the fil
 Authors: Enid
 -/
 import BoringMath.AlgebraicGeometry.Morphisms.Flat.Generalizing
+import BoringMath.AlgebraicGeometry.ResidueField.Tower
 import BoringMath.Topology.Sober.GenericPoints
 import Mathlib.AlgebraicGeometry.Fiber
 import Mathlib.AlgebraicGeometry.Morphisms.Flat
@@ -163,5 +164,28 @@ theorem mem_genericPoints_fiberBaseChange (h : IsPullback fst snd f g)
       (⟨irreducibleComponent ((fiberBaseChange h y).base η),
         irreducibleComponent_mem_irreducibleComponents _⟩ :
         irreducibleComponents ↥(Scheme.Hom.fiber f (g y)))).2
+
+-- Reference: [EGA IV], ch. 2 (the residue degrees exchange in a
+-- cartesian square: the degrees along the two factorizations of the
+-- square multiply to the same value).
+-- REVIEW(citation): pin down the section.
+/-- **The degree exchange of the base-change square**: the residue
+degrees along the two factorizations of a cartesian square through the
+fibers multiply to the same value. -/
+theorem residueDegree_exchange (h : IsPullback fst snd f g) (y : Y)
+    (η : ↥(Scheme.Hom.fiber snd y)) :
+    fst.residueDegree ((snd.fiberι y).base η) * (snd.fiberι y).residueDegree η =
+      (f.fiberι (g y)).residueDegree ((fiberBaseChange h y).base η) *
+        (fiberBaseChange h y).residueDegree η :=
+  calc fst.residueDegree ((snd.fiberι y).base η) *
+      (snd.fiberι y).residueDegree η
+      = (snd.fiberι y ≫ fst).residueDegree η :=
+        Eq.symm (Scheme.Hom.residueDegree_comp (snd.fiberι y) fst η)
+    _ = (fiberBaseChange h y ≫ f.fiberι (g y)).residueDegree η :=
+        congrArg (fun ψ => Scheme.Hom.residueDegree ψ η)
+          (fiberBaseChange_fiberι h y).symm
+    _ = (f.fiberι (g y)).residueDegree ((fiberBaseChange h y).base η) *
+        (fiberBaseChange h y).residueDegree η :=
+        Scheme.Hom.residueDegree_comp (fiberBaseChange h y) (f.fiberι (g y)) η
 
 end AlgebraicGeometry
