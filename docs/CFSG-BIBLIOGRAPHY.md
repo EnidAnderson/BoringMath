@@ -57,3 +57,25 @@ arXiv downloads below.
 ## Phase 4 — assembly (#214)
 - Master statement + sector glue in `BoringMath/GroupTheory/Simple/Classification.lean`;
   citations follow the sectors above.
+
+## Critical arguments whose details are NOT directly accessible — and the free coverage
+
+Must-be-in-the-proof arguments living in paywalled sources, mapped to the best
+freely available coverage (all cross-referenceable in `../refs/`):
+
+| Argument | Primary source (paywalled) | Free coverage now held |
+|---|---|---|
+| Odd-order theorem details | Feit–Thompson 1963 | **held in full** (msp.org); Lean precedent: yawara/odd-order (Ishida) + Qiuzhen-CFSG vendored Gorenstein–Walter/Feit–Thompson closure (public Lean code, cited in arXiv:2608.10894 **held**) |
+| Nonsolvable signalizer functor theorem | GLS vol 2 / Aschbacher 2011 | Flavell, arXiv:1609.08311 **held** (new self-contained proof) |
+| Trichotomy theorem | Gorenstein–Lyons Memoir 42.276 | Borovik–Burdges, arXiv:0711.4169 **held** (new proof) |
+| K-group structure theory | Memoir 42.276 / GLS vols 2–5 | arXiv:1609.03026, 1609.01969 **held**; full theory still a gap (borrow Memoir/GLS) |
+| Balance theorem, Thompson factorization, C*-stages, N-group analysis | Thompson 1968–71; GLS vols 1–2 | strategy surveys **held**: Gorenstein 1982 BAMS (via Wayback), Solomon 2018 Notices (via Wayback), GLS vol 1 TOC, Lyons 555 + ETSU notes; the proofs themselves remain the borrow/obtain gap |
+| Quasithin case | Aschbacher–Smith, Surveys 111 (2004) | **no free full account — biggest gap**; obtain list |
+| Characteristic-2 classification | Aschbacher, CUP 2011 (2 vols) | partial via held K-group/trichotomy papers; obtain Aschbacher 2011 |
+| Lie-type simplicity, all 16 families | Steinberg 1967/1968; Lusztig 1984; GLS vol 3 | Wilson GTM 251 **held** (A_n, PSL via Iwasawa); Geck arXiv:2404.11472 **held** (Chevalley construction course); DL 1976 **held**; Steinberg/Lusztig on obtain list |
+| Sporadic constructions, orders, maximal subgroups | ATLAS + original papers | ATLAS **held in full**; Wilson arXiv:1701.02095 **held**; Monster computer constructions arXiv:2002.10921, 2203.04223 **held**; simplicity proofs of the large sporadics: ATLAS tables + paywalled papers (partial gap) |
+| Schreier conjecture (Out of simple is solvable) | follows from CFSG, details in GLS | statement in held surveys; consequence-only, proved from the master theorem |
+| Bender–Suzuki, Gorenstein–Walter | 1970s papers | Lean closures exist in Qiuzhen-CFSG vendor tree (free code) |
+
+Rule: we never cite the paywalled originals directly; statements from them are
+verified through the held secondary sources and flagged `REVIEW(citation)`.
