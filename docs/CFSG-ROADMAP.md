@@ -57,6 +57,23 @@ proof details in Lean without buying books or hunting papers. Therefore:
   `BoringMath/GroupTheory/Simple/Classification.lean` — the A₄/PSL(2,3)
   exception reconstructed purely from pin lemmas, no external text.
 
+## The CFSG library (`BoringMath/GroupTheory/CFSG/`, ticket #236 CFSG.LIB)
+
+Special machinery beyond mathlib's pin (audited: pin HAS `Group.IsPerfect`, focal
+subgroup/transfer, Frattini, class equation, Sylow/p-groups, Coxeter, Jordan and
+multiple primitivity, characters; MISSING quasisimple, signalizers, J(P), K-groups,
+fusion systems, BN-pairs, local analysis, blocks):
+
+- `Quasisimple.lean` — landed: `IsQuasisimpleGroup`, `IsPerfect.of_surjective`
+  (proved), `alternatingGroup_isPerfect` (consumed), center-quotient lemma.
+- `Signalizer.lean` — landed: `SignalizerFunctor` structure (θ ≤ C_G(P),
+  nontrivial, conjugation-invariant, complete). Next: balance theorem (#227).
+- `ThompsonSubgroup.lean` — landed: `IsMaximalAbelian`, `thompsonSubgroup J(P)`,
+  `thompsonSubgroup_le` (proved). Next: J(P) characteristic, Thompson factorization (#228).
+- Planned modules: `KGROUP/` (K-groups, trichotomy), `Fusion/`, `BNPair/`,
+  `LocalAnalysis/` (centralizers of involutions, strongly closed, factorization),
+  `ThreeTransposition/`, `Blocks/`.
+
 ## Ticket tree (TOC of the proof, in formalization order)
 
 ### Phase 0 — foundations
