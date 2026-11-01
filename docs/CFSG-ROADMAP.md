@@ -70,6 +70,12 @@ fusion systems, BN-pairs, local analysis, blocks):
   nontrivial, conjugation-invariant, complete). Next: balance theorem (#227).
 - `ThompsonSubgroup.lean` — landed: `IsMaximalAbelian`, `thompsonSubgroup J(P)`,
   `thompsonSubgroup_le` (proved). Next: J(P) characteristic, Thompson factorization (#228).
+- `Fusion.lean` — landed: `IsConjHom` + `IsConjHom.injective` (proved). Next: the
+  fusion system of G on a Sylow p-subgroup, saturation, Alperin (#240).
+- `ThreeTransposition.lean` — landed: `ThreeTranspositionGroup` +
+  `orderOf_eq_two` (proved). Next: Fischer's classification (#245).
+- `AlmostSimple.lean` — landed: `IsAlmostSimpleGroup` + `nontrivial` (proved).
+  Next: socle/layer theory, Aut/Out, Schreier (#244).
 - Planned modules (each its own ticket, absolute end-states):
   - reduction core: signalizer #237, Thompson J #238, K-groups/trichotomy #239,
     fusion systems/Alperin #240, local analysis #241, factorizations #242,
