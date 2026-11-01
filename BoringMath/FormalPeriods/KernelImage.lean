@@ -985,6 +985,7 @@ theorem invK_ne_zero (hinv : ∀ a : K, a ≠ 0 → invK a * a = 1) {a : K} (h :
 /-- One pivot step of the elimination loop preserves `applyMat _ x = 0`. -/
 theorem rrefAux_step_pivot [DecidableEq K]
     (hinv : ∀ a : K, a ≠ 0 → invK a * a = 1) (fuel : ℕ)
+    (A : FreeMatrix K n m) (x : FreeMod K m)
     (ih : ∀ (r j : ℕ) (A : FreeMatrix K n m) (x : FreeMod K m),
       applyMat (rrefAux invK fuel r j A) x = 0 ↔ applyMat A x = 0)
     (r j : ℕ) (hr : r < n) (hj : j < m) (i : Fin n)
@@ -1028,7 +1029,7 @@ theorem rrefAux_step_pivotmatch [DecidableEq K]
   cases hfp : findPivotRow
       (fun k => Nat.ble r k.val && (if A k ⟨j, hj⟩ ≠ 0 then true else false)) n r with
   | none => exact ih r (j+1) A x
-  | some i => exact rrefAux_step_pivot invK hinv fuel ih r j hr hj i hfp
+  | some i => exact rrefAux_step_pivot invK hinv fuel A x ih r j hr hj i hfp
 
 -- Reference: Mines–Richman–Ruitenburg 1988, Pt. II Ch. 6 (advancing past a
 -- column: either the row index is in range and the pivot search runs, or it
