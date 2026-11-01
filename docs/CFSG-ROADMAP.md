@@ -41,6 +41,22 @@ Ticket **#234 CFSG.SRC** tracks obtaining the alternates. For formalization, the
 reduction phase (Phase 1) will cite the original papers / Aschbacher 2011 wherever
 GLS is unavailable; Phases 2–3 are covered by the refs we already hold.
 
+## Sourcing & reconstruction policy (agreed with the human)
+
+The end product is a single democratized Lean resource: anyone can explore the
+proof details in Lean without buying books or hunting papers. Therefore:
+
+* The **kernel-checked Lean proof is the authority**. Citations name and roadmap;
+  they never license a step. Where a source is paywalled/inaccessible, we
+  **reconstruct the argument from first principles in Lean** (the type checker
+  is the guardrail — same safety argument as the rest of the repo).
+* We cite only freely available sources (held in `../refs/`); paywalled
+  originals are never cited directly — statements from them are verified via
+  held secondary sources and flagged `REVIEW(citation)`.
+* Demonstrated: `not_isSimpleGroup_alternatingGroup_fin4` in
+  `BoringMath/GroupTheory/Simple/Classification.lean` — the A₄/PSL(2,3)
+  exception reconstructed purely from pin lemmas, no external text.
+
 ## Ticket tree (TOC of the proof, in formalization order)
 
 ### Phase 0 — foundations

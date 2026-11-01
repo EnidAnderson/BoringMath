@@ -6,6 +6,7 @@ Authors: Enid
 import Mathlib.GroupTheory.Subgroup.Simple
 import Mathlib.GroupTheory.SpecificGroups.Cyclic
 import Mathlib.GroupTheory.SpecificGroups.Alternating.Simple
+import Mathlib.GroupTheory.SpecificGroups.Alternating.KleinFour
 import Mathlib.LinearAlgebra.Matrix.ProjectiveSpecialLinearGroup
 import Mathlib.LinearAlgebra.Matrix.GeneralLinearGroup.Card
 import Mathlib.GroupTheory.Coset.Card
@@ -80,6 +81,35 @@ theorem alternating_isSimpleGroup (n : ℕ) (hn : 5 ≤ n) :
     IsSimpleGroup (alternatingGroup (Fin n)) :=
   alternatingGroup.isSimpleGroup
     (Eq.subst (motive := fun k => 5 ≤ k) (Nat.card_fin n).symm hn)
+
+-- Reference: reconstructed from first principles at the pin — no external text
+-- needed: the Klein four subgroup of `A_4` is normal (mathlib
+-- `alternatingGroup.normal_kleinFour`), and proper nontrivial by cardinality
+-- (`kleinFour_card_of_card_eq_four` vs `card_of_card_eq_four` +
+-- `Subgroup.card_bot`/`card_top`), contradicting `IsSimpleGroup`. This is the
+-- `A_4 ≅ PSL(2,3)` exception of sector C, proved directly.
+/-- **The small alternating exception, reconstructed from first principles**:
+`A_4` is not simple — its Klein four subgroup is a proper nontrivial normal
+subgroup (matching the `PSL(2,3)` exception clause of sector C). -/
+theorem not_isSimpleGroup_alternatingGroup_fin4 :
+    ¬ IsSimpleGroup (alternatingGroup (Fin 4)) := by
+  intro h
+  have h4 : Nat.card (Fin 4) = 4 := Nat.card_fin 4
+  have hc : Nat.card ↥(alternatingGroup.kleinFour (Fin 4)) = 4 :=
+    alternatingGroup.kleinFour_card_of_card_eq_four h4
+  rcases @IsSimpleGroup.eq_bot_or_eq_top_of_normal _ _ h
+      (alternatingGroup.kleinFour (Fin 4)) (alternatingGroup.normal_kleinFour h4) with hb | ht
+  · have h1 : Nat.card ↥(⊥ : Subgroup (alternatingGroup (Fin 4))) = 4 :=
+      Eq.subst (motive := fun (H : Subgroup (alternatingGroup (Fin 4))) => Nat.card ↥H = 4) hb hc
+    exact absurd ((Subgroup.card_bot (G := alternatingGroup (Fin 4))).symm.trans h1)
+      (Nat.ne_of_lt (Nat.lt_add_of_pos_right (k := 3) (Nat.succ_pos 2)))
+  · have h1 : Nat.card ↥(⊤ : Subgroup (alternatingGroup (Fin 4))) = 4 :=
+      Eq.subst (motive := fun (H : Subgroup (alternatingGroup (Fin 4))) => Nat.card ↥H = 4) ht hc
+    have h2 : Nat.card ↥(⊤ : Subgroup (alternatingGroup (Fin 4))) = 12 :=
+      (Subgroup.card_top (G := alternatingGroup (Fin 4))).trans
+        (alternatingGroup.card_of_card_eq_four h4)
+    exact absurd (h1.symm.trans h2)
+      (Nat.ne_of_lt (Nat.lt_add_of_pos_right (k := 8) (Nat.succ_pos 7)))
 
 /-! ## Sector C: Lie type — the `A`-family `PSL(n, F_q)` -/
 
