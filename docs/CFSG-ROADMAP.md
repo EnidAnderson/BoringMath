@@ -10,14 +10,15 @@ formalized from summaries.
 
 ## Reference texts and their status (refs live in `../refs/`, outside the repo)
 
-| Text | Role | PDF status |
+| Text | Role | PDF status (files in `../refs/`) |
 |---|---|---|
-| Feit–Thompson 1963, Pacific J. Math 13(3), 775–1029 | odd-order theorem (FT.0) | **obtained**: `refs/feit-thompson-1963-pjm-v13-n3-p01..p07.pdf` (msp.org open access) |
-| Deligne–Lusztig 1976, Ann. Math. 103, 103–161 | character theory of G(F_q) (CFSG.BRIDGE) | **obtained**: `refs/deligne-lusztig-1976-...pdf` (author's page) |
-| GLS vol 1–3, AMS Surveys 40 (1994/96/2005) | the proof roadmap | **needed from user** — AMS sells; archive.org controlled lending: `archive.org/details/classificationo40v1gorenstein` etc. |
-| ATLAS, Conway–Curtis–Norton–Parker–Wilson, OUP 1985 | sporadic data (#216, #222, #232, #233) | **needed from user** — OUP; archive.org borrow |
-| Carter, *Simple Groups of Lie Type*, Wiley 1972 | Chevalley construction (#218, #223) | **needed from user** — archive.org borrow: `archive.org/details/simplegroupsofli0000cart` |
-| Wilson, *The Finite Simple Groups*, Springer GTM 251 | graduate proofs (A_n, PSL via Iwasawa) | **needed from user** — Springer |
+| Feit–Thompson, *Solvability of groups of odd order*, Pacific J. Math 13(3) (1963), 775–1029 | odd-order theorem (FT.0, #226) | **obtained** (open access, msp.org): `feit-thompson-1963-pjm-v13-n3-p01..p07.pdf` |
+| Deligne–Lusztig, *Representations of reductive groups over finite fields*, Ann. Math. 103 (1976), 103–161 | character theory of G(F_q) (#218, #224) | **obtained** (author-hosted): `deligne-lusztig-1976-representations-reductive-groups.pdf` |
+| GLS vol 1, AMS Surveys 40.1 (1994) | proof roadmap, reduction (#219) | **endmatter/TOC obtained**: `gls-vol1-endmatter-ams-surv-40.1.pdf` (ams.org); full text of vols 1–3 still needed from user |
+| GLS vols 2–3, AMS Surveys 40.2/.3 (1996/2005) | local analysis; Lie type + sporadic + completion (#220, #221) | **needed from user** — AMS sells; archive.org controlled lending |
+| ATLAS, Conway–Curtis–Norton–Parker–Wilson, OUP 1985 | sporadic data (#216, #222, #232, #233) | **obtained** (CNRS-hosted copy, user-supplied link): `atlas-of-finite-groups-1985.pdf` |
+| Carter, *Simple Groups of Lie Type*, Wiley 1972 | Chevalley construction (#218, #223) | **tables obtained** (Utah math-library, user-supplied link): `carter-simple-groups-of-lie-type-tables.pdf`; full text still needed from user |
+| Wilson, *The Finite Simple Groups*, Springer GTM 251 (2009) | graduate proofs, A_n and PSL via Iwasawa | **obtained** (user-supplied link): `wilson-gtm251-finite-simple-groups.pdf` |
 
 mathlib pin v4.35.0-rc3 is the base layer (already has: `IsSimpleGroup`, A_n
 simplicity, `PSL`, SL card formulas, Iwasawa criterion, Lie algebras/modules/
