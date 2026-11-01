@@ -23,6 +23,24 @@ mathlib pin v4.35.0-rc3 is the base layer (already has: `IsSimpleGroup`, A_n
 simplicity, `PSL`, SL card formulas, Iwasawa criterion, Lie algebras/modules/
 weights/root systems).
 
+## Alternate / primary sources (the proof is NOT only in GLS)
+
+GLS (Surveys 40, Numbers 1–6 of a projected 11) is the *second-generation rewrite*,
+which stalled; the primary record is the original literature (~10–15k journal pages,
+hundreds of authors). Parts are reproduced elsewhere:
+
+- **Strategy/overview**: Gorenstein, *Classifying the finite simple groups*, Bull. AMS 14 (1982) 1–75; Gorenstein, *Finite Simple Groups: An Introduction to Their Classification* (1982 Harvard lecture notes; the "16-step program").
+- **Characteristic-2 local analysis** (GLS vols 2–5 content): Gorenstein–Lyons, *The Local Structure of Finite Groups of Characteristic 2 Type*, AMS Memoir 42.276 (1983) — K-groups, trichotomy; and **Aschbacher, *The Classification of Finite Simple Groups: Groups of Characteristic 2 Type*, 2 vols, CUP 2011** — the modern replacement account.
+- **Quasithin case**: Aschbacher–Smith, Surveys 111 (2004), 2 vols.
+- **Minimal simple / N-groups**: Thompson's N-group papers (1968–71); Bender–Glauberman simplifications of odd-order/local analysis.
+- **Lie type**: Steinberg, *Lectures on Chevalley Groups* (1967); Steinberg, *Endomorphisms of linear algebraic groups* (1968); Lusztig, *Characters of Reductive Groups over a Finite Field* (1984); Kleidman–Liebeck, *The Subgroup Structure of the Finite Classical Groups* (1990); + Carter/DL/Wilson/ATLAS (in refs).
+- **Sporadic**: ATLAS (in refs) + original construction papers (Griess, *The Friendly Giant*, Invent. Math. 69 (1982) for the Monster; Fischer; Harada–Norton; …).
+- **Odd order**: Feit–Thompson 1963 (in refs) + later simplifications.
+
+Ticket **#234 CFSG.SRC** tracks obtaining the alternates. For formalization, the
+reduction phase (Phase 1) will cite the original papers / Aschbacher 2011 wherever
+GLS is unavailable; Phases 2–3 are covered by the refs we already hold.
+
 ## Ticket tree (TOC of the proof, in formalization order)
 
 ### Phase 0 — foundations
