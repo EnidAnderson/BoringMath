@@ -78,7 +78,8 @@ theorem finite_comm_simple_iff_prime_card {G : Type*} [CommGroup G] [Finite G] :
 for `n ≥ 5`. -/
 theorem alternating_isSimpleGroup (n : ℕ) (hn : 5 ≤ n) :
     IsSimpleGroup (alternatingGroup (Fin n)) :=
-  alternatingGroup.isSimpleGroup (by simpa [Nat.card_fin] using hn)
+  alternatingGroup.isSimpleGroup
+    (Eq.subst (motive := fun k => 5 ≤ k) (Nat.card_fin n).symm hn)
 
 /-! ## Sector C: Lie type — the `A`-family `PSL(n, F_q)` -/
 
