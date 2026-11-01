@@ -70,9 +70,17 @@ fusion systems, BN-pairs, local analysis, blocks):
   nontrivial, conjugation-invariant, complete). Next: balance theorem (#227).
 - `ThompsonSubgroup.lean` — landed: `IsMaximalAbelian`, `thompsonSubgroup J(P)`,
   `thompsonSubgroup_le` (proved). Next: J(P) characteristic, Thompson factorization (#228).
-- Planned modules: `KGROUP/` (K-groups, trichotomy), `Fusion/`, `BNPair/`,
-  `LocalAnalysis/` (centralizers of involutions, strongly closed, factorization),
-  `ThreeTransposition/`, `Blocks/`.
+- Planned modules (each its own ticket, absolute end-states):
+  - reduction core: signalizer #237, Thompson J #238, K-groups/trichotomy #239,
+    fusion systems/Alperin #240, local analysis #241, factorizations #242,
+    recognition (N-groups, Z*, Bender–Suzuki, Gorenstein–Walter) #243,
+    almost-simple/layers/Schreier #244, 3-transpositions #245, quasithin #246,
+    characteristic-2 #247, cohomology H¹/H² #248, blocks/Brauer #249,
+    permutation actions/Jordan #250
+  - Lie type: BN-pairs/buildings/Tits #251, Chevalley #252, reductive+DL #253,
+    classical groups/subgroup structure #254
+  - sporadic: constructions library #255; small groups/exceptional isos #256
+  - assembly glue #257
 
 ## Ticket tree (TOC of the proof, in formalization order)
 
