@@ -2737,3 +2737,5 @@ theorem colimSymRel_nil_right (J : FilteredCat) (D : FilteredDiagram J K)
         (pairAdd_snd J D p ⟨J.nonemptyObj, 0⟩))
       (colimSymRel_nil_right_step J D p)⟩
 
+
+end BoringMath
