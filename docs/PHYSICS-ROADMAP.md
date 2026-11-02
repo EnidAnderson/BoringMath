@@ -18,6 +18,53 @@ Motivic Information theory-element (MI.0.1, #67): MHI is the BoringMath-grade,
 computable shadow of "the bulk is encoded in the boundary" (holographic
 principle) with motivic information as the counting/resource layer.
 
+## Non-vacuity / acceptance criteria (anti-triviality)
+
+Honest note (2026-11): as seeded, `MotivicHolographicInfo` is an *interface* —
+its only law (`holographicEq`) is satisfiable by the trivial calibration, so the
+framework alone proves nothing. That is deliberate (computad-style: the general
+frame first), but the folder is only non-crank when each specialization proves
+**laws on nontrivial instances**. Acceptance criteria per area:
+
+- Classical mechanics (#358): Liouville — the Hamiltonian flow preserves the
+  symplectic form — proved on a nontrivial instance (pin has
+  `Matrix.symplecticGroup`, `mem_iff' : A * J * Aᵀ = J`).
+- Quantum mechanics (#359): unitarity of time evolution; measurement
+  probabilities sum to 1 (via the probability folder #286–#292).
+- FQFT (#360): Atiyah–Segal axioms as theorems about the hologram functor.
+- Gravity (#361): the AdS/CFT dictionary as an adjunction, with the
+  entropic/information bound (boundary entropy = bulk area in Planck units,
+  statement layer).
+- Zeta/holography (#371, below): Abel–Plana proved, ζ(2) = π²/6 derived.
+
+## The Abel–Plana dictionary and the period conjecture (#371–#375)
+
+The motivic holographic principle in its analytic-number-theory form: the
+**boundary** is the discrete sum side (`∑ f(n)`, `n : ℕ`), the **bulk** is the
+contour/integral side (the complex plane, residues), and the **hologram** is
+the Abel–Plana map. The holographic equation is then literally the Abel–Plana
+formula: sum = integral + boundary term + contour term. Periods/zeta values
+sit at the interface: the lab's T3 thread re-derives ζ(2) = π²/6 this way, with
+Euler–Maclaurin remainders as the "correction" terms (zugzwang corrections).
+Connection to the period conjecture / standard conjectures / t-structures: the
+pin HAS t-structures (`Algebra/Homology/DerivedCategory/Ext/TStructure.lean`);
+the motivic holography conjecture reads as: the period matrix of a bulk motive
+is computed by the boundary's discrete invariants — an equation of information
+measures, stated as a labeled conjecture (never a bare `sorry`-shaped theorem,
+per the lab honesty rules).
+
+- **#371** `Physics/HolographicZeta.lean` — SEED: the Abel–Plana formula as a
+  named theorem (sorry + peeling plan via the residue theorem; pin has
+  `Analysis/Complex/CauchyIntegral`) and the MHI dictionary reading.
+- **#372** Euler–Maclaurin with remainder (statement + plan); ζ(2) = π²/6 by
+  Abel–Plana (T3) once #371 lands.
+- **#373** the motivic holography conjecture: stated as a `Prop` about
+  `MotivicHolographicInfo` + periods, labeled conjecture with falsifier.
+- **#374** t-structure interface: bulk motive categories with t-structures
+  (pin API), the conjecture that the hologram is t-exact on the relevant subcategory.
+- **#375** renormalization/residues dark sector (T4): Connes–Kreimer as the
+  bulk-side Hopf algebra; Apéry certificate as boundary-side null-move.
+
 ## Crank-free rules (binding for this folder)
 
 1. **No `axiom` declarations, ever.** Every structure field is data or `Prop`
