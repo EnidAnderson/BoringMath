@@ -5,7 +5,6 @@ Authors: Enid
 -/
 import Mathlib.Analysis.Complex.CauchyIntegral
 import Mathlib.Analysis.SpecialFunctions.Trigonometric.Basic
-import BoringMath.Physics.MotivicHolographicInfo
 
 /-!
 # The Abel–Plana dictionary — holography in analytic number theory — ticket #371
@@ -41,8 +40,8 @@ the contour term integrable. -/
 def AbelPlanaCond (f : ℂ → ℂ) : Prop :=
   AnalyticOn ℂ f {z | 0 < z.re} ∧
   IntegrableOn (fun x : ℝ => f x) (Ioi 0) ∧
-  Tendsto (fun x : ℝ => f x) atTop (𝓝 0) ∧
-  IntegrableOn (fun t : ℝ => (f (t * I) - f (-t * I)) / (Real.exp (2 * π * t) - 1)) (Ioi 0)
+  Filter.Tendsto (fun x : ℝ => f x) Filter.atTop (nhds 0) ∧
+  IntegrableOn (fun t : ℝ => (f (t * I) - f (-t * I)) / (Real.exp (2 * Real.pi * t) - 1)) (Ioi 0)
 
 -- Reference: [Abel–Plana]; [Whittaker–Watson] ch. XII. TEMPORARY SORRY with
 -- peeling plan.
@@ -61,7 +60,8 @@ TEMPORARY SORRY with peeling plan. -/
 theorem abel_plana (f : ℂ → ℂ) (hf : AbelPlanaCond f) :
     ∑' n : ℕ, f n
       = (∫ x in Ioi (0:ℝ), f x) + f 0 / 2
-        + I * ∫ t in Ioi (0:ℝ), (f (t * I) - f (-t * I)) / (Real.exp (2 * π * t) - 1) := by
+        + I * ∫ t in Ioi (0:ℝ),
+            (f (t * I) - f (-t * I)) / (Real.exp (2 * Real.pi * t) - 1) := by
   sorry
 
 -- Reference: the MHI dictionary reading of Abel–Plana (roadmap §#371): boundary =
@@ -71,10 +71,10 @@ theorem abel_plana (f : ℂ → ℂ) (hf : AbelPlanaCond f) :
 /-- The **motivic holography interface** for the zeta dictionary: the
 Abel–Plana equation *is* the holographic equation between the discrete
 boundary sum and the bulk contour integral. -/
-def motivicHolographyZeta (f : ℂ → ℂ) (hf : AbelPlanaCond f) : Prop :=
+def motivicHolographyZeta (f : ℂ → ℂ) (_hf : AbelPlanaCond f) : Prop :=
   ∑' n : ℕ, f n
     = (∫ x in Ioi (0:ℝ), f x) + f 0 / 2
-      + I * ∫ t in Ioi (0:ℝ), (f (t * I) - f (-t * I)) / (Real.exp (2 * π * t) - 1)
+      + I * ∫ t in Ioi (0:ℝ), (f (t * I) - f (-t * I)) / (Real.exp (2 * Real.pi * t) - 1)
 
 -- Reference: as `abel_plana`; the interface is proved exactly when #371 lands.
 /-- The interface holds for Abel–Plana-nice `f` (proved from `abel_plana`). -/

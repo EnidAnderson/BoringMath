@@ -4,8 +4,12 @@ Released under the Hippocratic Mathematics License v1.0, as described in the fil
 Authors: Enid
 -/
 import Mathlib.CategoryTheory.Category.Basic
+import Mathlib.CategoryTheory.Functor.Basic
+import Mathlib.CategoryTheory.Discrete.Basic
 import Mathlib.CategoryTheory.Sites.Grothendieck
+import Mathlib.CategoryTheory.Sites.Coverage
 import Mathlib.Algebra.Order.Monoid.Defs
+import Mathlib.Algebra.Order.Ring.Nat
 
 /-!
 # Motivic Holographic Information — the Physics folder's primitive — ticket #356
@@ -31,6 +35,10 @@ proved below (trivial, and a two-point toy).
 -/
 
 namespace BoringMath
+
+open CategoryTheory
+
+universe u v u₁ v₁ w
 
 -- Reference: [’t Hooft 1993]; [Susskind 1995]; [Schreiber]; lab PHYS.0 / MI.0.1.
 /-- A **Motivic Holographic Information** system: bulk phase category with a
@@ -70,7 +78,7 @@ structure MotivicHolographicInfo where
 -- Reference: [’t Hooft 1993] (holographic principle); the terminal calibration,
 -- as in PHYS.0's `trivialDoctrine`.
 /-- The **trivial MHI**: one-object bulk and boundary, `ℕ` as information. -/
-def trivialMHI : MotivicHolographicInfo.{0, 0, 0, 0, 0, 0} where
+def trivialMHI : MotivicHolographicInfo.{0, 0, 0, 0, 0} where
   bulk := Discrete Unit
   bulkUnit := Discrete.mk ()
   boundary := Discrete Unit
@@ -85,14 +93,14 @@ def trivialMHI : MotivicHolographicInfo.{0, 0, 0, 0, 0, 0} where
 -- the point's value in `ℕ`.
 /-- The **two-point toy MHI**: bulk = boundary = `Discrete (Fin 2)`, identity
 hologram, information = `Fin.val`. -/
-def toyMHI : MotivicHolographicInfo.{0, 0, 0, 0, 0, 0} where
+def toyMHI : MotivicHolographicInfo.{0, 0, 0, 0, 0} where
   bulk := Discrete (Fin 2)
   bulkUnit := Discrete.mk 0
   boundary := Discrete (Fin 2)
   hologram := 𝟭 (Discrete (Fin 2))
   info := ℕ
-  bulkInfo := fun b => b.unbox.val
-  boundaryInfo := fun b => b.unbox.val
+  bulkInfo := fun b => b.as.val
+  boundaryInfo := fun b => b.as.val
   holographicEq := fun _ => rfl
   boundaryLocality := (CategoryTheory.GrothendieckTopology.trivial _).toCoverage
 
