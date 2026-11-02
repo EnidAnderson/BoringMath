@@ -122,6 +122,17 @@ characters/blocks → the four realizations + comparisons (#269); Lie type →
 pro-unipotent MTM(ℤ) sector (#271/#265); CFSG → simple-mixed-motives
 classification (#266); ∞-version → simple objects of DM (#275).
 
+## The gameplay lift (#276 CFSG.GAMES.0, under the games-motives dictionary)
+
+Simple groups as irreducible forms of choice/decision: a face-down card /
+hidden token is a game position with an irreducible hidden choice
+(`faceDown`, landed in BoringLab.Games.Hidden); alternating play is the game
+structure; linear logic / ludics alternation (designs, daimon) is the
+proof-as-play structure; the referee's conventions (Games.Referee) are the
+symmetry group of the play. Dictionary rows filed: #277 alternating play ↔ A_n,
+#278 face-down ↔ sporadic (26 irreducible hidden-choice types), #279 ludics/
+referee ↔ motivic Galois (T2 bet). Each row proved or bet-labeled.
+
 ## Ticket tree (TOC of the proof, in formalization order)
 
 ### Phase 0 — foundations
