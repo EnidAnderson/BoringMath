@@ -36,7 +36,7 @@ namespace AlgebraicGeometry
 
 open CategoryTheory Limits
 
-variable {X Y : Scheme.{u}}
+variable {X Y W : Scheme.{u}}
 
 -- Reference: the induced map `X × 𝔸¹ → Y × 𝔸¹` on products with the affine
 -- line (base change of `f` along the terminal maps).
@@ -157,6 +157,36 @@ theorem quasiCompact_prodMapAffineLine (f : X ⟶ Y) [QuasiCompact f] :
   MorphismProperty.IsStableUnderBaseChange.of_isPullback
     (isPullback_prodMapAffineLine f) ‹QuasiCompact f›
 
+-- Reference: a section `i` with retraction `r` has `residueFieldMap` an
+-- isomorphism (the comp law `residueFieldMap_comp` with `i ≫ r = 𝟙` and
+-- `residueFieldMap_id` give a two-sided inverse; field homs with a left
+-- inverse are isos).
+/-- The residue-field map of a section is an isomorphism. TEMPORARY SORRY:
+peeling plan — `residueFieldMap_comp` with the retraction + `residueFieldMap_id`
+gives `r.residueFieldMap (i x) ≫ i.residueFieldMap x = 𝟙`; a `CommRingCat` hom
+between fields with a left inverse is an iso (`RingHom.injective` +
+surjectivity from the inverse). -/
+theorem isIso_residueFieldMap_section (i : X ⟶ W) (r : W ⟶ X) (h : i ≫ r = 𝟙 X) (x : ↥X) :
+    IsIso (i.residueFieldMap x) := by
+  -- TEMPORARY SORRY: peeling plan above.
+  sorry
+
+-- Reference: the residue degree of `f × 𝔸¹` at the section point `i_t x`
+-- equals that of `f` at `x` (the section's residue-field iso transports the
+-- extension; `Module.finrank` is invariant under algebra isos).
+/-- Residue-degree base change along a section: `(f × 𝔸¹).residueDegree (i_t x)
+= f.residueDegree x`. TEMPORARY SORRY: peeling plan — `residueDegree` is
+`Module.finrank` of the residue-field extension; the section isos
+(`isIso_residueFieldMap_section` for `i_t` and `i_t'`) transport the extension
+κ(f x) → κ(x) to κ(i_t' (f x)) → κ(i_t x); finrank invariance under algebra
+isos (`Module.finrank_eq_of_algEquiv`-style). -/
+theorem residueDegree_prodMap_sectionIncl (f : X ⟶ Y) (t : specZ ⟶ affineLine)
+    (ht : t ≫ affineLineProj = 𝟙 specZ) (x : ↥X) :
+    (prodMapAffineLine f).residueDegree
+      ((sectionIncl X t ht).base x) = f.residueDegree x := by
+  -- TEMPORARY SORRY: peeling plan above.
+  sorry
+
 -- Reference: Fulton ch. 1, §1.4 (pushforward commutes with pullback along
 -- sections: `f_*(i_t*γ) = i_t'*((f × 𝔸¹)_*γ)`).
 -- REVIEW(citation): pin.
@@ -164,11 +194,9 @@ theorem quasiCompact_prodMapAffineLine (f : X ⟶ Y) [QuasiCompact f] :
 `i_t'*((f × 𝔸¹)_*γ)`. TEMPORARY SORRY: peeling plan — pointwise via the landed
 `AlgebraicCycle.pushforward_apply` (fiber sums), the bijection
 `x ↦ i_t x : f ⁻¹' {y} ≃ (f × 𝔸¹) ⁻¹' {i_t' y}` (from
-`sectionIncl_prodMap` and injectivity of `i_t`), and the residue-degree
-base-change equality `residueDegree (f × 𝔸¹) (i_t x) = residueDegree f x`
-(peel: the section's `residueFieldMap` is an iso — `residueFieldMap_comp` with
-the retraction `sectionIncl_fst` — and `Module.finrank` is invariant under
-algebra isos). -/
+`sectionIncl_prodMap` and injectivity of `i_t`, then `Finset.sum_bij` on the
+finite fibers via `finite_support_inter_fiber`), and the residue-degree
+base-change equality `residueDegree_prodMap_sectionIncl`. -/
 theorem pushforward_sectionPullback (f : X ⟶ Y) [QuasiCompact f]
     [QuasiCompact (prodMapAffineLine f)]
     (t : specZ ⟶ affineLine) (ht : t ≫ affineLineProj = 𝟙 specZ)
