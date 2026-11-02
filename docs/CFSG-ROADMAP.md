@@ -76,6 +76,10 @@ fusion systems, BN-pairs, local analysis, blocks):
   `orderOf_eq_two` (proved). Next: Fischer's classification (#245).
 - `AlmostSimple.lean` — landed: `IsAlmostSimpleGroup` + `nontrivial` (proved).
   Next: socle/layer theory, Aut/Out, Schreier (#244).
+- `PCore.lean` — landed: `oCore O_p(G)`, `oCore_normal`, `le_oCore`, and
+  `oCore_isPGroup` (all proved, sorry-free; via `IsPGroup.of_normal_quotient` +
+  `IsPGroup.sup_of_normal` + directed join). Next: `O_p` functoriality,
+  `O_{p'}` disjointness (#241 remainder).
 - Planned modules (each its own ticket, absolute end-states):
   - reduction core: signalizer #237, Thompson J #238, K-groups/trichotomy #239,
     fusion systems/Alperin #240, local analysis #241, factorizations #242,
