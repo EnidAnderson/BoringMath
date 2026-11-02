@@ -211,7 +211,7 @@ referee ↔ motivic Galois (T2 bet). Each row proved or bet-labeled.
   `PSL(3,2)` simple — LANDED: `PSL_3_2_isSimpleGroup` (PSLSimple.lean), directly
   from the rank ≥ 3 Iwasawa theorem (`PSL_isSimpleGroup_zmod_of_three_le` at `n = 3`),
   with `card_PSL_3_2 = 168` in Classification.lean.
-- **#283** (= #235, detailed) `Nat.card (rootsOfUnity n F_q) = gcd n (q - 1)`
+- **#283** (= #235, detailed) `Nat.card (rootsOfUnity n F_q) = gcd n (q - 1)` — LANDED for ALL finite fields: `card_rootsOfUnity_finiteField` (ExceptionalIso.lean, via `IsCyclic Fˣ`); prime-field version `card_rootsOfUnity_zmod_prime` in PSLCard.lean.
   over finite fields (`F_qˣ` cyclic of order `q-1`) → the full order formula
   `|PSL(n,q)| = (∏_{i<n} (q^n - q^i)) / ((q-1) * gcd n (q-1))`.
   Module `BoringMath/GroupTheory/Simple/PSLCard.lean` pins the statement
@@ -220,9 +220,12 @@ referee ↔ motivic Galois (T2 bet). Each row proved or bet-labeled.
   `nthRoots d 1` has card `d` for `d ∣ p-1` via `roots_X_pow_card_sub_X`;
   or the cyclic-torsion route via `IsCyclic (ZMod p)ˣ`) and proves the
   assembled formula `card_PSL_zmod_prime_mul_gcd` from it.
-- **#284 CFSG.C.1c** `|PSL(2,4)| = |PSL(2,5)| = 60` (needs #283);
-  `card_alternatingGroup_fin6 = 360` LANDED; exceptional isomorphisms
-  `A_5 ≅ PSL(2,4) ≅ PSL(2,5)`, `A_6 ≅ PSL(2,9)`, `A_8 ≅ PSL(4,2)` under #256.
+- **#284 CFSG.C.1c** `|PSL(2,4)| = 60` LANDED (`card_PSL_2_galoisField_2_2`,
+  ExceptionalIso.lean, via #283-general + `card_PSL_finiteField_mul_card_rootsOfUnity`);
+  `card_alternatingGroup_fin6 = 360` LANDED; exceptional isomorphisms:
+  **`A_5 ≅ PSL(2,4)` LANDED** (`PSL_2_4_iso_alternatingGroup_fin5`, ExceptionalIso.lean —
+  faithful action on the 5 points of `ℙ¹(F_4)`, perfectness ⇒ image in `A_5`, both
+  of order 60). Remaining under #256: `PSL(2,5)`, `A_6 ≅ PSL(2,9)`, `A_8 ≅ PSL(4,2)`.
 
 ### Phase 3 — sporadic (ATLAS)
 - **#222 PREP** ATLAS front matter + sporadic pages.
