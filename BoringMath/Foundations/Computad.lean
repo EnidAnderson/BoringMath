@@ -56,16 +56,16 @@ structure Computad where
 -- Reference: the terminal computad.
 /-- The **trivial computad**: unit ports, one object, one identity generator. -/
 def Computad.trivial : Computad.{u} where
-  port := Unit
-  portMul := fun _ _ => ()
-  portOne := ()
+  port := ULift.{u} Unit
+  portMul := fun _ _ => ⟨()⟩
+  portOne := ⟨()⟩
   portMul_assoc := fun _ _ _ => rfl
   portMul_left_one := fun _ => rfl
   portMul_right_one := fun _ => rfl
-  obj := Unit
-  gen := Unit
-  src := fun _ => ()
-  tgt := fun _ => ()
+  obj := ULift.{u} Unit
+  gen := ULift.{u} Unit
+  src := fun _ => ⟨()⟩
+  tgt := fun _ => ⟨()⟩
   leftPorts := fun _ => []
   rightPorts := fun _ => []
 
