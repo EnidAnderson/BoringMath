@@ -3,6 +3,7 @@
 Master map of `BoringMath/<Area>/` folders, with the mathlib-pin coverage audit
 and the program need that justifies each. Proposed folders get a ticket range
 in the lab register; roadmap docs are added per area as work starts.
+**All tickets (both repos, #2–#400) are organized in `docs/TICKET-REGISTER.md`.**
 
 ## Existing (landed)
 
