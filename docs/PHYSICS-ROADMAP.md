@@ -178,3 +178,16 @@ Open gaps (pending rows with peeling plans in the lab ledgers): the proper
 volume spectrum (intertwiners + 6j symbols), black-hole entropy matching
 `S = A/4` in counting form (LQG); the continuum limit of the lattice action
 and perturbation-series convergence (string theory).
+
+### Gap tickets (filed; to be filled, never simplified away)
+
+- **#367** LQG open rows (lab LQG.1.1 #27): proper volume spectrum
+  (intertwiners + 6j), black-hole entropy `S = A/4` in counting form.
+- **#368** STR open rows (lab STR.1.1 #26): continuum limit of the lattice
+  action, perturbation-series convergence.
+- **#369** MI.0.2 puncture-degree model (lab #66): spin networks as zero
+  cycles of nonzero degree; the degree-trace row is already filled
+  (`gysinMove_degree_trace` via `degree_pushforward`).
+- The discrete-info law is stated at full generality (zero element as
+  explicit data): `DiscreteInfo` + `mhi_exists_discreteInfo` in
+  `Physics/LQG/SpinNetwork.lean`.

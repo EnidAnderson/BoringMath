@@ -328,6 +328,28 @@ theorem lqgKinematics_info_gap :
     ∃ g : ℕ, g ≠ 0 ∧ ∀ x : (lqgKinematics (Fin 1)).bulk,
       (lqgKinematics (Fin 1)).bulkInfo x = (0 : ℕ) ∨
         g ≤ ((lqgKinematics (Fin 1)).bulkInfo x : ℕ) :=
-  ⟨1, Nat.one_ne_zero, fun x => SpinNetwork.info_gap x.as⟩
+  ⟨(1 : ℕ), Nat.one_ne_zero, fun x => SpinNetwork.info_gap x.as⟩
+-- Reference: MI.0.1 (#67) / MHI (#356) — discreteness of an information
+-- measure, stated GENERALLY over any ordered commutative monoid with an
+-- explicit zero element `z` as data (a `CommMonoid` has no canonical zero),
+-- so the statement is not simplified to a concrete instance.
+/-- An information measure `f : α → M` into an ordered commutative monoid is
+**discrete about `z`** when some `g ≠ z` bounds every value different from
+`z` from below. -/
+def DiscreteInfo {α M : Type*} [CommMonoid M] [Preorder M] [IsOrderedMonoid M]
+    (z : M) (f : α → M) : Prop :=
+  ∃ g : M, g ≠ z ∧ ∀ x, f x = z ∨ g ≤ f x
+
+-- Reference: #352 items 3–6 + #356 — the GENERIC form of the LQG
+-- discrete-info law: there EXISTS an MHI instance whose info measure is
+-- discrete (not merely a statement about one concrete instance).
+/-- **There exists an MHI instance with a discrete information measure**
+(generic statement over the framework; witnessed by `lqgKinematics`). -/
+theorem mhi_exists_discreteInfo :
+    ∃ mhi : MotivicHolographicInfo.{0, 0, 0, 0, 0}, ∃ z : mhi.info,
+      @DiscreteInfo mhi.bulk mhi.info mhi.infoCommMonoid mhi.infoPreorder
+        mhi.infoOrderedMonoid z mhi.bulkInfo :=
+  ⟨lqgKinematics (Fin 1), (0 : ℕ),
+    ⟨(1 : ℕ), Nat.one_ne_zero, fun x => SpinNetwork.info_gap x.as⟩⟩
 
 end BoringMath
