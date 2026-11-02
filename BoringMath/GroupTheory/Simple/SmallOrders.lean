@@ -103,6 +103,69 @@ theorem not_isSimpleGroup_of_card_eq_prime_mul_prime {G : Type*} [Group G] [Fini
     exact absurd (Nat.mul_right_cancel hq.pos h3) hp.ne_one
 
 /-! ## Order `p ^ 2` — #280b -/
+/-! ## Order `m * q` with `q` prime and `1 < m < q` — #280f -/
+
+-- Reference: [Dummit–Foote], Ch. 4, Sec. 6 (Sylow III, generalized: `n_q ∣ m` and
+-- `n_q ≡ 1 [MOD q]` with `m < q` force `n_q = 1`); mathlib pin v4.35.0-rc3,
+-- `card_sylow_modEq_one`, `Sylow.card_dvd_index`, `Sylow.card_eq_multiplicity`,
+-- `Nat.eq_zero_of_dvd_of_lt`. This generalizes #280a and covers the census orders
+-- 18, 20, 28, 44, 45, 50, 52, 58, … in one lemma. REVIEW(citation).
+/-- **A group of order `m * q` with `q` prime and `1 < m < q` is not simple**
+(proved): `n_q ∣ m < q` and `n_q ≡ 1 [MOD q]` force `n_q = 1`, so the Sylow
+`q`-subgroup is normal, of order `q`, proper and nontrivial. -/
+theorem not_isSimpleGroup_of_card_eq_mul_prime_of_lt {G : Type*} [Group G] [Finite G]
+    {m q : ℕ} [Fact q.Prime] (hm1 : 1 < m) (hmq : m < q) (hcard : Nat.card G = m * q) :
+    ¬ IsSimpleGroup G := by
+  intro hsimple
+  have hq := (Fact.out : q.Prime)
+  obtain ⟨Q⟩ := Sylow.nonempty (p := q) (G := G)
+  have : Nonempty (Sylow q G) := ⟨Q⟩
+  -- the multiplicity of `q` in `m * q` is 1, since `q ∤ m` (`0 < m < q`)
+  have hf : Nat.factorization (m * q) q = 1 :=
+    (congrArg (fun f => f q)
+        (Nat.factorization_mul (Nat.one_le_iff_ne_zero.mp hm1.le) hq.ne_zero)).trans
+      ((Finsupp.add_apply m.factorization q.factorization q).trans
+        (Eq.subst (motive := fun n => n + q.factorization q = 1)
+            (Nat.factorization_eq_zero_of_not_dvd (fun hd =>
+              absurd (Nat.le_of_dvd hm1.pos hd) (Nat.not_le_of_gt hmq))).symm
+            (Eq.subst (motive := fun n => 0 + n = 1) (Nat.Prime.factorization_self hq).symm
+              (Nat.zero_add 1))))
+  have hcardQ : Nat.card ↥(Q : Subgroup G) = q :=
+    (Eq.subst (motive := fun n => Nat.card ↥(Q : Subgroup G) = q ^ n)
+        (Eq.subst (motive := fun n => Nat.factorization n q = 1) hcard.symm hf)
+        (Sylow.card_eq_multiplicity Q)).trans (pow_one q)
+  -- hence the index of `Q` is `m`
+  have hindex : (Q : Subgroup G).index = m :=
+    Nat.mul_right_cancel hq.pos
+      ((congrArg (fun c => (Q : Subgroup G).index * c) hcardQ).symm.trans
+        ((Subgroup.index_mul_card (Q : Subgroup G)).trans hcard))
+  -- Sylow III: `n_q ≡ 1 [MOD q]` and `n_q ∣ m`; with `m < q` this forces `n_q = 1`
+  have hn1 : Nat.card (Sylow q G) ∣ m :=
+    Eq.subst (motive := fun n => Nat.card (Sylow q G) ∣ n) hindex (Sylow.card_dvd_index Q)
+  have hn : Nat.card (Sylow q G) = 1 := by
+    have hpos : 0 < Nat.card (Sylow q G) := Nat.card_pos
+    have hle : Nat.card (Sylow q G) ≤ m := Nat.le_of_dvd hm1.pos hn1
+    have hmod : Nat.card (Sylow q G) ≡ 1 [MOD q] := card_sylow_modEq_one q G
+    have hdvd : q ∣ Nat.card (Sylow q G) - 1 :=
+      (Nat.modEq_iff_dvd' hpos).mp hmod.symm
+    have hlt : Nat.card (Sylow q G) - 1 < q :=
+      (Nat.sub_le_sub_right hle 1).trans_lt
+        (Nat.lt_of_le_of_lt (Nat.sub_le m 1) hmq)
+    exact Nat.le_antisymm
+      (Nat.sub_eq_zero_iff_le.mp (Nat.eq_zero_of_dvd_of_lt hdvd hlt)) hpos
+  have hsub : Subsingleton (Sylow q G) := (Nat.card_eq_one_iff_unique.mp hn).1
+  -- the unique Sylow `q`-subgroup is normal, of order `q`: neither `⊥` nor `⊤`
+  rcases @IsSimpleGroup.eq_bot_or_eq_top_of_normal G _ hsimple (Q : Subgroup G)
+      (@Sylow.normal_of_subsingleton G _ q hsub Q) with hb | ht
+  · exact absurd ((Subgroup.card_bot (G := G)).symm.trans
+        (Eq.subst (motive := fun H : Subgroup G => Nat.card ↥H = q) hb hcardQ))
+      (Nat.ne_of_lt hq.one_lt)
+  · have h1 : Nat.card ↥(⊤ : Subgroup G) = q :=
+      Eq.subst (motive := fun H : Subgroup G => Nat.card ↥H = q) ht hcardQ
+    have h2 : Nat.card ↥(⊤ : Subgroup G) = m * q := (Subgroup.card_top (G := G)).trans hcard
+    have h3 : m * q = 1 * q := (h2.symm.trans h1).trans (Nat.one_mul q).symm
+    exact absurd (Nat.mul_right_cancel hq.pos h3) (Nat.ne_of_lt hm1).symm
+
 
 -- Reference: mathlib pin v4.35.0-rc3,
 -- `IsPGroup.isMulCommutative_of_card_eq_prime_sq` (order `p^2` ⇒ commutative) and

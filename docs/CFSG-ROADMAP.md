@@ -194,6 +194,8 @@ referee ↔ motivic Galois (T2 bet). Each row proved or bet-labeled.
   - **#280f** generalization of #280a: `Nat.card G = m * q` with `q` prime and
     `1 < m < q` forces the Sylow `q`-subgroup to be normal (`n_q ∣ m < q`,
     `n_q ≡ 1 [MOD q]` ⇒ `n_q = 1`) — covers 18, 20, 28, 44, 45, … in one lemma.
+    LANDED: `not_isSimpleGroup_of_card_eq_mul_prime_of_lt` in
+    `BoringMath/GroupTheory/Simple/SmallOrders.lean` (sorry-free).
 - **#281 CFSG.C.1a** close the `(2,3)` exception at group level — LANDED so far
   in `Classification.lean`: `card_rootsOfUnity_two_zmod3 = 2`,
   `card_center_SL_2_3 = 2`, `card_PSL_2_3 = 12`; remaining:
