@@ -117,4 +117,58 @@ theorem areaAsVolume_gap_pos (A₀ : ℝ) (hA : 0 < A₀) :
   mul_pos hA (Real.sqrt_pos.mpr (mul_pos (half_pos zero_lt_one)
     (add_pos (half_pos zero_lt_one) zero_lt_one)))
 
+-- Reference: toy calibration #2 — volume = area + total spin: a volume
+-- operator genuinely DISTINCT from the area (fills the proper-volume row of
+-- lab LQG.1.1 #27 / ticket #367 at the toy level; the intertwiner/6j volume of
+-- [Rovelli–Smolin 1995] remains the named extension).
+/-- The **area-plus-info toy volume operator**: `volume = area + total spin`.
+All four laws hold; the volume differs from the area on every network with a
+spin-≥1 edge. -/
+-- noncomputable: `SpinNetwork.area` is noncomputable (Real.sqrt); the spectrum is the content.
+noncomputable def areaPlusInfoVolume (ι : Type*) [DecidableEq ι] (A₀ : ℝ) (hA : 0 < A₀) :
+    VolumeOperator ι where
+  volume := fun sn => sn.area A₀ + (sn.info : ℝ)
+  nonneg := fun sn =>
+    add_nonneg (mul_nonneg hA.le (Finset.sum_nonneg fun _ _ => Real.sqrt_nonneg _))
+      (Nat.cast_nonneg _)
+  relabel_invariant := fun {ιv _ιw} [DecidableEq ιv] {g g'} h => by
+    have h1 : g.toSpinNetwork.area A₀ = g'.toSpinNetwork.area A₀ :=
+      Eq.trans (ColoredGraph.area_toSpinNetwork g A₀).symm
+        (Eq.trans (ColoredGraph.area_relabel A₀ h) (ColoredGraph.area_toSpinNetwork g' A₀))
+    have h2 : g.toSpinNetwork.info = g'.toSpinNetwork.info := ColoredGraph.info_relabel h
+    exact congrArg₂ (fun a b => a + (b : ℝ)) h1 (congrArg (fun n : ℕ => (n : ℝ)) h2)
+  discrete :=
+    ⟨min (A₀ * Real.sqrt ((1 : ℝ) / 2 * ((1 : ℝ) / 2 + 1))) 1,
+      lt_min (areaAsVolume_gap_pos A₀ hA) zero_lt_one,
+      fun sn => by
+        match Classical.em (∃ e ∈ sn.edges, 1 ≤ sn.spin e) with
+        | Or.inl h =>
+            exact Or.inr (le_trans (min_le_left _ _)
+              (le_trans (SpinNetwork.area_gap hA.le sn h)
+                (le_add_of_nonneg_right (Nat.cast_nonneg _))))
+        | Or.inr h =>
+            have ha : sn.area A₀ = 0 := sn.area_eq_zero_of_all_spin_zero fun e he =>
+              Nat.lt_one_iff.mp (Nat.not_le.mp (fun hle => h ⟨e, he, hle⟩))
+            have hi : (sn.info : ℝ) = 0 :=
+              Eq.trans (congrArg (fun n : ℕ => (n : ℝ)) (Finset.sum_eq_zero fun e he =>
+                Nat.lt_one_iff.mp (Nat.not_le.mp (fun hle => h ⟨e, he, hle⟩))))
+                Nat.cast_zero
+            exact Or.inl (Eq.trans (congrArg₂ (fun a b => a + (b : ℝ)) ha hi) (add_zero 0))⟩
+
+-- Reference: #367 — the toy volume genuinely differs from the area on any
+-- network with a spin-≥1 edge (its info is ≥ 1, so area + info ≠ area).
+/-- **The area-plus-info volume differs from the area**: on a network with a
+spin-≥1 edge, `volume sn ≠ area sn`. -/
+theorem areaPlusInfoVolume_ne_area {ι : Type*} [DecidableEq ι] (A₀ : ℝ) (hA : 0 < A₀)
+    (sn : SpinNetwork ι) (h : ∃ e ∈ sn.edges, 1 ≤ sn.spin e) :
+    (areaPlusInfoVolume ι A₀ hA).volume sn ≠ sn.area A₀ := by
+  obtain ⟨e, he, hsp⟩ := h
+  have hi : (1 : ℝ) ≤ (sn.info : ℝ) :=
+    Eq.subst Nat.cast_one (motive := fun z => z ≤ (sn.info : ℝ))
+      (Nat.cast_le.mpr (le_trans hsp
+        (Finset.single_le_sum (f := sn.spin) (fun i _ => Nat.zero_le (sn.spin i)) he)))
+  intro heq
+  exact ne_of_gt (lt_of_lt_of_le zero_lt_one hi)
+    (add_left_cancel (Eq.trans heq (add_zero _).symm))
+
 end BoringMath

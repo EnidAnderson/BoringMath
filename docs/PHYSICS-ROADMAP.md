@@ -193,3 +193,8 @@ and perturbation-series convergence (string theory).
 - The discrete-info law is stated at full generality (zero element as
   explicit data): `DiscreteInfo` + `mhi_exists_discreteInfo` in
   `Physics/LQG/SpinNetwork.lean`.
+
+- **#367 proper-volume row**: FILLED at the toy level —
+  `areaPlusInfoVolume` (volume = area + total spin) in
+  `Physics/LQG/VolumeSpectrum.lean`, all four laws proved and
+  `areaPlusInfoVolume_ne_area`. The intertwiner/6j spectrum stays open.
