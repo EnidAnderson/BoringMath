@@ -6,6 +6,7 @@ Authors: Enid
 import BoringMath.AlgebraicGeometry.AlgebraicCycle.ChowGroup
 import BoringMath.AlgebraicGeometry.AlgebraicCycle.Pushforward
 import BoringMath.AlgebraicGeometry.ResidueTheory.Basic
+import Mathlib.AlgebraicGeometry.PullbackCarrier
 
 /-!
 # Functoriality of Chow groups: proper pushforward on `A_*(-)` (I.2, part 1)
@@ -215,6 +216,79 @@ theorem residueDegree_prodMap_sectionIncl (f : X ⟶ Y) (t : specZ ⟶ affineLin
       (((sectionIncl X t ht) ≫ prodMapAffineLine f) x) ⟶ X.residueField x =>
       (q : ↥((prodAffineLine Y).residueField (((sectionIncl X t ht) ≫ prodMapAffineLine f) x)) →
         ↥(X.residueField x))) hsqHom) z).symm
+
+-- Reference: point-extensionality on the `t`-slice of `X × 𝔸¹` via
+-- `Scheme.Pullback.carrierEquiv` (PullbackCarrier.lean): the `Triplet.ofPoint`s
+-- agree by `Triplet.ext` (lift laws `sectionIncl_fst`/`sectionIncl_snd`, the
+-- pullback condition, `ht`), and the `Triplet.tensor` is a field because its
+-- second leg is the section's residue-field iso (W.1
+-- `isIso_residueFieldMap_section` applied to `t ≫ affineLineProj = 𝟙`), so
+-- `IsPushout.isIso_inl_of_isIso` makes `tensorInl` an iso to `κ(x)`;
+-- `Unique (PrimeSpectrum _)` closes. Ticket #371. Stacks 01M8 vicinity.
+-- Reference: Stacks 01M8 (points of a fiber product).
+/-- A point of `X × 𝔸¹` whose second projection is `t`'s point equals the
+section image of its first projection. -/
+theorem sectionIncl_fst_snd_eq (X : Scheme.{u}) (t : specZ ⟶ affineLine)
+    (ht : t ≫ affineLineProj = 𝟙 specZ) (w : ↥(prodAffineLine X)) (p : ↥specZ)
+    (hw : pullback.snd (specULiftZIsTerminal.from X) (specULiftZIsTerminal.from affineLine) w
+      = t.base p) :
+    sectionIncl X t ht
+      (pullback.fst (specULiftZIsTerminal.from X) (specULiftZIsTerminal.from affineLine) w) = w := by
+  -- the pullback condition at `w`, pointwise
+  have hcond := congrFun (congrArg (fun m : prodAffineLine X ⟶ specZ =>
+    (m : ↥(prodAffineLine X) → ↥specZ)) (pullback.condition (f := specULiftZIsTerminal.from X)
+      (g := specULiftZIsTerminal.from affineLine))) w
+  have hcond' : (specULiftZIsTerminal.from X).base
+        (pullback.fst (specULiftZIsTerminal.from X) (specULiftZIsTerminal.from affineLine) w) =
+      (specULiftZIsTerminal.from affineLine).base
+        (pullback.snd (specULiftZIsTerminal.from X) (specULiftZIsTerminal.from affineLine) w) :=
+    Eq.trans (Scheme.Hom.comp_apply _ _ w).symm
+      (Eq.trans hcond (Scheme.Hom.comp_apply _ _ w))
+  -- the base point of the first projection is `p`
+  have hp : (specULiftZIsTerminal.from X).base
+      (pullback.fst (specULiftZIsTerminal.from X) (specULiftZIsTerminal.from affineLine) w) = p := by
+    have hg : (specULiftZIsTerminal.from affineLine).base (t.base p) = p :=
+      Eq.trans (Scheme.Hom.comp_apply t (specULiftZIsTerminal.from affineLine) p).symm
+        (Eq.trans (congrFun (congrArg (fun m : specZ ⟶ specZ => (m : ↥specZ → ↥specZ)) ht) p)
+          (Scheme.Hom.id_apply p))
+    exact Eq.trans hcond' (Eq.trans (congrArg _ hw) hg)
+  -- the two points have equal first/second projections
+  have hA : pullback.fst (specULiftZIsTerminal.from X) (specULiftZIsTerminal.from affineLine)
+        (sectionIncl X t ht
+          (pullback.fst (specULiftZIsTerminal.from X) (specULiftZIsTerminal.from affineLine) w)) =
+      pullback.fst (specULiftZIsTerminal.from X) (specULiftZIsTerminal.from affineLine) w := by
+    exact Eq.trans (Scheme.Hom.comp_apply _ _ _).symm
+      (Eq.trans (congrFun (congrArg (fun m : X ⟶ X =>
+        (m : ↥X → ↥X)) (sectionIncl_fst X t ht)) _) (Scheme.Hom.id_apply _))
+  have hB : pullback.snd (specULiftZIsTerminal.from X) (specULiftZIsTerminal.from affineLine)
+        (sectionIncl X t ht
+          (pullback.fst (specULiftZIsTerminal.from X) (specULiftZIsTerminal.from affineLine) w)) =
+      pullback.snd (specULiftZIsTerminal.from X) (specULiftZIsTerminal.from affineLine) w := by
+    exact Eq.trans (Scheme.Hom.comp_apply _ _ _).symm
+      (Eq.trans (congrFun (congrArg (fun m : X ⟶ affineLine =>
+        (m : ↥X → ↥affineLine)) (sectionIncl_snd X t ht)) _)
+        (Eq.trans (Scheme.Hom.comp_apply _ _ _) (Eq.trans (congrArg t.base hp) hw.symm)))
+  -- the triplets agree
+  have hT : Scheme.Pullback.Triplet.ofPoint (sectionIncl X t ht
+        (pullback.fst (specULiftZIsTerminal.from X) (specULiftZIsTerminal.from affineLine) w)) =
+      Scheme.Pullback.Triplet.ofPoint w :=
+    Scheme.Pullback.Triplet.ext hA hB
+  -- TEMPORARY SORRY (#371): the remaining steps, all with confirmed lemmas —
+  -- (i) the second pushout leg `(specZ.residueFieldCongr T.hy).inv ≫
+  --   g.residueFieldMap T.y` (T := ofPoint w) is an iso: W.1
+  --   `isIso_residueFieldMap_section t g ht p` makes `t.residueFieldMap p` an
+  --   iso, `Scheme.residueFieldMap_comp` + `Scheme.Hom.residueFieldMap_congr ht p`
+  --   + `Scheme.residueFieldMap_id` give `g.residueFieldMap (t p) ≫ t.residueFieldMap p
+  --   = (residueFieldCongr _).hom`, and `IsIso.of_isIso_comp_right` cancels;
+  --   transport to `T.y` along `hw` by `Eq.subst (motive := fun q => IsIso (g.residueFieldMap q))`;
+  --   compose with the iso `(residueFieldCongr _).inv` (`Iso.isIso_inv`, `comp_isIso`).
+  -- (ii) `IsPushout.of_hasPushout` + `IsPushout.isIso_inl_of_isIso` make
+  --   `tensorInl T` an iso to `κ(T.x)`; `RingEquiv.ofBijective` +
+  --   `MulEquiv.isField` + `IsField.toField` give `Field ↥T.tensor`.
+  -- (iii) `Scheme.Pullback.carrierEquiv_eq_iff` with `hT` and
+  --   `Unique ↥(Spec _)` (Scheme.lean:628, from `Field`) close
+  --   `carrierEquiv (i_t (pr₁ w)) = carrierEquiv w`; `carrierEquiv.injective` finishes.
+  sorry
 
 -- Reference: Fulton ch. 1, §1.4 (pushforward commutes with pullback along
 -- sections: `f_*(i_t*γ) = i_t'*((f × 𝔸¹)_*γ)`); Stacks tag 02R9 ff.

@@ -127,6 +127,20 @@ theorem sectionIncl_fst (X : Scheme.{u}) (t : specZ ⟶ affineLine)
     pullback.fst (specULiftZIsTerminal.from X) (specULiftZIsTerminal.from affineLine) = 𝟙 X
   exact pullback.lift_fst _ _ _
 
+-- Reference: the section inclusion composed with the second projection is
+-- the terminal map of `X` composed with `t` (the pullback lift law).
+/-- The section inclusion composed with the second projection is
+`X → Spec ℤ` composed with `t`. -/
+theorem sectionIncl_snd (X : Scheme.{u}) (t : specZ ⟶ affineLine)
+    (ht : t ≫ affineLineProj = 𝟙 specZ) :
+    sectionIncl X t ht ≫ pullback.snd (specULiftZIsTerminal.from X)
+      (specULiftZIsTerminal.from affineLine) =
+      specULiftZIsTerminal.from X ≫ t := by
+  change pullback.lift (𝟙 X) (specULiftZIsTerminal.from X ≫ t) _ ≫
+    pullback.snd (specULiftZIsTerminal.from X) (specULiftZIsTerminal.from affineLine) =
+      specULiftZIsTerminal.from X ≫ t
+  exact pullback.lift_snd _ _ _
+
 variable {X W : Scheme.{u}}
 
 -- Reference: a section of a morphism is injective on points (the retraction
