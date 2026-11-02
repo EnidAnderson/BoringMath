@@ -65,6 +65,27 @@ per the lab honesty rules).
 - **#375** renormalization/residues dark sector (T4): Connes–Kreimer as the
   bulk-side Hopf algebra; Apéry certificate as boundary-side null-move.
 
+## Universality checklist (what "a framework for any theory of physics" must carry)
+
+Reviewed 2026-11 against the specializations table; MHI currently carries:
+bulk category+unit (states/processes, P1), boundary site + locality (P3),
+hologram functor + holographic equation (the principle itself), information
+monoid + measures (P2). **Pending fields** (each its own ticket, added to MHI
+with calibrations updated):
+
+- **#376 time/dynamics**: a monoid `time` with `dynamics : time →* (bulk ⥤ bulk)`
+  (evolution as an endofunctor action); every theory has one.
+- **#377 symmetries/referee**: `referee` group acting on the boundary, ruling =
+  fixed points (Wigner; PHYS.0 P4) — gauge symmetries live here.
+- **#378 reconstruction/duality**: `hasReconstruction : ∃ r, Nonempty (hologram ⊣ r)`
+  as a Prop field (adjunction at the pin: `CategoryTheory.Adjunction`); the
+  AdS/CFT dictionary is an instance.
+- **#379 observables**: measurable/observable maps `boundary → info`-valued with
+  the expectation interface to the probability folder (#286–#292).
+- **#380 compositionality**: bulk processes compose (already, via the category);
+  tensor/product of MHI systems (two theories side by side) as a binary operation
+  on MHI — needed for QFT locality and for combining subsystems.
+
 ## Crank-free rules (binding for this folder)
 
 1. **No `axiom` declarations, ever.** Every structure field is data or `Prop`
