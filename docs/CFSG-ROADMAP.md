@@ -88,6 +88,22 @@ fusion systems, BN-pairs, local analysis, blocks):
   - sporadic: constructions library #255; small groups/exceptional isos #256
   - assembly glue #257
 
+## The motivic consumer (#260) — how CFSG gets consumed
+
+Simple pure motives over k correspond (under the Tate/Hodge conjectures, stated
+as labeled hypotheses) to irreducible ℓ-adic Galois representations ρ: G_k →
+GL(V); the motive is simple iff ρ is irreducible, and the image of ρ has a
+**simple socle S** — which by CFSG is one of the classified types. So
+*simple motives ↔ (S in the CFSG list) + (irreducible rep datum of the
+almost-simple group with socle S)* — the motivic mirror of CFSG's own
+almost-simple reduction (#244). Artin motives (weight 0) are the finite
+Galois-extension case: simple Artin motives ↔ irreducible characters of finite
+Galois groups. The pro-unipotent/Lie part of the motivic Galois group
+(MTM(ℤ), free Lie algebra on odd generators) is the Lie side (#218, #252,
+#253) where CFSG does not enter. ∞-groupoid version: #259. Motivic-side
+library tickets: #261 Tannakian/motivic Galois, #262 ℓ-adic reps + socle
+reduction, #263 Artin motives, #264 realizations, #265 MTM/MZV, #266 purity.
+
 ## Ticket tree (TOC of the proof, in formalization order)
 
 ### Phase 0 — foundations
