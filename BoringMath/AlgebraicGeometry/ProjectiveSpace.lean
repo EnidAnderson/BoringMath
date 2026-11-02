@@ -92,9 +92,15 @@ noncomputable def projectiveLine (S : Scheme.{u}) : Scheme.{u} :=
 -- proper (mathlib `IsProper (Proj.toSpecZero 𝒜)`, ProjectiveSpectrum/Proper.lean,
 -- Stacks 01M9?); the degree-0 part here is `ℤ` (constants) and the terminal
 -- map equals `toSpecZero` by uniqueness. TEMPORARY SORRY: peeling plan —
--- `Algebra.FiniteType ↥(𝒜 0) A` via `homogeneousSubmodule_zero` + `one_eq_range`
--- (constants), the mathlib `IsProper` instance, transport along
--- `specULiftZIsTerminal.hom_ext`. -/
+-- mathlib has the instance `IsProper (Proj.toSpecZero 𝒜)` under
+-- `[Algebra.FiniteType ↥(𝒜 0) A]` (ProjectiveSpectrum/Proper.lean:372); supply
+-- `Algebra.FiniteType ↥(𝒜 0) A` via `MvPolynomial.homogeneousSubmodule_zero`
+-- (`𝒜 0 = 1 = range (algebraMap)`, so `↥(𝒜 0) ≃ₐ ULift ℤ` by
+-- `AlgEquiv.ofInjective (Algebra.ofId _ _)` + `AlgEquiv.ofEq`) and
+-- `Algebra.FiniteType.trans` with the `MvPolynomial` finite-type instance;
+-- then transport `IsProper` along the terminal iso
+-- `Spec ↥(𝒜 0) ≅ specZ` (`specULiftZIsTerminal.hom_ext`,
+-- `MorphismProperty.RespectsIso @IsProper`). -/
 theorem isProper_projectiveSpaceToSpecZ (n : ℕ) :
     IsProper (projectiveSpaceToSpecZ n) := by
   -- TEMPORARY SORRY: peeling plan above.
