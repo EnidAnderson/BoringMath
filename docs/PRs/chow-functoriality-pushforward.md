@@ -21,6 +21,9 @@ Branch: `pr/algebraic-cycle-chow-functoriality` (proposed). Module:
 * `chowPushforward f : chowGroup X →+ chowGroup Y` — the pushforward on Chow
   groups (quotient lift), with `chowPushforward_mk` (primitive rfl):
   `f_* [c] = [f_* c]`.
+* `chowPushforward_id` and `chowPushforward_comp` — the identity and
+  composition laws `(g ≫ f)_* = g_* ∘ f_*` on Chow groups, PROVED (lift
+  extensionality + the landed cycle-level `pushforward_id`/`pushforward_comp`).
 
 Out of scope here (I.2 part 2, named peel): the **flat pullback** `f*` on
 Chow groups — needs the flat pullback of general cycles (Serre intersection

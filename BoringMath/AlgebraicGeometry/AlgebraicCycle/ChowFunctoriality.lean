@@ -212,4 +212,43 @@ theorem chowPushforward_mk (f : X ⟶ Y) [QuasiCompact f]
     chowPushforward f (chowClass X c) = chowClass Y (AlgebraicCycle.pushforward f c) :=
   rfl
 
+variable {Z : Scheme.{u}}
+
+-- Reference: Fulton ch. 1, §1.4 (the identity law `(𝟙 X)_* = id` on Chow
+-- groups); the cycle-level `AlgebraicCycle.pushforward_id` lifted.
+-- REVIEW(citation): pin.
+/-- **Identity law**: the pushforward along the identity is the identity on
+the Chow group. -/
+theorem chowPushforward_id (X : Scheme.{u}) [QuasiCompact (prodMapAffineLine (𝟙 X))] :
+    chowPushforward (𝟙 X) = AddMonoidHom.id (chowGroup X) := by
+  refine AddMonoidHom.ext fun x => ?_
+  induction x using Quotient.inductionOn with
+  | h c =>
+    exact Eq.trans (chowPushforward_mk (𝟙 X) c)
+      (Eq.trans (congrArg (chowClass X) (AlgebraicCycle.pushforward_id c)) rfl)
+
+-- Reference: Fulton ch. 1, §1.4 (the composition law `(g ∘ f)_* = g_* ∘ f_*`
+-- on Chow groups, Stacks Lemma 42.12.2 tag 02R5); the cycle-level
+-- `AlgebraicCycle.pushforward_comp` lifted.
+-- REVIEW(citation): pin.
+/-- **Composition law**: `(g ≫ f)_* = g_* ∘ f_*` on Chow groups. -/
+theorem chowPushforward_comp (f : X ⟶ Y) (g : Y ⟶ Z) [QuasiCompact f] [QuasiCompact g]
+    [QuasiCompact (prodMapAffineLine f)] [QuasiCompact (prodMapAffineLine g)]
+    [QuasiCompact (prodMapAffineLine (f ≫ g))] :
+    chowPushforward (f ≫ g) = (chowPushforward g).comp (chowPushforward f) := by
+  refine AddMonoidHom.ext fun x => ?_
+  induction x using Quotient.inductionOn with
+  | h c =>
+    have h1 := chowPushforward_mk (f ≫ g) c
+    have h2 := chowPushforward_mk f c
+    have h3 := chowPushforward_mk g (AlgebraicCycle.pushforward f c)
+    calc chowPushforward (f ≫ g) (chowClass X c)
+        = chowClass Z (AlgebraicCycle.pushforward (f ≫ g) c) := h1
+      _ = chowClass Z (AlgebraicCycle.pushforward g (AlgebraicCycle.pushforward f c)) :=
+          congrArg (chowClass Z) (AlgebraicCycle.pushforward_comp f g c)
+      _ = chowPushforward g (chowClass Y (AlgebraicCycle.pushforward f c)) := h3.symm
+      _ = chowPushforward g (chowPushforward f (chowClass X c)) :=
+          congrArg (chowPushforward g) h2
+      _ = ((chowPushforward g).comp (chowPushforward f)) (chowClass X c) := rfl
+
 end AlgebraicGeometry
