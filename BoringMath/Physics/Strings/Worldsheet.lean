@@ -7,6 +7,7 @@ import Mathlib.Algebra.BigOperators.Group.Finset.Defs
 import Mathlib.Algebra.Order.BigOperators.Group.Finset
 import Mathlib.Algebra.Order.Ring.Nat
 import Mathlib.Algebra.BigOperators.Ring.Finset
+import Mathlib.Analysis.SpecialFunctions.Exp
 import Mathlib.Basic.Real.Basic
 
 /-!
@@ -143,5 +144,64 @@ theorem polyakovAction_relabel (T : ℝ) {ιv : Type*} [DecidableEq ιv]
         (congrArg (fun z => X q.2 - z) hb))
   exact congrArg (fun z => (T / 2) * z)
     (Eq.trans hsum (Finset.sum_congr rfl fun q _ => hterm q))
+
+-- Reference: [Polchinski 1998] ch. 1 §1.2 — the lattice partition function as a
+-- finite sum of Boltzmann weights `exp(-S)` (the finite-alphabet shadow of the
+-- continuum path integral; the continuum limit itself stays a named hole).
+/-- The **finite-alphabet lattice partition function**: the sum of the
+Boltzmann weights `exp(-S)` over all fields taking values in the finite
+alphabet `A`. -/
+-- noncomputable: `Real.exp` is noncomputable; the real partition function is the content.
+noncomputable def latticePartitionFun (T : ℝ) {ιv : Type*} [DecidableEq ιv] [Fintype ιv]
+    (ws : LatticeWorldsheet ιv) (A : Finset ℝ) : ℝ :=
+  ∑ X ∈ (Finset.univ : Finset (ιv → A)),
+    Real.exp (- polyakovAction T ws (fun v => (X v : ℝ)))
+
+-- Reference: [Polchinski 1998] ch. 1 — the partition function is a finite sum
+-- of strictly positive weights over a nonempty field set, hence positive.
+/-- **The lattice partition function is positive** for a nonempty alphabet
+(non-vanishing of the finite lattice path integral). -/
+theorem latticePartitionFun_pos (T : ℝ) {ιv : Type*} [DecidableEq ιv] [Fintype ιv]
+    (ws : LatticeWorldsheet ιv) (A : Finset ℝ) (hA : A.Nonempty) :
+    0 < latticePartitionFun T ws A :=
+  Finset.sum_pos (fun _ _ => Real.exp_pos _)
+    ⟨fun _ => ⟨Exists.choose hA, Exists.choose_spec hA⟩, Finset.mem_univ _⟩
+
+-- Reference: projection law for `Equiv.arrowCongr` with a trivial second
+-- factor (STYLE §5): peeled into its own named, definitional lemma.
+/-- **Projection law**: `(arrowCongr e (refl _)) f` is `f ∘ e.symm`. -/
+theorem arrowCongr_refl_apply {α β γ : Type*} (e : α ≃ β) (f : α → γ) (a : β) :
+    ((Equiv.arrowCongr e (Equiv.refl γ)) f) a = f (e.symm a) := rfl
+
+-- Reference: [Friedan 1985] §2 — background independence at the level of the
+-- partition function: relabeling the sites permutes the finite field sum.
+/-- **The lattice partition function is relabeling-invariant**: transporting
+the lattice along a vertex equivalence `e` permutes the finite sum (via
+`polyakovAction_relabel`). -/
+theorem latticePartitionFun_relabel (T : ℝ) {ιv : Type*} [DecidableEq ιv] [Fintype ιv]
+    (ws : LatticeWorldsheet ιv) (A : Finset ℝ) (e : ιv ≃ ιv) :
+    latticePartitionFun T (ws.relabel e) A = latticePartitionFun T ws A := by
+  have hstep : ∀ Y : ιv → A,
+      Real.exp (- polyakovAction T (ws.relabel e)
+          (fun v => (((Equiv.arrowCongr e (Equiv.refl A)) Y) v : ℝ)))
+        = Real.exp (- polyakovAction T ws (fun v => (Y v : ℝ))) := by
+    intro Y
+    have hf : (fun v => (((Equiv.arrowCongr e (Equiv.refl A)) Y) v : ℝ))
+        = fun v => (Y (e.symm v) : ℝ) :=
+      funext fun v => congrArg (fun z : A => (z : ℝ)) (arrowCongr_refl_apply e Y v)
+    exact congrArg Real.exp (congrArg Neg.neg
+      (Eq.subst (motive := fun F => polyakovAction T (ws.relabel e) F
+          = polyakovAction T ws (fun v => (Y v : ℝ))) hf
+        (polyakovAction_relabel T ws e (fun v => (Y v : ℝ)))))
+  have hreindex : (∑ X ∈ (Finset.univ : Finset (ιv → A)),
+      Real.exp (- polyakovAction T (ws.relabel e) (fun v => (X v : ℝ))))
+      = ∑ Y ∈ (Finset.univ : Finset (ιv → A)),
+        Real.exp (- polyakovAction T (ws.relabel e)
+          (fun v => (((Equiv.arrowCongr e (Equiv.refl A)) Y) v : ℝ))) :=
+    (Equiv.sum_comp (Equiv.arrowCongr e (Equiv.refl A))
+      (fun Y => Real.exp (- polyakovAction T (ws.relabel e) (fun v => (Y v : ℝ))))).symm
+  change (∑ X ∈ (Finset.univ : Finset (ιv → A)),
+      Real.exp (- polyakovAction T (ws.relabel e) (fun v => (X v : ℝ)))) = _
+  exact Eq.trans hreindex (Finset.sum_congr rfl fun Y _ => hstep Y)
 
 end BoringMath

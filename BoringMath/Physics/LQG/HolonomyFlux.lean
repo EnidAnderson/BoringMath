@@ -139,4 +139,131 @@ theorem pullback_comp {ι ι' ι'' G R : Type*} [CommRing R] (φ : ι' → ι) (
     (f : (ι' → G) → R) :
     pullback ψ (pullback φ f) = pullback (fun e' => ψ (φ e')) f := rfl
 
+-- Reference: [Ashtekar–Lewandowski 2004] §II — cylinder functions on `s` form
+-- a commutative algebra: the subtype of functions depending on `s`, with the
+-- pointwise operations.
+/-- **Cylinder functions on the edge set `s`**: functions of the connection
+depending only on the edges in `s` (a subtype of `(ι → G) → R`). -/
+def CylinderFun (ι G R : Type*) [DecidableEq ι] [CommRing R] (s : Finset ι) :=
+  {f : (ι → G) → R // dependsOn s f}
+
+-- Reference: [Ashtekar–Lewandowski 2004] §II — closure of `dependsOn` under
+-- the pointwise operations; each op is transported along `Subtype.val`.
+/-- The zero cylinder function depends on `s`. -/
+instance cylinderFunZero {ι G R : Type*} [DecidableEq ι] [CommRing R] (s : Finset ι) :
+    Zero (CylinderFun ι G R s) :=
+  ⟨⟨0, fun c c' _ =>
+    (Pi.zero_apply (M := fun _ : (ι → G) => R) c).trans
+      (Pi.zero_apply (M := fun _ : (ι → G) => R) c').symm⟩⟩
+
+-- Reference: [Ashtekar–Lewandowski 2004] §II — same closure for the unit.
+/-- The one cylinder function depends on `s`. -/
+instance cylinderFunOne {ι G R : Type*} [DecidableEq ι] [CommRing R] (s : Finset ι) :
+    One (CylinderFun ι G R s) :=
+  ⟨⟨1, fun c c' _ => (cylinder_one_apply c).trans (cylinder_one_apply c').symm⟩⟩
+
+-- Reference: [Ashtekar–Lewandowski 2004] §II — same closure for addition.
+/-- The sum of two cylinder functions on `s` depends on `s`. -/
+instance cylinderFunAdd {ι G R : Type*} [DecidableEq ι] [CommRing R] (s : Finset ι) :
+    Add (CylinderFun ι G R s) :=
+  ⟨fun f g => ⟨f.1 + g.1, fun c c' h =>
+    Eq.trans (Pi.add_apply f.1 g.1 c)
+      (Eq.trans (congrArg₂ (· + ·) (f.2 c c' h) (g.2 c c' h))
+        (Pi.add_apply f.1 g.1 c').symm)⟩⟩
+
+-- Reference: [Ashtekar–Lewandowski 2004] §II — same closure for multiplication.
+/-- The product of two cylinder functions on `s` depends on `s`. -/
+instance cylinderFunMul {ι G R : Type*} [DecidableEq ι] [CommRing R] (s : Finset ι) :
+    Mul (CylinderFun ι G R s) :=
+  ⟨fun f g => ⟨f.1 * g.1, fun c c' h =>
+    Eq.trans (Pi.mul_apply f.1 g.1 c)
+      (Eq.trans (congrArg₂ (· * ·) (f.2 c c' h) (g.2 c c' h))
+        (Pi.mul_apply f.1 g.1 c').symm)⟩⟩
+
+-- Reference: [Ashtekar–Lewandowski 2004] §II — same closure for negation.
+/-- The negation of a cylinder function on `s` depends on `s`. -/
+instance cylinderFunNeg {ι G R : Type*} [DecidableEq ι] [CommRing R] (s : Finset ι) :
+    Neg (CylinderFun ι G R s) :=
+  ⟨fun f => ⟨-f.1, fun c c' h =>
+    Eq.trans (Pi.neg_apply f.1 c)
+      (Eq.trans (congrArg Neg.neg (f.2 c c' h)) (Pi.neg_apply f.1 c').symm)⟩⟩
+
+-- Reference: [Ashtekar–Lewandowski 2004] §II — same closure for subtraction.
+/-- The difference of two cylinder functions on `s` depends on `s`. -/
+instance cylinderFunSub {ι G R : Type*} [DecidableEq ι] [CommRing R] (s : Finset ι) :
+    Sub (CylinderFun ι G R s) :=
+  ⟨fun f g => ⟨f.1 - g.1, fun c c' h =>
+    Eq.trans (Pi.sub_apply f.1 g.1 c)
+      (Eq.trans (congrArg₂ (· - ·) (f.2 c c' h) (g.2 c c' h))
+        (Pi.sub_apply f.1 g.1 c').symm)⟩⟩
+
+-- Reference: [Ashtekar–Lewandowski 2004] §II — same closure for `ℕ`-multiples.
+/-- The `ℕ`-multiple of a cylinder function on `s` depends on `s`. -/
+instance cylinderFunNSMul {ι G R : Type*} [DecidableEq ι] [CommRing R] (s : Finset ι) :
+    SMul ℕ (CylinderFun ι G R s) :=
+  ⟨fun n f => ⟨n • f.1, fun c c' h => congrArg (n • ·) (f.2 c c' h)⟩⟩
+
+-- Reference: [Ashtekar–Lewandowski 2004] §II — same closure for `ℤ`-multiples.
+/-- The `ℤ`-multiple of a cylinder function on `s` depends on `s`. -/
+instance cylinderFunZSMul {ι G R : Type*} [DecidableEq ι] [CommRing R] (s : Finset ι) :
+    SMul ℤ (CylinderFun ι G R s) :=
+  ⟨fun n f => ⟨n • f.1, fun c c' h => congrArg (n • ·) (f.2 c c' h)⟩⟩
+
+-- Reference: [Ashtekar–Lewandowski 2004] §II — same closure for powers.
+/-- The power of a cylinder function on `s` depends on `s`. -/
+instance cylinderFunPow {ι G R : Type*} [DecidableEq ι] [CommRing R] (s : Finset ι) :
+    Pow (CylinderFun ι G R s) ℕ :=
+  ⟨fun f n => ⟨f.1 ^ n, fun c c' h => congrArg (· ^ n) (f.2 c c' h)⟩⟩
+
+-- Reference: [Ashtekar–Lewandowski 2004] §II — same closure for the natural cast.
+/-- The natural cast of a cylinder function on `s` depends on `s`. -/
+instance cylinderFunNatCast {ι G R : Type*} [DecidableEq ι] [CommRing R] (s : Finset ι) :
+    NatCast (CylinderFun ι G R s) :=
+  ⟨fun n => ⟨((n : ℕ) : (ι → G) → R), fun c c' _ =>
+    (Pi.natCast_apply (π := fun _ : (ι → G) => R) n c).trans
+      (Pi.natCast_apply (π := fun _ : (ι → G) => R) n c').symm⟩⟩
+
+-- Reference: [Ashtekar–Lewandowski 2004] §II — same closure for the integer cast.
+/-- The integer cast of a cylinder function on `s` depends on `s`. -/
+instance cylinderFunIntCast {ι G R : Type*} [DecidableEq ι] [CommRing R] (s : Finset ι) :
+    IntCast (CylinderFun ι G R s) :=
+  ⟨fun n => ⟨((n : ℤ) : (ι → G) → R), fun c c' _ =>
+    (Pi.intCast_apply (π := fun _ : (ι → G) => R) n c).trans
+      (Pi.intCast_apply (π := fun _ : (ι → G) => R) n c').symm⟩⟩
+
+-- Reference: [Ashtekar–Lewandowski 2004] §II — the transported pointwise
+-- operations make the cylinder functions a commutative ring.
+/-- **Cylinder functions on `s` form a commutative ring** (pointwise
+operations, transported along the subtype inclusion). -/
+instance cylinderFunCommRing {ι G R : Type*} [DecidableEq ι] [CommRing R] (s : Finset ι) :
+    CommRing (CylinderFun ι G R s) :=
+  Function.Injective.commRing Subtype.val Subtype.val_injective rfl rfl
+    (fun _ _ => rfl) (fun _ _ => rfl) (fun _ => rfl) (fun _ _ => rfl)
+    (fun _ _ => rfl) (fun _ _ => rfl) (fun _ _ => rfl) (fun _ => rfl) (fun _ => rfl)
+
+-- Reference: [Ashtekar–Lewandowski 2004] §II — the pullback of a cylinder
+-- function on `t` depends on the image `t.image φ`.
+/-- **Pullback preserves cylindrical dependence**: if `f` depends on `t`, then
+`pullback φ f` depends on `t.image φ` (proved). -/
+theorem dependsOn_pullback {ι ι' G R : Type*} [DecidableEq ι] [DecidableEq ι'] [CommRing R]
+    {t : Finset ι'} {f : (ι' → G) → R} (hd : dependsOn t f) (φ : ι' → ι) :
+    dependsOn (t.image φ) (pullback φ f) :=
+  fun c c' h => hd (fun e' => c (φ e')) (fun e' => c' (φ e'))
+    (fun e he => h (φ e) (Finset.mem_image.mpr ⟨e, he, rfl⟩))
+
+-- Reference: [Ashtekar–Lewandowski 2004] §II — pullback is a ring homomorphism
+-- between the cylinder algebras.
+/-- **Pullback is a ring homomorphism** of cylinder algebras
+`CylinderFun ι' G R t →+* CylinderFun ι G R (t.image φ)` (proved). -/
+def pullbackRingHom {ι ι' G R : Type*} [DecidableEq ι] [DecidableEq ι'] [CommRing R]
+    (φ : ι' → ι) (t : Finset ι') :
+    CylinderFun ι' G R t →+* CylinderFun ι G R (t.image φ) where
+  toFun f := ⟨pullback φ f.1, dependsOn_pullback f.2 φ⟩
+  map_one' := Subtype.ext (pullback_one φ)
+  map_zero' := Subtype.ext (funext fun c =>
+    Pi.zero_apply (M := fun _ : (ι → G) => R) c)
+  map_mul' x y := Subtype.ext (pullback_mul φ x.1 y.1)
+  map_add' x y := Subtype.ext (funext fun c =>
+    (Pi.add_apply (pullback φ x.1) (pullback φ y.1) c).symm)
+
 end BoringMath

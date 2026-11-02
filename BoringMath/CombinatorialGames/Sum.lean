@@ -5,6 +5,7 @@ Authors: Enid
 -/
 import BoringMath.CombinatorialGames.Outcome
 import Mathlib.Data.LawfulXor.Basic
+import Mathlib.Data.Nat.Bitwise
 
 /-!
 # Disjoint sums of impartial games — the Sprague–Grundy xor theorem
@@ -47,6 +48,14 @@ theorem nimSum_zero (a : ℕ) : nimSum a 0 = a := xor_zero a
 /-- `a ^^^ b = 0 ↔ a = b` (proved). -/
 theorem nimSum_eq_zero_iff (a b : ℕ) : nimSum a b = 0 ↔ a = b := xor_eq_zero_iff
 
+-- Reference: mathlib pin v4.35.0-rc3, `LawfulXor Nat` (`xor_cancel_right`).
+/-- Nim-sum cancels on the right: `(a ^^^ b) ^^^ b = a` (proved). -/
+theorem nimSum_cancel_right (a b : ℕ) : nimSum (nimSum a b) b = a := xor_cancel_right a b
+
+-- Reference: mathlib pin v4.35.0-rc3, `LawfulXor Nat` (`xor_cancel_left`).
+/-- Nim-sum cancels on the left: `a ^^^ (a ^^^ b) = b` (proved). -/
+theorem nimSum_cancel_left (a b : ℕ) : nimSum a (nimSum a b) = b := xor_cancel_left a b
+
 /-- The **disjoint sum** of two finite impartial games: a move changes exactly
 one component. -/
 noncomputable def ImpartialGame.sum (G : ImpartialGame α) (H : ImpartialGame β) :
@@ -62,26 +71,107 @@ noncomputable def ImpartialGame.sum (G : ImpartialGame α) (H : ImpartialGame β
 
 -- Reference: [Sprague] 1935 / [Grundy] 1939 — the xor theorem.
 /-- **Sprague–Grundy theorem**: the Grundy value of a disjoint sum is the
-nim-sum of the Grundy values.
-
-SANCTIONED SORRY — peeling plan: well-founded induction on `(a, b)` (lex).
-By `grundy_eq`, `grundy (a,b) = mex S` where `S = {g(a') ^^^ h(b)} ∪
-{g(a) ^^^ h(b')}` (using the IH on options). Show `mex S = g(a) ^^^ h(b)` via
-`mex_eq_of_not_mem_and_forall`:
-1. `g(a) ^^^ h(b) ∉ S`: else `g(a') = g(a)` (xor-cancel) contradicting
-   `mex_not_mem`, resp. symmetric.
-2. For `m < g(a) ^^^ h(b)`: let `k` be the top bit of `m ^^^ (g(a)^^^h(b))`
-   (`Nat.log2`); since `m < c`, bit `k` of `c` is `1`. Case on whether bit
-   `k` of `g(a)` is `1`: then `m ^^^ h(b) < g(a)` (top-bit argument), so
-   `m ^^^ h(b) = g(a')` for some option `a'` (all values below the mex are
-   attained), giving `m = g(a') ^^^ h(b) ∈ S`. Else bit `k` of `h(b)` is
-   `1` and symmetrically `m ^^^ g(a) < h(b)` gives `m ∈ S`.
-   Bit manipulations via `Nat.testBit_xor`, `Nat.lt_of_testBit`-style lemmas
-   at the pin. -/
+nim-sum of the Grundy values (proved by well-founded induction on `(a, b)`
+under `Prod.Lex`, via `mex_eq_of_not_mem_and_forall`: non-membership by
+xor-cancellation against `mex_not_mem`; attainment of every
+`m < g(a) ^^^ h(b)` by `Nat.lt_xor_cases` (mathlib pin v4.35.0-rc3,
+`Mathlib/Data/Nat/Bitwise.lean:296`) plus `exists_move_grundy_eq_of_lt`). -/
 theorem ImpartialGame.grundy_sum (G : ImpartialGame α) (H : ImpartialGame β)
     (a : α) (b : β) :
-    (G.sum H).grundy (a, b) = nimSum (G.grundy a) (H.grundy b) := by
-  sorry
+    (G.sum H).grundy (a, b) = nimSum (G.grundy a) (H.grundy b) :=
+  WellFounded.induction WellFoundedRelation.wf
+    (C := fun p : α × β => (G.sum H).grundy p = nimSum (G.grundy p.1) (H.grundy p.2))
+    (a, b) (fun p ih => by
+      rcases p with ⟨a, b⟩
+      change (G.sum H).grundy (a, b) = nimSum (G.grundy a) (H.grundy b)
+      have hnot : nimSum (G.grundy a) (H.grundy b) ∉
+          ((G.sum H).moves (a, b)).attach.image (fun q => (G.sum H).grundy q.1) := by
+        intro hmem
+        obtain ⟨q, _, hq⟩ := Finset.mem_image.mp hmem
+        have hqm : q.1 ∈ (G.moves a).image (fun a' => (a', b)) ∪
+            (H.moves b).image (fun b' => (a, b')) := q.2
+        rcases Finset.mem_union.mp hqm with hl | hr
+        · obtain ⟨a', ha', haeq⟩ := Finset.mem_image.mp hl
+          have hih : (G.sum H).grundy (a', b) = nimSum (G.grundy a') (H.grundy b) :=
+            ih (a', b) (Prod.Lex.left b b (G.wf a a' ha'))
+          have hq' : (G.sum H).grundy (a', b) = nimSum (G.grundy a) (H.grundy b) :=
+            Eq.subst (motive := fun x => (G.sum H).grundy x = nimSum (G.grundy a) (H.grundy b))
+              haeq.symm hq
+          have heq : nimSum (G.grundy a') (H.grundy b) = nimSum (G.grundy a) (H.grundy b) :=
+            hih.symm.trans hq'
+          have hcan : G.grundy a' = G.grundy a :=
+            (nimSum_cancel_right (G.grundy a') (H.grundy b)).symm.trans
+              ((congrArg (fun n => nimSum n (H.grundy b)) heq).trans
+                (nimSum_cancel_right (G.grundy a) (H.grundy b)))
+          have hmem' : G.grundy a ∈ ((G.moves a).attach.image (fun q => G.grundy q.1)) :=
+            Finset.mem_image.mpr ⟨⟨a', ha'⟩, Finset.mem_attach _ _, by exact hcan⟩
+          have hnotmem : G.grundy a ∉ ((G.moves a).attach.image (fun q => G.grundy q.1)) := by
+            intro hga
+            have h2 : mex ((G.moves a).attach.image (fun q => G.grundy q.1)) ∈
+                ((G.moves a).attach.image (fun q => G.grundy q.1)) :=
+              Eq.subst (motive := fun n => n ∈ ((G.moves a).attach.image (fun q => G.grundy q.1)))
+                (G.grundy_eq a) hga
+            exact mex_not_mem _ h2
+          exact (hnotmem hmem').elim
+        · obtain ⟨b', hb', hbeq⟩ := Finset.mem_image.mp hr
+          have hih : (G.sum H).grundy (a, b') = nimSum (G.grundy a) (H.grundy b') :=
+            ih (a, b') (Prod.Lex.right a (H.wf b b' hb'))
+          have hq' : (G.sum H).grundy (a, b') = nimSum (G.grundy a) (H.grundy b) :=
+            Eq.subst (motive := fun x => (G.sum H).grundy x = nimSum (G.grundy a) (H.grundy b))
+              hbeq.symm hq
+          have heq : nimSum (G.grundy a) (H.grundy b') = nimSum (G.grundy a) (H.grundy b) :=
+            hih.symm.trans hq'
+          have hcan : H.grundy b' = H.grundy b :=
+            (nimSum_cancel_left (G.grundy a) (H.grundy b')).symm.trans
+              ((congrArg (nimSum (G.grundy a)) heq).trans
+                (nimSum_cancel_left (G.grundy a) (H.grundy b)))
+          have hmem' : H.grundy b ∈ ((H.moves b).attach.image (fun q => H.grundy q.1)) :=
+            Finset.mem_image.mpr ⟨⟨b', hb'⟩, Finset.mem_attach _ _, by exact hcan⟩
+          have hnotmem : H.grundy b ∉ ((H.moves b).attach.image (fun q => H.grundy q.1)) := by
+            intro hgb
+            have h2 : mex ((H.moves b).attach.image (fun q => H.grundy q.1)) ∈
+                ((H.moves b).attach.image (fun q => H.grundy q.1)) :=
+              Eq.subst (motive := fun n => n ∈ ((H.moves b).attach.image (fun q => H.grundy q.1)))
+                (H.grundy_eq b) hgb
+            exact mex_not_mem _ h2
+          exact (hnotmem hmem').elim
+      have hforall : ∀ m, m < nimSum (G.grundy a) (H.grundy b) →
+          m ∈ ((G.sum H).moves (a, b)).attach.image (fun q => (G.sum H).grundy q.1) := by
+        intro m hm
+        have hm' : m < G.grundy a ^^^ H.grundy b := hm
+        rcases Nat.lt_xor_cases hm' with h | h
+        · obtain ⟨a', ha', hav⟩ := G.exists_move_grundy_eq_of_lt a h
+          have hih : (G.sum H).grundy (a', b) = nimSum (G.grundy a') (H.grundy b) :=
+            ih (a', b) (Prod.Lex.left b b (G.wf a a' ha'))
+          have hmeq : m = nimSum (G.grundy a') (H.grundy b) :=
+            calc m = nimSum (nimSum m (H.grundy b)) (H.grundy b) :=
+                  (nimSum_cancel_right m (H.grundy b)).symm
+              _ = nimSum (G.grundy a') (H.grundy b) :=
+                  (congrArg (fun n => nimSum n (H.grundy b)) hav).symm
+          have hmem : (a', b) ∈ (G.sum H).moves (a, b) := by
+            change (a', b) ∈ (G.moves a).image (fun a' => (a', b)) ∪
+              (H.moves b).image (fun b' => (a, b'))
+            exact Finset.mem_union_left _ (Finset.mem_image_of_mem _ ha')
+          refine Finset.mem_image.mpr ⟨⟨(a', b), hmem⟩, Finset.mem_attach _ _, ?_⟩
+          change (G.sum H).grundy (a', b) = m
+          exact hih.trans hmeq.symm
+        · obtain ⟨b', hb', hbv⟩ := H.exists_move_grundy_eq_of_lt b h
+          have hih : (G.sum H).grundy (a, b') = nimSum (G.grundy a) (H.grundy b') :=
+            ih (a, b') (Prod.Lex.right a (H.wf b b' hb'))
+          have hmeq : m = nimSum (G.grundy a) (H.grundy b') :=
+            calc m = nimSum (nimSum m (G.grundy a)) (G.grundy a) :=
+                  (nimSum_cancel_right m (G.grundy a)).symm
+              _ = nimSum (H.grundy b') (G.grundy a) :=
+                  (congrArg (fun n => nimSum n (G.grundy a)) hbv).symm
+              _ = nimSum (G.grundy a) (H.grundy b') := nimSum_comm _ _
+          have hmem : (a, b') ∈ (G.sum H).moves (a, b) := by
+            change (a, b') ∈ (G.moves a).image (fun a' => (a', b)) ∪
+              (H.moves b).image (fun b' => (a, b'))
+            exact Finset.mem_union_right _ (Finset.mem_image_of_mem _ hb')
+          refine Finset.mem_image.mpr ⟨⟨(a, b'), hmem⟩, Finset.mem_attach _ _, ?_⟩
+          change (G.sum H).grundy (a, b') = m
+          exact hih.trans hmeq.symm
+      exact ((G.sum H).grundy_eq (a, b)).trans (mex_eq_of_not_mem_and_forall hnot hforall))
 
 -- Reference: [Sprague] 1935 / [Grundy] 1939 — the outcome theorem for sums.
 /-- **Outcome theorem for sums**: `G + H` is a P-position at `(a, b)` iff the
