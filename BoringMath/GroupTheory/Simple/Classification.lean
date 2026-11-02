@@ -374,6 +374,14 @@ theorem PSL_isSimpleGroup {n p k : ℕ} [NeZero n] [Fact p.Prime] (hk : 1 ≤ k)
   --       faithfully;
   --   (4) apply the Iwasawa criterion (`Subgroup.isSimpleGroup` in
   --       `Mathlib/GroupTheory/GroupAction/Iwasawa.lean`) to conclude.
+  -- UPDATE (#230): rank `n ≥ 3` is now PROVED sorry-free in
+  -- `BoringMath.GroupTheory.Simple.PSLSimpleRank` (`PSL_isSimpleGroup_rank_ge_three`,
+  -- with `SL_isPerfect` from SLPerfect.lean, itself sorry-free via SLDiag.lean's
+  -- `hOf_eq_diag2n`), with finite-field corollaries in PSLSimple.lean
+  -- (`PSL_isSimpleGroup_galoisField_of_three_le`, `PSL_isSimpleGroup_zmod_of_three_le`);
+  -- rank `n = 2` is consumed at the pin (`rank_two_simple`, PSLSimple.lean).
+  -- NOTE for review: the statement below needs `2 ≤ n` — `PSL(1, q)` is trivial,
+  -- hence not simple. Remaining sorry: the `n = 2` wiring + the `2 ≤ n` fix.
   sorry
 
 /-! ## Sector D: sporadic — the 26 sporadic groups as data -/

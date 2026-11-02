@@ -10,6 +10,7 @@ import Mathlib.GroupTheory.Index
 import Mathlib.GroupTheory.OrderOfElement
 import Mathlib.Algebra.Group.Subgroup.Finite
 import Mathlib.SetTheory.Cardinal.Finite
+import BoringMath.GroupTheory.Simple.OrderTwelve
 
 /-!
 # Small-order non-simplicity
@@ -19,8 +20,8 @@ simple group has composite order `< 60`" (the smallest nonabelian simple group
 is `A_5`, of order 60 — `card_alternatingGroup_fin5` in
 `BoringMath.GroupTheory.Simple.Classification`). This module proves the two
 clean Sylow-theoretic cases: order `p * q` with primes `p < q` (#280a) and order
-`p ^ 2` (#280b), and records the order-12 case (#280c, the `PSL(2,3) ≅ A_4`
-level) as a `sorry` with a peeling plan.
+`p ^ 2` (#280b), and consumes the order-12 case (#280c, the `PSL(2,3) ≅ A_4`
+level) from `BoringMath.GroupTheory.Simple.OrderTwelve` (proved there).
 
 ## References
 * [Dummit–Foote] D. S. Dummit, R. M. Foote, *Abstract Algebra*, 3rd ed., Wiley
@@ -134,21 +135,13 @@ theorem not_isSimpleGroup_of_card_eq_prime_sq {G : Type*} [Group G] [Finite G]
       (pow_two p).symm.trans ((h2.symm.trans h1).trans (mul_one p).symm)
     exact absurd (Nat.mul_left_cancel hp.pos h3) hp.ne_one
 
-/-! ## Order 12 — #280c (the `PSL(2,3) ≅ A_4` level) -/
+/-! ## Order 12 — #280c (the `PSL(2,3) ≅ A_4` level)
 
--- Reference: [Dummit–Foote], Ch. 4, Sec. 6 (Sylow counting for `|G| = 12`);
--- [Wilson] GTM 251, ch. 1. REVIEW(citation): pin sections against held texts.
-/-- **A group of order 12 is not simple** (e.g. `PSL(2, F_3) ≅ A_4`). TEMPORARY
-SORRY with peeling plan. -/
-theorem not_isSimpleGroup_of_card_eq_twelve {G : Type*} [Group G] [Finite G]
-    (h : Nat.card G = 12) : ¬ IsSimpleGroup G := by
-  -- TEMPORARY SORRY: this duplicate of ticket #280c is now PROVED in
-  -- `BoringMath.GroupTheory.Simple.OrderTwelve`
-  -- (`not_isSimpleGroup_of_card_eq_twelve`, by the element-counting route:
-  -- `n_3 = 4` gives 8 elements of order 3, so the remaining 4 form the unique
-  -- normal Sylow 2-subgroup). Close this duplicate in review by importing
-  -- `OrderTwelve` and deleting the redeclaration (the two files are never
-  -- imported together, so the shared name does not clash at the pin).
-  sorry
+The order-12 case is proved in `BoringMath.GroupTheory.Simple.OrderTwelve`
+(`not_isSimpleGroup_of_card_eq_twelve`, by the element-counting route: `n_3 = 4`
+gives 8 elements of order 3, so the remaining 4 form the unique normal Sylow
+2-subgroup); this module imports it instead of redeclaring it.
+
+-/
 
 end BoringMath

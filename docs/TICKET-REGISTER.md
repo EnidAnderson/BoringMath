@@ -25,7 +25,7 @@ C in progress, D data landed.
 | #226 | Feit–Thompson odd order | open (refs held) |
 | #230 | PSL simplicity (Iwasawa) | in-flight: rank-2 consumed at pin (#700b4e3); rank≥3 reduced (#34cf085) to SL perfect + Iwasawa; transvection identity landed (#4d0f66e); SL_isPerfect + PSL_simple_of_SL_perfect open |
 | #235/#283 | \|μ_n(F_q)\| = gcd formula → \|PSL\| formula | in-flight (CyclicTorsion landed #7fae0af; PSLCard.lean being closed by other lane) |
-| #236–#257 | CFSG.LIB modules | partially landed (Quasisimple, Signalizer, ThompsonSubgroup, Fusion, FusionSystem, Local, PCore #c29c4f1, StronglyClosed, AlmostSimple, ThreeTransposition, BNPairs, Centralizer); rest open |
+| #236–#257 | CFSG.LIB modules | partially landed (Quasisimple, Signalizer, ThompsonSubgroup, Fusion, FusionSystem, Local, PCore #c29c4f1, StronglyClosed, AlmostSimple, ThreeTransposition, BNPairs, Centralizer); rest open. Sector C (#230): rank n>=3 PSL simplicity LANDED sorry-free (SLTransvection + SLDiag hOf_eq_diag2n + SLPerfect SL_isPerfect + PSLSimpleRank PSL_isSimpleGroup_rank_ge_three + PSLSimple finite-field corollaries); rank 2 consumed at pin; SmallOrders order-12 duplicate closed via OrderTwelve |
 | #258 | \|A_5\|=60 | landed |
 | #280a/b | order pq, p² not simple | landed (#72a321f) |
 | #280c | order 12 | in-flight (OrderTwelve.lean) |

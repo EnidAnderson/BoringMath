@@ -8,6 +8,7 @@ import Mathlib.Algebra.Field.ZMod
 import Mathlib.FieldTheory.Finite.GaloisField
 import BoringMath.GroupTheory.Simple.Classification
 import BoringMath.GroupTheory.Simple.OrderTwelve
+import BoringMath.GroupTheory.Simple.PSLSimpleRank
 
 /-!
 # Simplicity of `PSL(2, F_q)` — the rank-2 case of sector C (#230)
@@ -62,4 +63,20 @@ theorem not_isSimpleGroup_PSL_2_3 [Fact (Nat.Prime 3)] [NeZero 2] :
     ¬ IsSimpleGroup (PSL(2, ZMod 3)) :=
   not_isSimpleGroup_of_card_eq_twelve card_PSL_2_3
 
+
+-- Reference: `PSL_isSimpleGroup_rank_ge_three` (PSLSimpleRank.lean, PROVED via the
+-- Iwasawa criterion) + `Fintype.card_fin`; [Wilson] ch. 5.
+/-- **`PSL(n, F_{p^k})` is simple for `n ≥ 3`** (rank ≥ 3 case of #230, proved). -/
+theorem PSL_isSimpleGroup_galoisField_of_three_le {n p k : ℕ} [Fact p.Prime] [NeZero k]
+    (hn : 3 ≤ n) : IsSimpleGroup (PSL(n, GaloisField p k)) :=
+  PSL_isSimpleGroup_rank_ge_three (F := GaloisField p k) (ι := Fin n)
+    (Eq.subst (motive := fun m => 3 ≤ m) (Fintype.card_fin n).symm hn)
+
+-- Reference: as above, over the prime field `F_p` (`Fintype.card (ZMod p) = p` via
+-- `Fintype.card_fin`).
+/-- **`PSL(n, F_p)` is simple for `n ≥ 3`** (rank ≥ 3 case of #230, proved). -/
+theorem PSL_isSimpleGroup_zmod_of_three_le {n p : ℕ} [Fact p.Prime] (hn : 3 ≤ n) :
+    IsSimpleGroup (PSL(n, ZMod p)) :=
+  PSL_isSimpleGroup_rank_ge_three (F := ZMod p) (ι := Fin n)
+    (Eq.subst (motive := fun m => 3 ≤ m) (Fintype.card_fin n).symm hn)
 end BoringMath

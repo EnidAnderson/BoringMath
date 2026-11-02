@@ -32,7 +32,7 @@ open Matrix
 (consumed at the pin; holds for `|F| ≥ 4`). -/
 theorem SL2_isPerfect {F : Type*} [Field F] {a : F} (ha : a ≠ 0) (hasq : a ^ 2 ≠ 1) :
     Group.IsPerfect (SpecialLinearGroup (Fin 2) F) :=
-  ⟨SpecialLinearGroup.SL2.commutator_eq_top ha hasq⟩
+  ⟨SL2.commutator_eq_top ha hasq⟩
 
 -- Reference: [Carter] ch. 5 / [Wilson] ch. 5 (`SL(n, F)` is perfect for
 -- `n ≥ 3` over any field). Steps (1) and (2) are landed:
@@ -43,11 +43,11 @@ theorem SL2_isPerfect {F : Type*} [Field F] {a : F} (ha : a ≠ 0) (hasq : a ^ 2
 /-- **`SL(n, F)` is perfect for `n ≥ 3`** (over any field; proved). -/
 theorem SL_isPerfect {ι : Type*} [Fintype ι] [DecidableEq ι] (F : Type*) [Field F]
     (hι : 3 ≤ Fintype.card ι) : Group.IsPerfect (SpecialLinearGroup ι F) := by
-  haveI : Nontrivial ι := Fintype.one_lt_card_iff_nontrivial.mp
+  have : Nontrivial ι := Fintype.one_lt_card_iff_nontrivial.mp
     (Nat.lt_of_lt_of_le (Nat.lt_succ_of_le (Nat.le_add_right 1 1)) hι)
   refine ⟨?_⟩
-  apply Subgroup.eq_top_iff'.mpr
-  intro M
+  apply le_antisymm le_top
+  intro M _
   exact SpecialLinearGroup.diagonal_transvection_induction'
     (fun A => A ∈ commutator (SpecialLinearGroup ι F)) M
     (fun i j hij c hc => diag2n_mem_commutator_of_card_three hij c hc hι)

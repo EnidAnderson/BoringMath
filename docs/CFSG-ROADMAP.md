@@ -154,7 +154,19 @@ referee ↔ motivic Galois (T2 bet). Each row proved or bet-labeled.
 ### Phase 2 — Lie type (GLS vol 3 + Carter + DL)
 - **#221 PREP** GLS vol 3; **#223 PREP** Carter ch 1–6; **#224 PREP** DL 1976.
 - **#215 CFSG.C** sector tracking; **#229->#230 CFSG.C.1** `PSL_isSimpleGroup` sorry-free
-  (Iwasawa; sub-lemmas: SL perfect, projective action quasiprimitive, faithful mod center);
+  (Iwasawa; sub-lemmas: SL perfect, projective action quasiprimitive, faithful mod center).
+  STATUS: rank `n >= 3` LANDED sorry-free -- `SL_isPerfect` (SLPerfect.lean) via
+  `transvection_mem_commutator_of_card_three` (SLTransvection.lean) +
+  `hOf_eq_diag2n` / `diag2n_mem_commutator_of_card_three` (SLDiag.lean; torus identity
+  `h_ij(u) = diag2n(i,j,u)` proved via basis-vector action), then
+  `PSL_isSimpleGroup_rank_ge_three` (PSLSimpleRank.lean; Iwasawa structure on
+  `PSL(i, F)` acting on the projective space, all general-i pin lemmas); finite-field
+  corollaries `PSL_isSimpleGroup_galoisField_of_three_le` and
+  `PSL_isSimpleGroup_zmod_of_three_le` (PSLSimple.lean). Rank `n = 2` consumed at the
+  pin (`rank_two_simple`, PSLSimple.lean). REMAINING: wire into
+  `Classification.PSL_isSimpleGroup` -- NOTE its statement needs `2 <= n`
+  (`PSL(1,q)` is trivial, hence not simple; flag for review); the `(2,2)`, `(2,3)`
+  exceptions are non-simple by order (Classification / OrderTwelve / SmallOrders);
   **#231 CFSG.C.2** the other 15 families.
 - **#218 CFSG.BRIDGE** Chevalley ℤ-forms + Deligne–Lusztig + motivic dictionary row (bet).
 - Code so far: `BoringMath/GroupTheory/Simple/Classification.lean` (sectors A/B consumed,
