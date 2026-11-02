@@ -17,6 +17,8 @@ import Mathlib.LinearAlgebra.Matrix.ProjectiveSpecialLinearGroup
 import Mathlib.LinearAlgebra.Matrix.GeneralLinearGroup.Card
 import Mathlib.GroupTheory.Coset.Card
 import Mathlib.FieldTheory.Finite.GaloisField
+import Mathlib.LinearAlgebra.Projectivization.PSL.PSL2
+import BoringMath.GroupTheory.Simple.PSLSimpleRank
 
 /-!
 # The classification of finite simple groups (CFSG) — sector decomposition
@@ -34,8 +36,9 @@ sectors, with the sectors filled in one at a time.
   split is proved below, as are the small orders `|SL(2,2)| = 6`,
   `|PSL(2,2)| = 6`, `|SL(2,3)| = 24`, `|Z(SL(2,3))| = 2`, `|PSL(2,3)| = 12`,
   `|SL(3,2)| = |PSL(3,2)| = 168`, `|A_5| = 60`, `|A_6| = 360`; the simplicity
-  theorem (Iwasawa criterion) is the main open lemma of this sector, with a
-  peeling plan. The remaining 15 families (B/C/D classical, twisted
+  theorem `PSL_isSimpleGroup` (Iwasawa criterion) is PROVED below for `2 ≤ n`
+  outside `(2,2)`,`(2,3)` (rank `n = 2` consumed from the pin, rank `n ≥ 3` proved
+  in `PSLSimpleRank.lean`). The remaining 15 families (B/C/D classical, twisted
   Steinberg/Suzuki/Ree, exceptional `^2E_6`, `E_6`-`E_9`, `F_4`, `G_2`,
   `^3D_4`) join this sector as they are constructed.
 * **Sector D (sporadic)** — the 26 sporadic groups as data (ATLAS names and
@@ -354,35 +357,37 @@ theorem card_PSL_3_2 [Fact (Nat.Prime 2)] [NeZero 3] :
     ((congrArg (fun c => Nat.card (PSL(3, ZMod 2)) * c) card_center_SL_3_2).symm.trans
       ((card_PSL_mul_card_center 3 (ZMod 2)).trans card_SL_3_2))
 
--- Reference: [Wilson] ch. 5 (Iwasawa's criterion applied to `SL(n,q)` acting on
--- projective space); mathlib pin v4.35.0-rc3,
--- `Mathlib/GroupTheory/GroupAction/Iwasawa.lean` (`isSimpleGroup`).
-/-- **Sector C main theorem (A-family)**: `PSL(n, F_q)` is simple except
-`(n, q) ∈ {(2,2), (2,3)}`. TEMPORARY SORRY with peeling plan. -/
-theorem PSL_isSimpleGroup {n p k : ℕ} [NeZero n] [Fact p.Prime] (hk : 1 ≤ k)
+-- Reference: [Wilson] ch. 5 (PSL(n,q) simple except (n,q) ∈ {(2,2),(2,3)});
+-- mathlib pin v4.35.0-rc3, `Matrix.ProjectiveSpecialLinearGroup.rank_two_simple`
+-- (Projectivization/PSL/PSL2.lean, rank 2) and `PSL_isSimpleGroup_rank_ge_three`
+-- (BoringMath PSLSimpleRank.lean, rank ≥ 3, proved via the Iwasawa criterion).
+/-- **Sector C main theorem (A-family)**: `PSL(n, F_{p^k})` is simple for `2 ≤ n`
+except `(n, q) ∈ {(2,2), (2,3)}` (proved). The hypothesis `2 ≤ n` is needed:
+`PSL(1, q)` is trivial, hence not simple. -/
+theorem PSL_isSimpleGroup {n p k : ℕ} [NeZero n] [Fact p.Prime] (hk : 1 ≤ k) (hn : 2 ≤ n)
     (h : (n, p ^ k) ≠ (2, 2) ∧ (n, p ^ k) ≠ (2, 3)) :
     IsSimpleGroup (PSL(n, GaloisField p k)) := by
-  -- TEMPORARY SORRY: the honest proof has not been instantiated yet.
-  -- PEELING PLAN:
-  --   (1) `commutator_SL_eq_top`: `SL(n, F_q)` is perfect except `(n,q) ∈
-  --       {(2,2),(2,3)}` (elementary matrices; mathlib has
-  --       `commutator_alternatingGroup_eq_top` as a model);
-  --   (2) the action of `SL(n, F_q)` on the projective space `P^{n-1}(F_q)`
-  --       is quasiprimitive (`IsQuasiPreprimitive`) — point stabilizers are
-  --       maximal parabolics;
-  --   (3) the kernel of the action is exactly the center, so `PSL` acts
-  --       faithfully;
-  --   (4) apply the Iwasawa criterion (`Subgroup.isSimpleGroup` in
-  --       `Mathlib/GroupTheory/GroupAction/Iwasawa.lean`) to conclude.
-  -- UPDATE (#230): rank `n ≥ 3` is now PROVED sorry-free in
-  -- `BoringMath.GroupTheory.Simple.PSLSimpleRank` (`PSL_isSimpleGroup_rank_ge_three`,
-  -- with `SL_isPerfect` from SLPerfect.lean, itself sorry-free via SLDiag.lean's
-  -- `hOf_eq_diag2n`), with finite-field corollaries in PSLSimple.lean
-  -- (`PSL_isSimpleGroup_galoisField_of_three_le`, `PSL_isSimpleGroup_zmod_of_three_le`);
-  -- rank `n = 2` is consumed at the pin (`rank_two_simple`, PSLSimple.lean).
-  -- NOTE for review: the statement below needs `2 ≤ n` — `PSL(1, q)` is trivial,
-  -- hence not simple. Remaining sorry: the `n = 2` wiring + the `2 ≤ n` fix.
-  sorry
+  have hk0 : k ≠ 0 := Nat.one_le_iff_ne_zero.mp hk
+  have hp : 2 ≤ p := Nat.Prime.two_le (Fact.out : p.Prime)
+  have hp1 : 1 ≤ p := Nat.le_of_lt (Nat.lt_of_lt_of_le Nat.one_lt_two hp)
+  have hq2 : 2 ≤ p ^ k :=
+    hp.trans (Eq.subst (motive := fun m => m ≤ p ^ k) (pow_one p) (pow_le_pow_right' hp1 hk))
+  rcases eq_or_ne n 2 with rfl | hne
+  · -- rank 2: `q = p^k ≥ 4` (since `q ≠ 2, 3`), then the pin's `rank_two_simple`
+    have hqne2 : p ^ k ≠ 2 := fun e => h.1 (congrArg (fun x => (2, x)) e)
+    have hqne3 : p ^ k ≠ 3 := fun e => h.2 (congrArg (fun x => (2, x)) e)
+    have hq4 : 4 ≤ p ^ k := by
+      rcases Nat.lt_or_ge (p ^ k) 4 with hlt | hge
+      · rcases Nat.lt_or_ge (p ^ k) 3 with h3 | h3
+        · exact absurd (Nat.le_antisymm (Nat.lt_succ_iff.mp h3) hq2) hqne2
+        · exact absurd (Nat.le_antisymm (Nat.lt_succ_iff.mp hlt) h3) hqne3
+      · exact hge
+    exact Matrix.ProjectiveSpecialLinearGroup.rank_two_simple
+      (Eq.subst (motive := fun m => 4 ≤ m) (GaloisField.card (p := p) (n := k) hk0).symm hq4)
+  · -- rank ≥ 3: `PSL_isSimpleGroup_rank_ge_three` (PSLSimpleRank.lean)
+    have hn3 : 3 ≤ n := Nat.lt_of_le_of_ne hn (Ne.symm hne)
+    exact PSL_isSimpleGroup_rank_ge_three (F := GaloisField p k) (ι := Fin n)
+      (Eq.subst (motive := fun m => 3 ≤ m) (Fintype.card_fin n).symm hn3)
 
 /-! ## Sector D: sporadic — the 26 sporadic groups as data -/
 
