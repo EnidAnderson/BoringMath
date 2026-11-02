@@ -1,0 +1,56 @@
+/-
+Copyright (c) 2026 Enid. All rights reserved.
+Released under the Hippocratic Mathematics License v1.0, as described in the file LICENSE.
+Authors: Enid
+-/
+import Mathlib.LinearAlgebra.Projectivization.PSL.PSL2
+import Mathlib.Algebra.Field.ZMod
+import Mathlib.FieldTheory.Finite.GaloisField
+
+/-!
+# Simplicity of `PSL(2, F_q)` — the rank-2 case of sector C (#230)
+
+The pin already proves `Matrix.ProjectiveSpecialLinearGroup.rank_two_simple`:
+`PSL(2, F)` is simple whenever `4 ≤ Nat.card F`, via the Iwasawa criterion on
+the faithful action on the projective line (`Projectivization/PSL/PSL2.lean`).
+This module consumes it over the concrete finite fields. The exceptions
+`PSL(2,2)` and `PSL(2,3)` are handled in `Classification.lean` /
+`SmallOrders.lean`; rank `≥ 3` remains open (see `PSL_isSimpleGroup` in
+`Classification.lean`).
+
+## References
+* mathlib pin v4.35.0-rc3: `Matrix.ProjectiveSpecialLinearGroup.rank_two_simple`,
+  `rank_two_simple'` (Projectivization/PSL/PSL2.lean, Iwasawa criterion);
+  `GaloisField.card`; `ZMod.card`.
+* [Wilson] ch. 5 (PSL(2,q) simple for q ≥ 4); [GLS] Number 3.
+-/
+
+namespace BoringMath
+
+open Matrix
+open scoped MatrixGroups
+
+-- Reference: mathlib pin v4.35.0-rc3, `Matrix.ProjectiveSpecialLinearGroup.
+-- rank_two_simple`; [Wilson] ch. 5.
+/-- **`PSL(2, F)` is simple when `4 ≤ |F|`** (consumed at the pin). -/
+theorem PSL2_isSimpleGroup {F : Type*} [Field F] (hF : 4 ≤ Nat.card F) :
+    IsSimpleGroup (PSL(2, F)) :=
+  Matrix.ProjectiveSpecialLinearGroup.rank_two_simple hF
+
+-- Reference: as above, over the prime field `F_p` (`Nat.card (ZMod p) = p`).
+/-- **`PSL(2, p)` is simple for a prime `p ≥ 4`** (i.e. `p ≥ 5`) (consumed). -/
+theorem PSL2_isSimpleGroup_zmod {p : ℕ} [Fact p.Prime] (hp : 4 ≤ p) :
+    IsSimpleGroup (PSL(2, ZMod p)) :=
+  PSL2_isSimpleGroup
+    (Eq.subst (motive := fun n => 4 ≤ n)
+      ((Nat.card_eq_fintype_card (α := ZMod p)).trans (ZMod.card p)).symm hp)
+
+-- Reference: as above, over `F_{p^k}` (`GaloisField.card`).
+/-- **`PSL(2, F_{p^k})` is simple when `p^k ≥ 4`** (consumed). -/
+theorem PSL2_isSimpleGroup_galoisField {p k : ℕ} [Fact p.Prime] [NeZero k]
+    (h : 4 ≤ p ^ k) : IsSimpleGroup (PSL(2, GaloisField p k)) :=
+  PSL2_isSimpleGroup
+    (Eq.subst (motive := fun n => 4 ≤ n)
+      (GaloisField.card (p := p) (n := k) (NeZero.ne k)).symm h)
+
+end BoringMath
