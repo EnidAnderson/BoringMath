@@ -25,7 +25,7 @@ initial among models of science) is a labeled conjecture, not an assumption.
 
 namespace BoringMath
 
-universe u v u₁ u₂
+universe u v u₁ u₂ v₁ w
 
 -- Reference: [Popper 1959], [Kuhn 1962], [Kelly 1996]; [Street]; lab roadmap #381.
 /-- A **verification system**: a theory computad with a current model (0-cell),
@@ -68,7 +68,7 @@ structure VerificationSystem where
 /-- The **trivial verification system**. -/
 def trivialVerification : VerificationSystem.{0, 0, 0} where
   theory := Computad.trivial
-  current := ()
+  current := ⟨()⟩
   data := Unit
   experiment := Unit
   run := fun _ => ()
@@ -77,10 +77,10 @@ def trivialVerification : VerificationSystem.{0, 0, 0} where
   falsified := fun _ _ => false
   revise := fun c _ => c
   complexity := fun _ => 0
-  choose := fun l _ => l.head?.getD ()
+  choose := fun l _ => l.head?.getD ⟨()⟩
   falsified_iff := fun _ _ =>
-    ⟨fun h => Bool.false_ne_true h, fun h => False.elim h⟩
-  revise_eliminates := fun _ _ h => Bool.false_ne_true h
+    ⟨fun h => False.elim (Bool.false_ne_true h), fun h => False.elim (h True.intro)⟩
+  revise_eliminates := fun _ _ h => False.elim (Bool.false_ne_true h)
   choose_law := fun _ _ _ => ⟨True.intro, fun _ _ _ => Nat.zero_le _⟩
 
 -- Reference: the dictionary between the physics framework and the verification
@@ -89,23 +89,23 @@ def trivialVerification : VerificationSystem.{0, 0, 0} where
 /-- From a Motivic Holographic Information system to a verification system. -/
 def VerificationSystem.ofMHI (m : MotivicHolographicInfo.{u, v, u₁, v₁, w}) :
     VerificationSystem.{u, u₁, u₁} where
-  theory := { port := Unit, portMul := fun _ _ => (), portOne := (),
-    portMul_assoc := fun _ _ _ => rfl, portMul_left_one := fun _ => rfl,
-    portMul_right_one := fun _ => rfl, obj := m.bulk, gen := m.bulk,
-    src := fun x => x, tgt := fun x => x, leftPorts := fun _ => [], rightPorts := fun _ => [] }
+  theory := Computad.mk (ULift.{u} Unit) (fun _ _ => ⟨()⟩) ⟨()⟩ (fun _ _ _ => rfl)
+    (fun _ => rfl) (fun _ => rfl) m.bulk m.bulk (fun x => x) (fun x => x)
+    (fun _ => []) (fun _ => [])
   current := m.bulkUnit
   data := m.boundary
   experiment := m.boundary
   run := fun b => b
-  predict := fun x _ => m.hologram.obj x
+  predict := fun x _ =>
+    @CategoryTheory.Functor.obj m.bulk m.bulkCategory m.boundary m.boundaryCategory m.hologram x
   fits := fun _ _ => True
   falsified := fun _ _ => false
   revise := fun c _ => c
   complexity := fun _ => 0
   choose := fun l _ => l.head?.getD m.bulkUnit
   falsified_iff := fun _ _ =>
-    ⟨fun h => Bool.false_ne_true h, fun h => False.elim h⟩
-  revise_eliminates := fun _ _ h => Bool.false_ne_true h
+    ⟨fun h => False.elim (Bool.false_ne_true h), fun h => False.elim (h True.intro)⟩
+  revise_eliminates := fun _ _ h => False.elim (Bool.false_ne_true h)
   choose_law := fun _ _ _ => ⟨True.intro, fun _ _ _ => Nat.zero_le _⟩
 
 -- Reference: the initiality target — a LABELED CONJECTURE, not an assumption
@@ -117,6 +117,6 @@ theory is (a computad presenting) a motivic category, initial among all
 verification systems: every other receives a unique computad map from it. -/
 def initialityConjecture : Prop :=
   ∃ V₀ : VerificationSystem.{0, 0, 0},
-    ∀ V : VerificationSystem.{0, 0, 0}, ∃! f : Computad.Map V₀.theory V.theory, True
+    ∀ V : VerificationSystem.{0, 0, 0}, ∃! _f : Computad.Map V₀.theory V.theory, True
 
 end BoringMath

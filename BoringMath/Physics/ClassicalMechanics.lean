@@ -25,8 +25,8 @@ namespace BoringMath
 two-point toy MHI: the phase-space point is the unit, the Hamiltonian is constant. -/
 def harmonicOscillator : ClassicalMechanics.{0, 0, 0, 0, 0} where
   toMotivicHolographicInfo := toyMHI
-  phaseSpace := Discrete.mk 0
-  hamiltonian := fun _ => 1
+  phaseSpace := CategoryTheory.Discrete.mk 0
+  hamiltonian := fun _ => (1 : ℕ)
 
 -- Reference: [Goldstein] ch. 9 (Liouville's theorem); `rot_mem_symplecticGroup`
 -- (Liouville.lean, proved).
