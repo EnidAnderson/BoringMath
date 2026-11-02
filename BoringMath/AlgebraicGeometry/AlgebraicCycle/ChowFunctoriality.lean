@@ -160,15 +160,20 @@ theorem quasiCompact_prodMapAffineLine (f : X ⟶ Y) [QuasiCompact f] :
 -- Reference: a section `i` with retraction `r` has `residueFieldMap` an
 -- isomorphism (the comp law `residueFieldMap_comp` with `i ≫ r = 𝟙` and
 -- `residueFieldMap_id` give a two-sided inverse; field homs with a left
--- inverse are isos).
-/-- The residue-field map of a section is an isomorphism. TEMPORARY SORRY:
-peeling plan — `residueFieldMap_comp` with the retraction + `residueFieldMap_id`
-gives `r.residueFieldMap (i x) ≫ i.residueFieldMap x = 𝟙`; a `CommRingCat` hom
-between fields with a left inverse is an iso (`RingHom.injective` +
-surjectivity from the inverse). -/
+-- inverse are isos). Stacks tag 01HX? — REVIEW(citation): pin.
+/-- The residue-field map of a section is an isomorphism. -/
 theorem isIso_residueFieldMap_section (i : X ⟶ W) (r : W ⟶ X) (h : i ≫ r = 𝟙 X) (x : ↥X) :
     IsIso (i.residueFieldMap x) := by
-  -- TEMPORARY SORRY: peeling plan above.
+  -- TEMPORARY SORRY: peeling plan (probe-confirmed route against the pin API,
+  -- 2026-11-02): (1) point retraction hxx : r (i x) = x from
+  -- `Scheme.Hom.comp_apply` + `Scheme.Hom.id_apply` + congrArg on h; (2)
+  -- hsplit : r.residueFieldMap (i x) ≫ i.residueFieldMap x = 𝟙 from
+  -- `residueFieldMap_comp i r x` + congrArg on h + `residueFieldMap_id` — mind
+  -- the heterogeneous index cast `X.residueField (r (i x)) = X.residueField x`
+  -- via `congrArg (β := Type (u+1))` + `Eq.subst`; (3) r's map is bijective
+  -- (`RingHom.injective` for the field hom + surjective from the split) hence
+  -- iso (`ConcreteCategory.isIso_iff_bijective`); (4) i's map is iso by
+  -- `isIso_of_isIso_comp_left`.
   sorry
 
 -- Reference: the residue degree of `f × 𝔸¹` at the section point `i_t x`
