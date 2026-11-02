@@ -52,6 +52,31 @@ C in progress, D data landed.
 | #401–#408 | LinearAlgebra | LINEARALGEBRA-ROADMAP | #401 Jordan seed, #402 RationalCanonical seed | #403–#408 open |
 | #409–#416 | GaloisTheory (Beilinson focus) | GALOIS-ROADMAP | #409 ArtinSchreier seed, #410 InverseGalois seed, #411 Beilinson seed | #412–#416 open |
 | #417–#424 | LinearAlgebra (extension wave: spectra, linear logic, computadic rewriting, higher LA) | LINEARALGEBRA-ROADMAP | #417 Spectrum, #418 LinearLogic, #419 Computadic, #420 Higher seeds | #421–#424 open |
+| #425–#428 | GaloisTheory (Galois cohomology → Beilinson–Lichtenbaum bridge) | GALOIS-ROADMAP | #425 GaloisCohomology seed | #426–#428 open ( #428 depends on KTheory lane ) |
+
+## Stage D — breadth pass: new top-level and mid-level libraries (#500–#561)
+
+Opened by the folder-breadth pass: the structure now anticipates the full
+breadth of modern mathematics around the motivic/transcendence core. Each new
+folder landed with a seed module (defs + named sorries with peeling plans, per
+STYLE §7) and a per-area roadmap. Homes: per-area roadmaps.
+
+| Range | Folder | Roadmap | Seeds landed | Open |
+|---|---|---|---|---|
+| #500–#509 | `Analysis/` | ANALYSIS-ROADMAP | #500 Complex/Contour, #501 SpecialFunctions/Series, #502 Asymptotics/Basic | #503–#509 (Cauchy strengthening, D.13–D.17 home, Abel–Plana #371/#372, Functional #509) |
+| #510–#519 | `AlgebraicTopology/` | ALGEBRAICTOPO-ROADMAP | #510 Spectra/Basic | #511–#519 (F.1–F.4, Dold–Kan, A¹-interface, six-functor, #259) |
+| #520–#524 | `KTheory/` | KTHEORY-ROADMAP | #520 K0, #521 Milnor | #522–#524 (exact cats K.1, GW/Witt K.3/K.4, K-spectrum) |
+| #525–#533 | `NumberTheory/Transcendence/` | TRANSCENDENCE-ROADMAP | #525 Gelfond, #526 Schanuel, #527 Apéry | #528–#533 (Baker D.4, Siegel–Shidlovsky D.5, Hermite–Lindemann D.2, LW assembly D.1, D.9 capstone, Mahler D.10) |
+| #534–#537 | `SetTheory/` | SETTHEORY-ROADMAP | #534 Forcing/Basic, #535 Descriptive | #536–#537 (Boolean-valued models #332, independence #333–#334 / Neukirch–Uchida #272) |
+| #538–#541 | `Logic/` | LOGIC-ROADMAP | #538 ProofTheory/Sequent, #539 Computability/Bridge | #540–#541 (cut-elim consequences #336, ludics #337–#338/#279) |
+| #542–#545 | `InformationTheory/` | INFORMATION-ROADMAP | #542 Entropy | #543–#545 (Kolmogorov #340, BPP/PAC #308/#341, coding #342) |
+| #546–#548 | `Optimization/` | OPTIMIZATION-ROADMAP | #546 Linear | #547–#548 (IP #354, convex #355) |
+| #549–#553 | `LieTheory/` | LIETHEORY-ROADMAP | #549 RootData, #550 LieGroup | #551–#553 (Chevalley #323/#252, Steinberg #324, reductive/twisted #325/#326) |
+| #554–#558 | mid-level seeds | nearest roadmap | #554 GaloisTheory/Differential (PV.0), #555 Combinatorics/Graph (Turán), #556 Combinatorics/Matroid (Tutte), #557 Cohomology/SpectralSequence (LHS), #558 ProbabilityTheory/Measure | — |
+| #559–#561 | planned | LIBRARY-MAP | — | #559 Analysis/Functional, #560 NumberTheory LocalField/ClassField (#272), #561 reserved |
+
+BoringLab side: `BoringLab/Transcendence/Zeta.lean` (lab T3 `ζ(2) = π²/6`
+statement, docked on #500/#508) — lab ticket, doc-tracked here.
 
 ## Next stage (dependency order, proposed)
 

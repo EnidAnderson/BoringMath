@@ -120,14 +120,48 @@ quasicompact: it is the pullback of the diagonal of the target along
 theorem quasiCompact_graph_of_isSeparated {X Y : Scheme.{u}} (pX : X ⟶ S) (pY : Y ⟶ S)
     (f : X ⟶ Y) (hf : f ≫ pY = pX) (hsep : IsSeparated pY) :
     QuasiCompact (graph pX pY f hf) := by
-  -- TEMPORARY SORRY: Tier-2 peel. PEELING PLAN: (1) `graph pX pY f hf` is the
-  -- pullback of `pullback.diagonal pY` along the morphism
-  -- `(pullback.lift f (𝟙 Y) ...)` — a named `IsPullback` instance for the
-  -- graph square; (2) `IsClosedImmersion` is stable under pullback
-  -- (`IsClosedImmersion.pullback`); (3) a closed immersion is quasicompact
-  -- (`IsClosedImmersion.quasiCompact` or via properness); (4)
-  -- quasicompactness is stable under pullback (`QuasiCompact.pullback`).
-  sorry
+  haveI : IsSeparated pY := hsep
+  -- the canonical iso `pullback pX pY ≅ pullback (f ≫ pY) pY` (proof irrelevance
+  -- of `hf`); its legs are the projections (`pullback.congrHom_hom`, the map
+  -- legs by `pullback.lift_fst`/`pullback.lift_snd` with identity isos).
+  let e : pullback pX pY ≅ pullback (f ≫ pY) pY :=
+    pullback.congrHom hf.symm (Category.id_comp pY)
+  have hmapfst : e.hom ≫ pullback.fst (f ≫ pY) pY = pullback.fst pX pY :=
+    (pullback.lift_fst (pullback.fst pX pY ≫ 𝟙 X) (pullback.snd pX pY ≫ 𝟙 Y) _).trans
+      (Category.comp_id _)
+  have hmapnsnd : e.hom ≫ pullback.snd (f ≫ pY) pY = pullback.snd pX pY :=
+    (pullback.lift_snd (pullback.fst pX pY ≫ 𝟙 X) (pullback.snd pX pY ≫ 𝟙 Y) _).trans
+      (Category.comp_id _)
+  -- the graph transported along `e` is the Mathlib graph lift, a closed
+  -- immersion when the target is separated (instance at the pin,
+  -- `Mathlib/AlgebraicGeometry/Morphisms/Separated.lean`)
+  have hCI' : IsClosedImmersion (pullback.lift (𝟙 X) f (Category.id_comp (f ≫ pY))) :=
+    inferInstance
+  have hleg1 : graph pX pY f hf ≫ e.hom ≫ pullback.fst (f ≫ pY) pY
+      = pullback.lift (𝟙 X) f (Category.id_comp (f ≫ pY)) ≫ pullback.fst (f ≫ pY) pY := by
+    calc graph pX pY f hf ≫ e.hom ≫ pullback.fst (f ≫ pY) pY
+        = graph pX pY f hf ≫ pullback.fst pX pY :=
+          (Category.assoc _ _ _).trans (congrArg (graph pX pY f hf ≫ ·) hmapfst)
+      _ = 𝟙 X := graph_fst pX pY f hf
+      _ = pullback.lift (𝟙 X) f (Category.id_comp (f ≫ pY)) ≫ pullback.fst (f ≫ pY) pY :=
+          (pullback.lift_fst (𝟙 X) f (Category.id_comp (f ≫ pY))).symm
+  have hleg2 : graph pX pY f hf ≫ e.hom ≫ pullback.snd (f ≫ pY) pY
+      = pullback.lift (𝟙 X) f (Category.id_comp (f ≫ pY)) ≫ pullback.snd (f ≫ pY) pY := by
+    calc graph pX pY f hf ≫ e.hom ≫ pullback.snd (f ≫ pY) pY
+        = graph pX pY f hf ≫ pullback.snd pX pY :=
+          (Category.assoc _ _ _).trans (congrArg (graph pX pY f hf ≫ ·) hmapnsnd)
+      _ = f := graph_snd pX pY f hf
+      _ = pullback.lift (𝟙 X) f (Category.id_comp (f ≫ pY)) ≫ pullback.snd (f ≫ pY) pY :=
+          (pullback.lift_snd (𝟙 X) f (Category.id_comp (f ≫ pY))).symm
+  have hgraph : graph pX pY f hf ≫ e.hom
+      = pullback.lift (𝟙 X) f (Category.id_comp (f ≫ pY)) :=
+    pullback.hom_ext hleg1 hleg2
+  haveI : IsClosedImmersion (graph pX pY f hf) :=
+    (MorphismProperty.cancel_right_of_respectsIso @IsClosedImmersion (graph pX pY f hf) e.hom).mp
+      (Eq.subst (motive := fun m => IsClosedImmersion m) hgraph.symm hCI')
+  -- closed immersions are finite, finite morphisms are proper, and proper
+  -- morphisms are universally closed, hence quasicompact (instances at the pin)
+  exact inferInstance
 
 variable {X Y Z : Scheme.{u}} (pX : X ⟶ S) (pY : Y ⟶ S) (pZ : Z ⟶ S)
 

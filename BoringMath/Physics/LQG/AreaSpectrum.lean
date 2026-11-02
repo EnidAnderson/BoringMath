@@ -32,7 +32,7 @@ namespace BoringMath
 /-- The spin label as a real number: `j = n/2` for `n : ℕ` (the half-integers
 `½ℕ`, encoded by naturals). -/
 -- Reference: [Rovelli 2004] ch. 6 (spins are half-integers j = n/2). REVIEW(citation): pin.
--- noncomputable: ℝ division (`Real.instDivInvMonoid`) is noncomputable; the real spectrum is the content.
+-- noncomputable: ℝ division is noncomputable; the real spectrum is the content.
 noncomputable def spinJ (n : ℕ) : ℝ := (n : ℝ) / 2
 
 /-- The area contributed by one edge of spin `n`, with fundamental area
@@ -81,10 +81,11 @@ least the fundamental gap `A₀ · √(3/4)`. -/
 theorem SpinNetwork.area_gap {ι : Type*} [DecidableEq ι] {A₀ : ℝ} (hA : 0 ≤ A₀)
     (sn : SpinNetwork ι) (h : ∃ e ∈ sn.edges, 1 ≤ sn.spin e) :
     A₀ * Real.sqrt ((1 : ℝ) / 2 * ((1 : ℝ) / 2 + 1)) ≤ sn.area A₀ :=
-  let ⟨e, he, hsp⟩ := h
+  let ⟨_e, he, hsp⟩ := h
   le_trans (edgeArea_gap hA hsp)
     (mul_le_mul_of_nonneg_left
-      (Finset.single_le_sum (f := fun i => Real.sqrt (spinJ (sn.spin i) * (spinJ (sn.spin i) + 1))) (fun i _ => Real.sqrt_nonneg _) he)
+      (Finset.single_le_sum (f := fun i => Real.sqrt (spinJ (sn.spin i) * (spinJ (sn.spin i) + 1)))
+        (fun _ _ => Real.sqrt_nonneg _) he)
       hA)
 
 end BoringMath

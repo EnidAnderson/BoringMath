@@ -83,8 +83,11 @@ peeling plan — `IsSeparated` is stable under base change
 line is separated over `S`). -/
 theorem isSeparated_fst_affineLineProj_comp (X : SmoothSchemeOver S) :
     IsSeparated (pullback.fst X.proj (affineLineProj S) ≫ X.proj) := by
-  -- TEMPORARY SORRY: peeling plan above.
-  sorry
+  have hX : IsSeparated X.proj := X.separated
+  have hS : IsSeparated (affineLineProj S) :=
+    inferInstanceAs (IsSeparated (𝔸(ULift.{u} Unit; S) ↘ S))
+  have h1 : IsSeparated (pullback.fst X.proj (affineLineProj S)) := inferInstance
+  exact inferInstance
 
 -- Reference: MVW (2006), Appendix 1A p. 7 (products in `Cor_S` are Noetherian
 -- over a Noetherian base).
@@ -96,8 +99,22 @@ over a Noetherian base (`pullback` of `X ⟶ S` along `𝔸¹_S ⟶ S`), via
 finite-presentation + Noetherian base ⇒ Noetherian source. -/
 theorem isNoetherian_pullback_affineLineProj (X : SmoothSchemeOver S) [IsNoetherian S] :
     IsNoetherian (pullback X.proj (affineLineProj S)) := by
-  -- TEMPORARY SORRY: peeling plan above.
-  sorry
+  haveI := X.smooth
+  haveI := X.noetherian
+  haveI : Smooth (affineLineProj S) :=
+    inferInstanceAs (Smooth (𝔸(ULift.{u} Unit; S) ↘ S))
+  haveI : LocallyOfFiniteType X.proj := inferInstance
+  haveI : IsLocallyNoetherian S := inferInstance
+  haveI : LocallyOfFiniteType (affineLineProj S) := inferInstance
+  haveI : QuasiCompact (affineLineProj S) :=
+    inferInstanceAs (QuasiCompact (𝔸(ULift.{u} Unit; S) ↘ S))
+  haveI : QuasiCompact X.proj := inferInstance
+  haveI : CompactSpace ↥S := inferInstance
+  haveI : CompactSpace ↥(affineLineOver S) := by
+    change CompactSpace ↥(pullback (terminal.from S)
+      (terminal.from (Spec (CommRingCat.of (MvPolynomial (ULift.{u} Unit) (ULift.{u} ℤ))))))
+    exact inferInstance
+  exact (isNoetherian_iff _).mpr ⟨inferInstance, inferInstance⟩
 
 -- Reference: MVW (2006), Appendix 1A p. 7 (the object `X ×_S A¹` of `Cor_S`).
 -- REVIEW(citation): pin the exact proposition in review.

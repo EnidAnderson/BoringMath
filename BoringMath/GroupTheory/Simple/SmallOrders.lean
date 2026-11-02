@@ -142,21 +142,13 @@ theorem not_isSimpleGroup_of_card_eq_prime_sq {G : Type*} [Group G] [Finite G]
 SORRY with peeling plan. -/
 theorem not_isSimpleGroup_of_card_eq_twelve {G : Type*} [Group G] [Finite G]
     (h : Nat.card G = 12) : ¬ IsSimpleGroup G := by
-  -- TEMPORARY SORRY: the honest proof has not been instantiated yet.
-  -- PEELING PLAN (ticket #280c):
-  --   (1) `n_3 ∈ {1, 4}`: `Sylow.card_sylow_modEq_one` (n_3 ≡ 1 [MOD 3]) and
-  --       `Sylow.card_dvd_index` with `Subgroup.index_mul_card`
-  --       (a Sylow 3-subgroup has order 3, hence index 4);
-  --   (2) `n_3 = 1`: the unique Sylow 3-subgroup is normal
-  --       (`Sylow.normal_of_subsingleton`), of order 3 — proper nontrivial;
-  --   (3) `n_3 = 4`: conjugation on `Sylow 3 G` (card 4) gives
-  --       `φ : G →* Equiv.Perm (Sylow 3 G)`; transitivity (Sylow conjugacy,
-  --       `Sylow.isPretransitive`) gives `4 ∣ Nat.card φ.range`, Lagrange gives
-  --       `Nat.card φ.range ∣ 12`, so `|im| ∈ {4, 12}`;
-  --   (4) `|im| = 4`: `ker φ` has order 3, is normal, proper nontrivial;
-  --   (5) `|im| = 12`: `φ` is injective and `G` is an order-12 subgroup of
-  --       `S_4`, hence `A_4` (subgroup census in `BoringMath/Symmetry/S4Census.lean`);
-  --       `kleinFour` pulled back along `φ` is a normal subgroup of order 4.
+  -- TEMPORARY SORRY: this duplicate of ticket #280c is now PROVED in
+  -- `BoringMath.GroupTheory.Simple.OrderTwelve`
+  -- (`not_isSimpleGroup_of_card_eq_twelve`, by the element-counting route:
+  -- `n_3 = 4` gives 8 elements of order 3, so the remaining 4 form the unique
+  -- normal Sylow 2-subgroup). Close this duplicate in review by importing
+  -- `OrderTwelve` and deleting the redeclaration (the two files are never
+  -- imported together, so the shared name does not clash at the pin).
   sorry
 
 end BoringMath
