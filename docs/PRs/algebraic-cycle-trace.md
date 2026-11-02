@@ -45,3 +45,23 @@ violations, 0 sorries.
 * S. Lang, *Algebra*, revised 3rd ed., Springer, 2002 (the tower law
   for the degrees of field extensions). REVIEW(citation): exact section
   to be pinned.
+
+## Update: boring restructure of `degree_pushforward` (urgent-class issue resolved)
+
+The original proof carried `set_option maxHeartbeats 1000000` on
+`degree_pushforward`: the fiber-sum re-indexing (`finsum_cond_eq_sum_of_cond_iff`
+inside a `calc` step, `Finset.sum_fiberwise_of_maps_to` against the doubly
+filtered shape) was elaborated inline, and the cumulative `isDefEq`/`whnf`
+work blew the default 200000-heartbeat budget (confirmed: at the default
+limit the proof times out at the `sum_fiberwise_of_maps_to` step).
+
+Per the standing ruling (heartbeat/non-boring issues are urgent), the
+proof is peeled into named, fully typed lemmas — `degree_eq_sum`,
+`localDegree_pushforward`, `sum_localDegree_pushforward`,
+`finsum_fiber_localDegree`, `sum_finsum_fiber_localDegree`,
+`sum_fiberwise_filter`, `localDegree_eq_zero_of_not_mem_filter`,
+`sum_filter_localDegree` — and the main theorem is a flat chain of
+`Eq.trans` applications of those lemmas. The statement of
+`degree_pushforward` is unchanged. It now elaborates at the default
+heartbeat limit: `lake build BoringMath.AlgebraicGeometry.AlgebraicCycle.Trace`
+succeeds warning-free in ~30s; `scripts/check-style.sh` 0 violations.
