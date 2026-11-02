@@ -45,7 +45,7 @@ C in progress, D data landed.
 | #315–#320 | RepresentationTheory | REPRESENTATION-ROADMAP | — | all open |
 | #321–#326 | AlgebraicGroups | ALGEBRAICGROUPS-ROADMAP | — | all open |
 | #327–#355 | Cohomology/Forcing/ProofTheory/InfoTheory/CGT/Transcendence/Asymptotics/Optimization | LIBRARY-MAP | — | all open (proposed) |
-| #462–#467 | CombinatorialGames missing main theorems (2026-11-02 audit of Impartial/Sum/Partizan): #462 attainment lemma `exists_move_grundy_eq_of_lt`; #463 close the `grundy_sum` xor-theorem sorry (Sum.lean:84); #464 outcome-for-sums `outcome_sum_eq_p_iff`; #465 multi-heap Nim / Bouton P-iff-xor-0; #466 partizan Conway order + partial-order laws; #467 partizan outcome + determinacy. GitHub issues #372–#377 (sub-issues of #331/#332) | LIBRARY-MAP (CGT row) | Mex/Impartial/Outcome landed; Sum.lean holds the sanctioned `grundy_sum` sorry | open |
+| #462–#469 | CombinatorialGames missing main theorems (2026-11-02 audit of Impartial/Sum/Partizan): #462 attainment lemma `exists_move_grundy_eq_of_lt`; #463 close the `grundy_sum` xor-theorem sorry (Sum.lean:84); #464 outcome-for-sums `outcome_sum_eq_p_iff`; #465 multi-heap Nim / Bouton P-iff-xor-0; #466 partizan Conway order + partial-order laws; #467 partizan outcome + determinacy; #468 partizan arithmetic (`G + (-G)` P-position); #469 surreal numbers + simplicity theorem. GitHub issues #372–#377, #387–#388 (sub-issues of #331/#332) | LIBRARY-MAP (CGT row) | Mex/Impartial/Outcome landed; Sum.lean holds the sanctioned `grundy_sum` sorry | open |
 | #356–#380 | Physics | PHYSICS-ROADMAP | #356 MHI, #357 Specializations, #358 ClassicalMechanics+Liouville (proved), #371 zeta seed, #352 LQG items 2–15 (proved), #366 STR lane (proved) | #359–#365, #367–#380 open |
 | #381–#392 | Science + Foundations | SCIENCE-ROADMAP | #381 Verification (proved), #391 Computad (proved) | #382–#390, #392 open |
 | #393–#400 | cross-program connections | CONNECTIONS.md | — | guidance tickets open |
@@ -77,6 +77,11 @@ STYLE §7) and a per-area roadmap. Homes: per-area roadmaps.
 
 BoringLab side: `BoringLab/Transcendence/Zeta.lean` (lab T3 `ζ(2) = π²/6`
 statement, docked on #500/#508) — lab ticket, doc-tracked here.
+
+GitHub work-orders for the Stage D folders (repo issue numbers, separate
+namespace from the doc tickets above): #378 Analysis, #379 AlgebraicTopology,
+#380 KTheory, #381 Transcendence, #382 SetTheory, #383 Logic, #384
+InformationTheory, #385 Optimization, #386 LieTheory.
 
 ## Next stage (dependency order, proposed)
 

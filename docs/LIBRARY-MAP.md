@@ -44,7 +44,7 @@ in the lab register; roadmap docs are added per area as work starts.
 |---|---|---|---|---|
 | `RepresentationTheory/` | ACTIVE (seeds pending build, tickets 303-308) | `Character`, `FDRep`, `FinGroupCharZero`, `Homological` | blocks, Brauer, DL character theory | CFSG #249/#253, motives #262 | #315–#320 |
 | `AlgebraicGroups/` | ACTIVE (seed pending build, tickets 309-314) | nothing (no linear algebraic groups) | everything: GL/SL as groups, Chevalley | Lie-type sector #251–#253 | #321–#326 |
-| `CombinatorialGames/` | ACTIVE (seed pending build, tickets 331-334) | only `Order/GameAdd` | Sprague–Grundy, partizan, misère | BoringLab/Games consumers | #343–#346; follow-ups #462–#467 (GitHub #372–#377) |
+| `CombinatorialGames/` | ACTIVE (seed pending build, tickets 331-334) | only `Order/GameAdd` | Sprague–Grundy, partizan, misère | BoringLab/Games consumers | #343–#346; follow-ups #462–#469 (GitHub #372–#377, #387–#388) |
 | `Analysis/Functional/` | `Analysis` (normed/inner-product spaces) | spectral theory of compact operators, unitary reps at scale | LQG L²(Ā, dμ_AL) #352, reps #315–#320 | #410 (planned) |
 | `NumberTheory/LocalField/` + `NumberTheory/ClassField/` | `NumberTheory` (adeles absent at pin) | local fields, ideles, reciprocity | Neukirch–Uchida #272, Chebotarev as fusion #272 | #460–#461 (planned) |
 | `Algebra/Universal/` | `Algebra` | universal algebra / varieties | posterity | reserved |
