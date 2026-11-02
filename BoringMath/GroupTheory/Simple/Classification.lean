@@ -5,6 +5,10 @@ Authors: Enid
 -/
 import Mathlib.Algebra.Field.ZMod
 import Mathlib.GroupTheory.Subgroup.Simple
+import Mathlib.GroupTheory.Sylow
+import Mathlib.GroupTheory.IndexNormal
+import Mathlib.Data.Nat.Totient
+import Mathlib.RingTheory.RootsOfUnity.Basic
 import Mathlib.GroupTheory.SpecificGroups.Cyclic
 import Mathlib.GroupTheory.SpecificGroups.Alternating.Simple
 import Mathlib.GroupTheory.SpecificGroups.Alternating.KleinFour
@@ -180,6 +184,79 @@ theorem card_SL_2_3 [Fact (Nat.Prime 3)] [NeZero 3] :
     ((congrArg (fun c => (∏ i : Fin 2, (c ^ 2 - c ^ (i : ℕ))) / (c - 1)) (ZMod.card 3)).trans
       ((congrArg (fun P => P / (3 - 1))
         (Fin.prod_univ_two fun i : Fin 2 => (3:ℕ)^2 - (3:ℕ)^(i:ℕ))).trans rfl))
+
+-- Reference: mathlib pin v4.35.0-rc3, `nat_card_alternatingGroup` +
+-- `Nat.card_fin`; `|A_5| = 5!/2 = 60` by literal computation (`rfl`).
+/-- **`|A_5| = 60`** (proved; the smallest nonabelian simple group, ticket #258). -/
+theorem card_alternatingGroup_fin5 : Nat.card (alternatingGroup (Fin 5)) = 60 :=
+  (nat_card_alternatingGroup (α := Fin 5)).trans
+    ((congrArg (fun n => n.factorial / 2) (Nat.card_fin 5)).trans rfl)
+
+-- Reference: mathlib pin v4.35.0-rc3, `Matrix.SpecialLinearGroup.center_equiv_rootsOfUnity'`,
+-- `ZMod.card_units_eq_totient`, `Nat.totient_prime`: the center of `SL(2, F_2)`
+-- is `μ_2(F_2) = {1}` since `F_2ˣ` is trivial.
+/-- **The center of `SL(2, F_2)` is trivial** (proved). -/
+theorem card_center_SL_2_2 [Fact (Nat.Prime 2)] [NeZero 2] :
+    Nat.card (Subgroup.center (SpecialLinearGroup (Fin 2) (ZMod 2))) = 1 := by
+  have h1 : Nat.card (Subgroup.center (SpecialLinearGroup (Fin 2) (ZMod 2))) =
+      Nat.card (rootsOfUnity (Fintype.card (Fin 2)) (ZMod 2)) :=
+    Nat.card_congr (Matrix.SpecialLinearGroup.center_equiv_rootsOfUnity' (0 : Fin 2)).toEquiv
+  have h2 : Nat.card (rootsOfUnity (Fintype.card (Fin 2)) (ZMod 2)) =
+      Nat.card (rootsOfUnity 2 (ZMod 2)) :=
+    congrArg (fun n => Nat.card (rootsOfUnity n (ZMod 2))) (Fintype.card_fin 2)
+  have hle : Nat.card (rootsOfUnity 2 (ZMod 2)) ≤ Nat.card (ZMod 2)ˣ :=
+    Nat.card_le_card_of_injective (rootsOfUnity 2 (ZMod 2)).subtype fun a b h => Subtype.ext h
+  have hunits : Nat.card (ZMod 2)ˣ = 1 :=
+    (Nat.card_eq_fintype_card (α := (ZMod 2)ˣ)).trans
+      ((ZMod.card_units_eq_totient 2).trans ((Nat.totient_prime Nat.prime_two).trans rfl))
+  have hpos : 1 ≤ Nat.card (rootsOfUnity 2 (ZMod 2)) :=
+    Nat.succ_le_of_lt
+      (@Nat.card_pos (rootsOfUnity 2 (ZMod 2)) ⟨⟨(1 : (ZMod 2)ˣ), Subgroup.one_mem _⟩⟩ _)
+  exact h1.trans (h2.trans (Nat.le_antisymm (hle.trans hunits.le) hpos))
+
+-- Reference: `card_PSL_mul_card_center` + `card_center_SL_2_2` + `card_SL_2_2`.
+/-- **`|PSL(2, F_2)| = 6`** (proved; `PSL(2,2) ≅ S_3`). -/
+theorem card_PSL_2_2 [Fact (Nat.Prime 2)] [NeZero 2] :
+    Nat.card (PSL(2, ZMod 2)) = 6 :=
+  (Nat.mul_one (Nat.card (PSL(2, ZMod 2)))).symm.trans
+    ((congrArg (fun c => Nat.card (PSL(2, ZMod 2)) * c) card_center_SL_2_2).symm.trans
+      ((card_PSL_mul_card_center 2 (ZMod 2)).trans card_SL_2_2))
+
+-- Reference: Cauchy (`exists_prime_orderOf_dvd_card`) + index-2 subgroups are
+-- normal (`Subgroup.normal_of_index_eq_two`): a group of order 6 has a normal
+-- subgroup of order 3. [Wilson] ch. 1.
+/-- **A group of order 6 is not simple** (proved: Cauchy gives an element of
+order 3; its cyclic subgroup has index 2, hence is normal, proper, nontrivial). -/
+theorem not_isSimpleGroup_of_card_eq_six {G : Type*} [Group G] [Finite G]
+    (h : Nat.card G = 6) : ¬ IsSimpleGroup G := by
+  intro hsimple
+  have h6 : @Fintype.card G (Fintype.ofFinite G) = 6 :=
+    (@Nat.card_eq_fintype_card G (Fintype.ofFinite G)).symm.trans h
+  obtain ⟨x, hx⟩ := @exists_prime_orderOf_dvd_card G _ (Fintype.ofFinite G) 3
+    ⟨Nat.prime_three⟩ (Eq.subst (motive := fun n => 3 ∣ n) h6.symm ⟨2, rfl⟩)
+  have hcardH : Nat.card ↥(Subgroup.zpowers x) = 3 := (Nat.card_zpowers x).trans hx
+  have hidx := Subgroup.index_mul_card (Subgroup.zpowers x)
+  have hindex : (Subgroup.zpowers x).index * 3 = 6 :=
+    ((congrArg (fun c => (Subgroup.zpowers x).index * c) hcardH).symm.trans (hidx.trans h))
+  have hindex2 : (Subgroup.zpowers x).index = 2 :=
+    Nat.mul_right_cancel (Nat.succ_pos 2) (hindex.trans rfl)
+  rcases @IsSimpleGroup.eq_bot_or_eq_top_of_normal G _ hsimple (Subgroup.zpowers x)
+      (Subgroup.normal_of_index_eq_two hindex2) with hb | ht
+  · have h1 : Nat.card ↥(⊥ : Subgroup G) = 3 :=
+      Eq.subst (motive := fun (K : Subgroup G) => Nat.card ↥K = 3) hb hcardH
+    exact absurd ((Subgroup.card_bot (G := G)).symm.trans h1)
+      (Nat.ne_of_lt (Nat.lt_add_of_pos_right (k := 2) (Nat.succ_pos 1)))
+  · have h1 : Nat.card ↥(⊤ : Subgroup G) = 3 :=
+      Eq.subst (motive := fun (K : Subgroup G) => Nat.card ↥K = 3) ht hcardH
+    have h2 : Nat.card ↥(⊤ : Subgroup G) = 6 := (Subgroup.card_top (G := G)).trans h
+    exact absurd (h1.symm.trans h2)
+      (Nat.ne_of_lt (Nat.lt_add_of_pos_right (k := 3) (Nat.succ_pos 2)))
+
+-- Reference: as above; the `PSL(2,2)` exception of sector C.
+/-- **`PSL(2, F_2)` is not simple** (proved: order 6). -/
+theorem not_isSimpleGroup_PSL_2_2 [Fact (Nat.Prime 2)] [NeZero 2] :
+    ¬ IsSimpleGroup (PSL(2, ZMod 2)) :=
+  not_isSimpleGroup_of_card_eq_six card_PSL_2_2
 
 -- Reference: [Wilson] ch. 5 (Iwasawa's criterion applied to `SL(n,q)` acting on
 -- projective space); mathlib pin v4.35.0-rc3,
