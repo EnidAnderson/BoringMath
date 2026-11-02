@@ -191,6 +191,12 @@ referee ↔ motivic Galois (T2 bet). Each row proved or bet-labeled.
   - **#280d** full census of composite orders `< 60` by per-order Sylow tables
     (12, 18, 20, 24, 28, 30, 36, 40, 42, 44, 45, 48, 50, 52, 54, 56, 58);
     general tool: Burnside `p^a q^b` (**#280e**, not in mathlib at the pin).
+    LANDED so far: all prime powers `p^a`, `a ≥ 2` (pin's `IsPGroup.isSimpleGroup_iff_card_eq`,
+    via `not_isSimpleGroup_of_isPGroup_of_card_ne`), order 18 (`n_3 ∣ 2 < 3` ⇒ `n_3 = 1`;
+    `not_isSimpleGroup_of_card_eq_eighteen`), and the shared Sylow-counting helper
+    `card_sylow_eq_one_of_card_dvd_of_lt` (SmallOrders.lean); order 12 in OrderTwelve.lean;
+    #280a/#280f cover `p*q` and `m*q` (`1 < m < q`). Remaining: 24, 30, 36, 45, 48, 50, 54
+    (two-prime-factor orders; need element counting or Burnside #280e).
   - **#280f** generalization of #280a: `Nat.card G = m * q` with `q` prime and
     `1 < m < q` forces the Sylow `q`-subgroup to be normal (`n_q ∣ m < q`,
     `n_q ≡ 1 [MOD q]` ⇒ `n_q = 1`) — covers 18, 20, 28, 44, 45, … in one lemma.
@@ -202,8 +208,9 @@ referee ↔ motivic Galois (T2 bet). Each row proved or bet-labeled.
   `not_isSimpleGroup_PSL_2_3` via #280c.
 - **#282 CFSG.C.1b** the order-168 family — LANDED in `Classification.lean`:
   `card_SL_3_2 = 168`, `card_center_SL_3_2 = 1`, `card_PSL_3_2 = 168`; remaining:
-  `PSL(3,2)` simple (Sylow counting on 168: `n_7 = 8`, action on 8 Sylow
-  7-subgroups embeds into `S_8`, or Iwasawa as in #230).
+  `PSL(3,2)` simple — LANDED: `PSL_3_2_isSimpleGroup` (PSLSimple.lean), directly
+  from the rank ≥ 3 Iwasawa theorem (`PSL_isSimpleGroup_zmod_of_three_le` at `n = 3`),
+  with `card_PSL_3_2 = 168` in Classification.lean.
 - **#283** (= #235, detailed) `Nat.card (rootsOfUnity n F_q) = gcd n (q - 1)`
   over finite fields (`F_qˣ` cyclic of order `q-1`) → the full order formula
   `|PSL(n,q)| = (∏_{i<n} (q^n - q^i)) / ((q-1) * gcd n (q-1))`.

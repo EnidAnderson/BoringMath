@@ -103,6 +103,92 @@ theorem not_isSimpleGroup_of_card_eq_prime_mul_prime {G : Type*} [Group G] [Fini
     exact absurd (Nat.mul_right_cancel hq.pos h3) hp.ne_one
 
 /-! ## Order `p ^ 2` — #280b -/
+/-! ## Sylow counting helper — #280d tool -/
+
+-- Reference: mathlib pin v4.35.0-rc3, `card_sylow_modEq_one`, `Nat.modEq_iff_dvd'`,
+-- `Nat.eq_zero_of_dvd_of_lt`; [Dummit–Foote], Ch. 4, Sec. 6.
+/-- If `n_q ∣ m < q` (with `q` prime), then `n_q ≡ 1 [MOD q]` forces `n_q = 1`. -/
+theorem card_sylow_eq_one_of_card_dvd_of_lt {G : Type*} [Group G] [Finite G]
+    {q m : ℕ} [Fact q.Prime] (hm : 0 < m) (hmq : m < q)
+    (hn1 : Nat.card (Sylow q G) ∣ m) : Nat.card (Sylow q G) = 1 := by
+  have hne : Nonempty (Sylow q G) := Sylow.nonempty
+  have hpos : 0 < Nat.card (Sylow q G) := Nat.card_pos
+  have hle : Nat.card (Sylow q G) ≤ m := Nat.le_of_dvd hm hn1
+  have hmod : Nat.card (Sylow q G) ≡ 1 [MOD q] := card_sylow_modEq_one q G
+  have hdvd : q ∣ Nat.card (Sylow q G) - 1 :=
+    (Nat.modEq_iff_dvd' hpos).mp hmod.symm
+  have hlt : Nat.card (Sylow q G) - 1 < q :=
+    (Nat.sub_le_sub_right hle 1).trans_lt
+      (Nat.lt_of_le_of_lt (Nat.sub_le m 1) hmq)
+  exact Nat.le_antisymm
+    (Nat.sub_eq_zero_iff_le.mp (Nat.eq_zero_of_dvd_of_lt hdvd hlt)) hpos
+
+/-! ## Prime-power orders — #280d (p-group case) -/
+
+-- Reference: mathlib pin v4.35.0-rc3, `IsPGroup.isSimpleGroup_iff_card_eq`
+-- (a finite p-group is simple iff its order is `p`; its center is nontrivial).
+/-- **A finite p-group of order `≠ p` is not simple** (consumed at the pin:
+the center is a nontrivial normal subgroup). Covers orders `p^a`, `a ≥ 2`. -/
+theorem not_isSimpleGroup_of_isPGroup_of_card_ne {G : Type*} [Group G] [Finite G]
+    {p : ℕ} [Fact p.Prime] (hG : IsPGroup p G) (h : Nat.card G ≠ p) :
+    ¬ IsSimpleGroup G :=
+  fun hs => h (hG.isSimpleGroup_iff_card_eq.mp hs)
+
+/-! ## Order 18 — #280d (`2 * 3^2`) -/
+
+-- Reference: [Dummit–Foote], Ch. 4, Sec. 6 (Sylow III for `|G| = 18`):
+-- `n_3 ∣ 2` and `n_3 ≡ 1 [MOD 3]` force `n_3 = 1`; the Sylow 3-subgroup (order 9)
+-- is normal, proper and nontrivial. mathlib pin v4.35.0-rc3: `Sylow.card_eq_multiplicity`,
+-- `Sylow.card_dvd_index`, `Nat.factorization_mul`, `Nat.factorization_pow_self`.
+/-- **A group of order 18 is not simple** (proved). -/
+theorem not_isSimpleGroup_of_card_eq_eighteen {G : Type*} [Group G] [Finite G]
+    (hcard : Nat.card G = 18) : ¬ IsSimpleGroup G := by
+  intro hsimple
+  have : Fact (Nat.Prime 3) := ⟨Nat.prime_three⟩
+  obtain ⟨Q⟩ := Sylow.nonempty (p := 3) (G := G)
+  -- the multiplicity of `3` in `18 = 2 * 9 = 2 * 3^2` is 2
+  have h2f : Nat.factorization 2 3 = 0 :=
+    Nat.factorization_eq_zero_of_not_dvd (fun hd =>
+      absurd (Nat.le_of_dvd Nat.two_pos hd)
+        (Nat.not_le_of_gt (Nat.lt_succ_of_le (Nat.le_refl 2))))
+  have h9f : Nat.factorization 9 3 = 2 :=
+    Eq.subst (motive := fun n => Nat.factorization n 3 = 2) (rfl : (3 : ℕ) ^ 2 = 9)
+      (Nat.factorization_pow_self Nat.prime_three)
+  have hmul : Nat.factorization (2 * 9) = Nat.factorization 2 + Nat.factorization 9 :=
+    Nat.factorization_mul (Nat.succ_ne_zero 1) (Nat.succ_ne_zero 8)
+  have hf : Nat.factorization 18 3 = 2 := by
+    refine Eq.subst (motive := fun n => Nat.factorization n 3 = 2) (rfl : (18 : ℕ) = 2 * 9) ?_
+    exact (congrArg (fun f => f 3) hmul).trans
+      ((Finsupp.add_apply (Nat.factorization 2) (Nat.factorization 9) 3).trans
+        (Eq.subst (motive := fun n => n + Nat.factorization 9 3 = 2) h2f.symm
+          ((Nat.zero_add (Nat.factorization 9 3)).trans h9f)))
+  have hcardQ : Nat.card ↥(Q : Subgroup G) = 9 :=
+    (Eq.subst (motive := fun n => Nat.card ↥(Q : Subgroup G) = 3 ^ n)
+        (Eq.subst (motive := fun n => Nat.factorization n 3 = 2) hcard.symm hf)
+        (Sylow.card_eq_multiplicity Q)).trans rfl
+  -- hence the index of `Q` is `2`
+  have hindex : (Q : Subgroup G).index = 2 :=
+    Nat.mul_right_cancel (Nat.succ_pos 8)
+      ((congrArg (fun c => (Q : Subgroup G).index * c) hcardQ).symm.trans
+        ((Subgroup.index_mul_card (Q : Subgroup G)).trans hcard))
+  -- `n_3 ∣ 2 < 3` and `n_3 ≡ 1 [MOD 3]` force `n_3 = 1`
+  have hn1 : Nat.card (Sylow 3 G) ∣ 2 :=
+    Eq.subst (motive := fun n => Nat.card (Sylow 3 G) ∣ n) hindex (Sylow.card_dvd_index Q)
+  have hn : Nat.card (Sylow 3 G) = 1 :=
+    card_sylow_eq_one_of_card_dvd_of_lt Nat.two_pos
+      (Nat.lt_succ_of_le (Nat.le_refl 2)) hn1
+  have hsub : Subsingleton (Sylow 3 G) := (Nat.card_eq_one_iff_unique.mp hn).1
+  -- the unique Sylow 3-subgroup is normal, of order 9: neither `⊥` nor `⊤`
+  rcases @IsSimpleGroup.eq_bot_or_eq_top_of_normal G _ hsimple (Q : Subgroup G)
+      (@Sylow.normal_of_subsingleton G _ 3 hsub Q) with hb | ht
+  · exact absurd ((Subgroup.card_bot (G := G)).symm.trans
+        (Eq.subst (motive := fun H : Subgroup G => Nat.card ↥H = 9) hb hcardQ))
+      (Nat.ne_of_lt (Nat.lt_succ_of_le (Nat.le_add_right 1 7)))
+  · have h1 : Nat.card ↥(⊤ : Subgroup G) = 9 :=
+      Eq.subst (motive := fun H : Subgroup G => Nat.card ↥H = 9) ht hcardQ
+    have h2 : Nat.card ↥(⊤ : Subgroup G) = 18 := (Subgroup.card_top (G := G)).trans hcard
+    exact absurd (h2.symm.trans h1) (Nat.ne_of_lt (Nat.lt_succ_of_le (Nat.le_add_right 9 8))).symm
+
 /-! ## Order `m * q` with `q` prime and `1 < m < q` — #280f -/
 
 -- Reference: [Dummit–Foote], Ch. 4, Sec. 6 (Sylow III, generalized: `n_q ∣ m` and

@@ -79,4 +79,12 @@ theorem PSL_isSimpleGroup_zmod_of_three_le {n p : ℕ} [Fact p.Prime] (hn : 3 �
     IsSimpleGroup (PSL(n, ZMod p)) :=
   PSL_isSimpleGroup_rank_ge_three (F := ZMod p) (ι := Fin n)
     (Eq.subst (motive := fun m => 3 ≤ m) (Fintype.card_fin n).symm hn)
+
+-- Reference: `PSL_isSimpleGroup_zmod_of_three_le` (rank ≥ 3, proved) applied at
+-- `n = 3`, `p = 2`; `card_PSL_3_2 = 168` (Classification.lean). Closes the
+-- remaining item of #282. [Wilson] ch. 5.
+/-- **`PSL(3, F_2)` is simple** (it has order 168; proved via the Iwasawa
+criterion in rank ≥ 3). -/
+theorem PSL_3_2_isSimpleGroup : IsSimpleGroup (PSL(3, ZMod 2)) :=
+  PSL_isSimpleGroup_zmod_of_three_le (p := 2) (Nat.le_refl 3)
 end BoringMath
