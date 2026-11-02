@@ -157,24 +157,52 @@ theorem quasiCompact_prodMapAffineLine (f : X ⟶ Y) [QuasiCompact f] :
   MorphismProperty.IsStableUnderBaseChange.of_isPullback
     (isPullback_prodMapAffineLine f) ‹QuasiCompact f›
 
--- Reference: a section `i` with retraction `r` has `residueFieldMap` an
--- isomorphism (the comp law `residueFieldMap_comp` with `i ≫ r = 𝟙` and
--- `residueFieldMap_id` give a two-sided inverse; field homs with a left
--- inverse are isos). Stacks tag 01HX? — REVIEW(citation): pin.
+-- Reference: a section composed with its retraction is the identity, applied
+-- at a point (the pullback-lift laws `Scheme.Hom.comp_apply`,
+-- `Scheme.Hom.id_apply`).
+/-- The retraction of a section acts as the identity on points:
+`r (i x) = x`. -/
+theorem section_point_retraction (i : X ⟶ W) (r : W ⟶ X) (h : i ≫ r = 𝟙 X) (x : ↥X) :
+    r (i x) = x :=
+  Eq.trans (Scheme.Hom.comp_apply i r x).symm
+    (Eq.trans (congrFun (congrArg (fun g : X ⟶ X => (g : ↥X → ↥X)) h) x)
+      (Scheme.Hom.id_apply x))
+
+-- Reference: the residue-field split of a section: `i.map (r.map y) = y`
+-- (the comp law `residueFieldMap_comp` with `i ≫ r = 𝟙` and
+-- `residueFieldMap_id`, cast along `section_point_retraction`'s index
+-- `X.residueField (r (i x)) = X.residueField x`). Stacks tag 01HX? —
+-- REVIEW(citation): pin.
+/-- The residue-field map of a section is split-surjective: for every
+`y : κ(x)`, `i.residueFieldMap x (r.residueFieldMap (i x) (y cast to κ(r (i x)))) = y`.
+TEMPORARY SORRY: peeling plan — `Scheme.residueFieldMap_comp i r x` +
+congruence on `h` + `Scheme.residueFieldMap_id`, with the index cast
+`congrArg (β := CommRingCat.{u}) X.residueField (section_point_retraction …)` +
+`Eq.subst`. -/
+theorem residueFieldMap_section_split (i : X ⟶ W) (r : W ⟶ X) (h : i ≫ r = 𝟙 X) (x : ↥X)
+    (y : X.residueField x) :
+    i.residueFieldMap x (r.residueFieldMap (i x)
+      (cast (congrArg (β := Type u) (fun K : CommRingCat.{u} => ↥K)
+        (congrArg (β := CommRingCat.{u}) X.residueField
+          (section_point_retraction i r h x))).symm y)) = y := by
+  -- TEMPORARY SORRY: peeling plan above.
+  sorry
+
+-- Reference: a section's `residueFieldMap` is an isomorphism (field homs are
+-- injective; the split gives surjectivity; `ConcreteCategory.isIso_iff_bijective`).
+-- Stacks tag 01HX? — REVIEW(citation): pin.
 /-- The residue-field map of a section is an isomorphism. -/
 theorem isIso_residueFieldMap_section (i : X ⟶ W) (r : W ⟶ X) (h : i ≫ r = 𝟙 X) (x : ↥X) :
     IsIso (i.residueFieldMap x) := by
-  -- TEMPORARY SORRY: peeling plan (probe-confirmed route against the pin API,
-  -- 2026-11-02): (1) point retraction hxx : r (i x) = x from
-  -- `Scheme.Hom.comp_apply` + `Scheme.Hom.id_apply` + congrArg on h; (2)
-  -- hsplit : r.residueFieldMap (i x) ≫ i.residueFieldMap x = 𝟙 from
-  -- `residueFieldMap_comp i r x` + congrArg on h + `residueFieldMap_id` — mind
-  -- the heterogeneous index cast `X.residueField (r (i x)) = X.residueField x`
-  -- via `congrArg (β := Type (u+1))` + `Eq.subst`; (3) r's map is bijective
-  -- (`RingHom.injective` for the field hom + surjective from the split) hence
-  -- iso (`ConcreteCategory.isIso_iff_bijective`); (4) i's map is iso by
-  -- `isIso_of_isIso_comp_left`.
-  sorry
+  have hxx := section_point_retraction i r h x
+  have hinj : Function.Injective (i.residueFieldMap x) := RingHom.injective _
+  have hsurj : Function.Surjective (i.residueFieldMap x) := by
+    intro y
+    refine ⟨r.residueFieldMap (i x)
+      (cast (congrArg (β := Type u) (fun K : CommRingCat.{u} => ↥K)
+        (congrArg (β := CommRingCat.{u}) X.residueField hxx)).symm y),
+      residueFieldMap_section_split i r h x y⟩
+  exact (ConcreteCategory.isIso_iff_bijective _).mpr ⟨hinj, hsurj⟩
 
 -- Reference: the residue degree of `f × 𝔸¹` at the section point `i_t x`
 -- equals that of `f` at `x` (the section's residue-field iso transports the
