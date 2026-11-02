@@ -104,6 +104,15 @@ Galois groups. The pro-unipotent/Lie part of the motivic Galois group
 library tickets: #261 Tannakian/motivic Galois, #262 ℓ-adic reps + socle
 reduction, #263 Artin motives, #264 realizations, #265 MTM/MZV, #266 purity.
 
+## The lifted (motivic) library map (#267 CFSG.MOT.LIB, under #260)
+
+Motivic analogs of the CFSG tools, filed as #268–#275: abelian category of
+motives + Schur (#268), realizations as the character table (#269), local at a
+prime = ℓ-adic/p-adic Hodge fibers (#270), the Lie sector = pro-unipotent
+motivic Galois / MTM(ℤ) / MZV (#271), Artin motives + Galois images (the CFSG
+consumption point) (#272), weights/purity infrastructure (#273), sporadic
+motives (#274), ∞-categorical DM lift (#275).
+
 ## Ticket tree (TOC of the proof, in formalization order)
 
 ### Phase 0 — foundations
