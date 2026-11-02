@@ -91,14 +91,14 @@ def forget : VectorBundle X ⥤ X.Modules where
 -- Reference: finite-rank local-generator data for the free sheaf
 -- (Stacks 01C6 + the generating sections of `free`).
 -- REVIEW(citation): pin.
-/-- The free sheaf on a finite index set has finite-rank local-generator data.
-TEMPORARY SORRY: peeling plan — take the covering by the terminal object
-`⊤` (`CoversTop` of the constant family) and `free.generatingSections I`
-transported along `M.over ⊤ ≅ M`; the generating index set is `I`, finite. -/
+/-- The free sheaf on a finite index set has finite-rank local-generator data:
+the trivial-cover data `GeneratingSections.localGeneratorsData` of
+`free.generatingSections I` (whose generating index set is `I`, finite), with
+the locally-free instance of mathlib. -/
 theorem free_finiteRankData (I : Type u) [Finite I] :
-    IsLocallyFreeOfFiniteRank X (SheafOfModules.free (R := X.ringCatSheaf) I) := by
-  -- TEMPORARY SORRY: peeling plan above.
-  sorry
+    IsLocallyFreeOfFiniteRank X (SheafOfModules.free (R := X.ringCatSheaf) I) :=
+  ⟨(SheafOfModules.free.generatingSections (R := X.ringCatSheaf) I).localGeneratorsData,
+    inferInstance, fun _ => inferInstanceAs (Finite I)⟩
 
 -- Reference: Hartshorne II.5, Ex. 5.1? — the free bundle `O_X^I` for finite `I`
 -- is a vector bundle (locally free of rank `Nat.card I`).
