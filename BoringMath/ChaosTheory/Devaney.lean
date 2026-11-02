@@ -36,7 +36,7 @@ def TopologicallyTransitive (f : α → α) : Prop :=
 
 -- Reference: mathlib pin v4.35.0-rc3, `Dynamics.periodicPts`.
 /-- `f` has **dense periodic points**. -/
-def DensePeriodicPts (f : α → α) : Prop := Dense (periodicPts f)
+def DensePeriodicPts (f : α → α) : Prop := Dense (Function.periodicPts f)
 
 -- Reference: [Devaney], ch. 1.7 (sensitive dependence on initial conditions).
 /-- `f` has **sensitive dependence on initial conditions**: some `δ > 0` works
