@@ -90,17 +90,15 @@ noncomputable def projectiveLine (S : Scheme.{u}) : Scheme.{u} :=
 
 -- Reference: `Proj` of a finite-type graded ring over its degree-0 part is
 -- proper (mathlib `IsProper (Proj.toSpecZero 𝒜)`, ProjectiveSpectrum/Proper.lean,
--- Stacks 01M9?); the degree-0 part here is `ℤ` (constants) and the terminal
--- map equals `toSpecZero` by uniqueness. TEMPORARY SORRY: peeling plan —
--- mathlib has the instance `IsProper (Proj.toSpecZero 𝒜)` under
--- `[Algebra.FiniteType ↥(𝒜 0) A]` (ProjectiveSpectrum/Proper.lean:372); supply
--- `Algebra.FiniteType ↥(𝒜 0) A` via `MvPolynomial.homogeneousSubmodule_zero`
--- (`𝒜 0 = 1 = range (algebraMap)`, so `↥(𝒜 0) ≃ₐ ULift ℤ` by
--- `AlgEquiv.ofInjective (Algebra.ofId _ _)` + `AlgEquiv.ofEq`) and
--- `Algebra.FiniteType.trans` with the `MvPolynomial` finite-type instance;
--- then transport `IsProper` along the terminal iso
--- `Spec ↥(𝒜 0) ≅ specZ` (`specULiftZIsTerminal.hom_ext`,
--- `MorphismProperty.RespectsIso @IsProper`). -/
+-- Stacks 01M9?).
+-- TEMPORARY SORRY peeling plan: the instance needs `Algebra.FiniteType ↥(𝒜 0) A`
+-- (Proper.lean:372); supply it via `MvPolynomial.homogeneousSubmodule_zero`
+-- (`𝒜 0 = 1`, so `↥(𝒜 0) ≃ₐ ULift ℤ` by `AlgEquiv.ofInjective (Algebra.ofId _ _)`)
+-- and `Algebra.FiniteType.trans` with the `MvPolynomial` finite-type instance;
+-- transport `IsProper` along `Spec ↥(𝒜 0) ≅ specZ` (`specULiftZIsTerminal.hom_ext`,
+-- `MorphismProperty.RespectsIso @IsProper`).
+-- Reference: Stacks 01M9 (properness of Proj of a finite-type graded ring).
+/-- `P^{n-1}_ℤ ⟶ Spec ℤ` is proper. -/
 theorem isProper_projectiveSpaceToSpecZ (n : ℕ) :
     IsProper (projectiveSpaceToSpecZ n) := by
   -- TEMPORARY SORRY: peeling plan above.
