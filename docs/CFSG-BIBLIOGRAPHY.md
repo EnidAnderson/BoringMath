@@ -79,3 +79,15 @@ freely available coverage (all cross-referenceable in `../refs/`):
 
 Rule: we never cite the paywalled originals directly; statements from them are
 verified through the held secondary sources and flagged `REVIEW(citation)`.
+
+## Work-bot hints (mapped to tickets, PDFs now in `../refs/`)
+- **geometric Satake** → arXiv:1603.05593 (PCMI notes; affine Grassmannian,
+  geometric Satake equivalence) — the geometric lift of the Lie/representation
+  sector; feeds #218/#252/#253/#271.
+- **Neukirch–Uchida** → arXiv:1309.3046, 2009.10431, 1901.09243, 2601.01251 —
+  G_k determines the number field; the Artin/finite-quotient side of G_mot;
+  feeds #272.
+- **sporadic Artin sectors** → ATLAS (held) + moonshine via Monster reps;
+  feeds #272/#274.
+- **Hilbert monodromy** → arXiv:1610.03528 (explicit Hilbert irreducibility) —
+  generic S_n/A_n monodromy; feeds #277 (alternating row).
