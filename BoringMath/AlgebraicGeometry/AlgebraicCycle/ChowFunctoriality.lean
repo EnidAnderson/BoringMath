@@ -109,17 +109,53 @@ theorem sectionIncl_prodMap (f : X ⟶ Y) (t : specZ ⟶ affineLine)
               (specULiftZIsTerminal.from X)))))
     exact Eq.trans hL hR.symm
 
+-- Reference: the square `X × 𝔸¹ → Y × 𝔸¹` over `f` is a pullback (pasting of
+-- the two canonical pullback squares of the products; Stacks 01K4?).
+-- REVIEW(citation): pin.
+/-- The square `(pr₁, f × 𝔸¹, f, pr₁)` is a pullback square: `X × 𝔸¹` is the
+pullback of the first projection `Y × 𝔸¹ → Y` along `f`. -/
+theorem isPullback_prodMapAffineLine (f : X ⟶ Y) :
+    IsPullback (pullback.fst (specULiftZIsTerminal.from X) (specULiftZIsTerminal.from affineLine))
+      (prodMapAffineLine f) f
+      (pullback.fst (specULiftZIsTerminal.from Y) (specULiftZIsTerminal.from affineLine)) := by
+  have hfac : pullback.fst (specULiftZIsTerminal.from X)
+        (specULiftZIsTerminal.from affineLine) ≫ f =
+      prodMapAffineLine f ≫ pullback.fst (specULiftZIsTerminal.from Y)
+        (specULiftZIsTerminal.from affineLine) :=
+    (prodMapAffineLine_fst f).symm
+  have houter : IsPullback
+      (pullback.fst (specULiftZIsTerminal.from X) (specULiftZIsTerminal.from affineLine))
+      (prodMapAffineLine f ≫ pullback.snd (specULiftZIsTerminal.from Y)
+        (specULiftZIsTerminal.from affineLine))
+      (f ≫ specULiftZIsTerminal.from Y) (specULiftZIsTerminal.from affineLine) := by
+    have h1 : prodMapAffineLine f ≫ pullback.snd (specULiftZIsTerminal.from Y)
+        (specULiftZIsTerminal.from affineLine) =
+        pullback.snd (specULiftZIsTerminal.from X) (specULiftZIsTerminal.from affineLine) :=
+      prodMapAffineLine_snd f
+    have h2 : f ≫ specULiftZIsTerminal.from Y = specULiftZIsTerminal.from X :=
+      (specULiftZIsTerminal.hom_ext _ _).symm
+    refine Eq.subst (motive := fun t => IsPullback
+      (pullback.fst (specULiftZIsTerminal.from X) (specULiftZIsTerminal.from affineLine)) t
+      (f ≫ specULiftZIsTerminal.from Y) (specULiftZIsTerminal.from affineLine)) h1.symm ?_
+    refine Eq.subst (motive := fun t => IsPullback
+      (pullback.fst (specULiftZIsTerminal.from X) (specULiftZIsTerminal.from affineLine))
+      (pullback.snd (specULiftZIsTerminal.from X) (specULiftZIsTerminal.from affineLine)) t
+      (specULiftZIsTerminal.from affineLine)) h2.symm ?_
+    exact IsPullback.of_hasPullback _ _
+  exact IsPullback.of_bot houter hfac
+    (IsPullback.of_hasPullback (specULiftZIsTerminal.from Y)
+      (specULiftZIsTerminal.from affineLine))
+
 -- Reference: quasicompactness is stable under base change (Stacks tag
--- 01K4? — REVIEW(citation)); `f × 𝔸¹` is the pullback of `f`.
-/-- The product map `f × 𝔸¹` is quasicompact when `f` is. TEMPORARY SORRY:
-peeling plan — `prodMapAffineLine f` is the pullback of `f` along the first
-projection `Y × 𝔸¹ → Y` (the square is a pullback: `IsPullback.of_hasPullback`
-+ `pullbackSymmetry`), and `QuasiCompact` is stable under pullback
-(`MorphismProperty.pullback_fst` for `@QuasiCompact`). -/
+-- 01K4? — REVIEW(citation)); mathlib pins
+-- `MorphismProperty.IsStableUnderBaseChange @QuasiCompact`.
+/-- The product map `f × 𝔸¹` is quasicompact when `f` is: it is the base change
+of `f` along the first projection `Y × 𝔸¹ → Y` (`isPullback_prodMapAffineLine`),
+and `QuasiCompact` is stable under base change. -/
 theorem quasiCompact_prodMapAffineLine (f : X ⟶ Y) [QuasiCompact f] :
-    QuasiCompact (prodMapAffineLine f) := by
-  -- TEMPORARY SORRY: peeling plan above.
-  sorry
+    QuasiCompact (prodMapAffineLine f) :=
+  MorphismProperty.IsStableUnderBaseChange.of_isPullback
+    (isPullback_prodMapAffineLine f) ‹QuasiCompact f›
 
 -- Reference: Fulton ch. 1, §1.4 (pushforward commutes with pullback along
 -- sections: `f_*(i_t*γ) = i_t'*((f × 𝔸¹)_*γ)`).
