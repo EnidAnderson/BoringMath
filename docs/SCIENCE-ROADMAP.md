@@ -16,11 +16,21 @@ slogans.
 
 ## Ticket tree
 
-- **#381** `Science/Verification.lean` — SEED: the `VerificationSystem`
-  structure (theory category + current model, data, experiments, run/predict,
-  fits, falsified, revise, complexity, choose) with the laws as Prop fields;
-  trivial calibration; the MHI dictionary (`MHI → VerificationSystem`); the
-  initiality conjecture as a labeled Prop.
+- **#381** `Science/Verification.lean` — SEED (revised 2026-11 after review):
+  the `VerificationSystem` structure with **theories as computads** (a theory is
+  a presentation, not a category — categories are the special case), current
+  model as a 0-cell, data, experiments, run/predict, fits (required field, no
+  default), falsified, revise, complexity, choose; laws as Prop fields; trivial
+  calibration; the MHI dictionary; the initiality conjecture as a labeled Prop
+  over `Computad.Map`s.
+- **#391** `Foundations/Computad.lean` — SEED: the 1-dimensional `Computad`
+  (port monoid as explicit data, objects, generators with src/tgt/ports),
+  mirroring the lab's `BoringLab.Doctrine.Computad` so they can later be proved
+  equivalent; `Computad.Map`.
+- **#392** `Computad.ofCategory`: every category is a computad (categories as the
+  special case — the computad-first direction); and `Computad.presentedCategory`
+  (the free category on a computad) with the unit/counit — the two directions of
+  the computad/category correspondence.
 - **#382** real data ingestion: a `Dataset` as a computable table
   (`experiment → data` lists), ingestion = loading, with checksums/counts as
   proved invariants.

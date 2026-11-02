@@ -21,11 +21,15 @@ unlabeled `sorry`.
 
 namespace BoringMath
 
+open CategoryTheory
+
+universe u v u₁ v₁ w
+
 -- Reference: [Goldstein] *Classical Mechanics*, ch. 8–9 (symplectic structure,
 -- Hamiltonian); ticket #358.
 /-- **Classical mechanics** as an MHI specialization: the bulk carries a
 symplectic phase space and a Hamiltonian valued in the information monoid. -/
-structure ClassicalMechanics extends MotivicHolographicInfo.{u, v, u₁, v₁, w, 0, 0, 0} where
+structure ClassicalMechanics extends MotivicHolographicInfo.{u, v, u₁, v₁, w} where
   /-- The symplectic phase space, as a bulk object. -/
   phaseSpace : bulk
   /-- The Hamiltonian: energy as information content of a bulk state. -/
@@ -36,23 +40,23 @@ structure ClassicalMechanics extends MotivicHolographicInfo.{u, v, u₁, v₁, w
 /-- **Quantum mechanics** as an MHI specialization: a Hilbert object in the
 boundary, observables as its endomorphisms, measurement via the referee
 ruling (PHYS.0 P4). -/
-structure QuantumMechanics extends MotivicHolographicInfo.{u, v, u₁, v₁, w, 0, 0, 0} where
+structure QuantumMechanics extends MotivicHolographicInfo.{u, v, u₁, v₁, w} where
   /-- The Hilbert object in the boundary category. -/
   hilbert : boundary
   /-- The observable endomorphisms of the Hilbert object. -/
-  observables : hilbert ⟶ hilbert → Prop
+  observables : (hilbert ⟶ hilbert) → Prop
 
 -- Reference: [Atiyah 1988], Publ. Math. IHÉS 49 (FQFT axioms); ticket #360.
 /-- **Functorial QFT** as an MHI specialization: the bulk is the cobordism
 category and the hologram assigns to each bulk process its boundary QFT. -/
-structure FunctorialQFT extends MotivicHolographicInfo.{u, v, u₁, v₁, w, 0, 0, 0} where
+structure FunctorialQFT extends MotivicHolographicInfo.{u, v, u₁, v₁, w} where
   /-- The boundary value type assigned to the bulk unit (the vacuum). -/
-  vacuum : hologram.obj bulkUnit
+  vacuum : boundary
 
 -- Reference: [Maldacena 1997]; [Witten 1998]; ticket #361.
 /-- **Gravity/holography** as an MHI specialization: bulk and boundary are
 adjoint (the AdS/CFT dictionary), so the hologram has a right adjoint. -/
-structure HolographicGravity extends MotivicHolographicInfo.{u, v, u₁, v₁, w, 0, 0, 0} where
+structure HolographicGravity extends MotivicHolographicInfo.{u, v, u₁, v₁, w} where
   /-- The boundary-to-bulk (reconstruction) functor, right adjoint to the
   hologram (adjunction laws land with the instance). -/
   reconstruct : boundary ⥤ bulk
@@ -60,7 +64,7 @@ structure HolographicGravity extends MotivicHolographicInfo.{u, v, u₁, v₁, w
 -- Reference: [Landauer 1961]; ticket #362.
 /-- **Statistical mechanics / thermodynamics** as an MHI specialization: the
 information monoid is the thermodynamic resource ordering. -/
-structure StatisticalMechanics extends MotivicHolographicInfo.{u, v, u₁, v₁, w, 0, 0, 0} where
+structure StatisticalMechanics extends MotivicHolographicInfo.{u, v, u₁, v₁, w} where
   /-- The equilibrium state of the bulk unit, as information. -/
   equilibriumInfo : info
 
