@@ -37,12 +37,17 @@ theorem ogf_mul (a b : ℕ → ℚ) :
     ogf a * ogf b = ogf (fun n => ∑ k ∈ Finset.range (n + 1), a k * b (n - k)) := by
   apply PowerSeries.ext
   intro n
-  exact (PowerSeries.coeff_mul n (ogf a) (ogf b)).trans
-    ((congrArg (fun s => ∑ p ∈ s, a p.1 * b p.2))
-      (Finset.Nat.antidiagonal_eq_range n) |>.trans
-      (by
-        apply Finset.sum_congr rfl
-        intro k _
-        exact rfl))
+  calc PowerSeries.coeff n (ogf a * ogf b)
+      = ∑ p ∈ Finset.antidiagonal n,
+          PowerSeries.coeff p.1 (ogf a) * PowerSeries.coeff p.2 (ogf b) :=
+        PowerSeries.coeff_mul n (ogf a) (ogf b)
+    _ = ∑ p ∈ Finset.antidiagonal n, a p.1 * b p.2 :=
+        Finset.sum_congr (Eq.refl _) fun p _ =>
+          congrArg₂ (fun x y => x * y) (coeff_ogf a p.1) (coeff_ogf b p.2)
+    _ = ∑ k ∈ Finset.range (n + 1), a k * b (n - k) :=
+        Finset.Nat.sum_antidiagonal_eq_sum_range_succ (fun i j => a i * b j) n
+    _ = PowerSeries.coeff n
+          (ogf fun n => ∑ k ∈ Finset.range (n + 1), a k * b (n - k)) :=
+        (coeff_ogf (fun n => ∑ k ∈ Finset.range (n + 1), a k * b (n - k)) n).symm
 
 end BoringMath
