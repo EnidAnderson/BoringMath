@@ -185,9 +185,11 @@ and perturbation-series convergence (string theory).
   (intertwiners + 6j), black-hole entropy `S = A/4` in counting form.
 - **#368** STR open rows (lab STR.1.1 #26): continuum limit of the lattice
   action, perturbation-series convergence.
-- **#369** MI.0.2 puncture-degree model (lab #66): spin networks as zero
-  cycles of nonzero degree; the degree-trace row is already filled
-  (`gysinMove_degree_trace` via `degree_pushforward`).
+- **#369** MI.0.2 puncture-degree model (lab #66): FILLED —
+  `Physics/LQG/PunctureCycle.lean` (puncture point-cycle over Spec k,
+  degree = total spin via `degree_single` + `residueDegree_id`), bridged by
+  `gysinMove_degree_trace` (via `degree_pushforward`). Finer per-edge model
+  (degrees = area eigenvalues) is the named extension.
 - The discrete-info law is stated at full generality (zero element as
   explicit data): `DiscreteInfo` + `mhi_exists_discreteInfo` in
   `Physics/LQG/SpinNetwork.lean`.
