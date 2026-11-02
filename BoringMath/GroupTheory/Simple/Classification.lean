@@ -4,6 +4,7 @@ Released under the Hippocratic Mathematics License v1.0, as described in the fil
 Authors: Enid
 -/
 import Mathlib.Algebra.Field.ZMod
+import Mathlib.Algebra.Group.Subgroup.Lattice
 import Mathlib.GroupTheory.Subgroup.Simple
 import Mathlib.GroupTheory.Sylow
 import Mathlib.GroupTheory.IndexNormal
@@ -30,11 +31,13 @@ sectors, with the sectors filled in one at a time.
   `A_n` is simple for `n ≥ 5`.
 * **Sector C (Lie type)** — the `A`-family `PSL(n, F_q)` is built as the
   concrete mathlib object `PSL(n, R) = SL(n, R) / Z(SL(n, R))`; the cardinality
-  split is proved below; the simplicity theorem (Iwasawa criterion) is the
-  main open lemma of this sector, with a peeling plan. The remaining 15
-  families (B/C/D classical, twisted Steinberg/Suzuki/Ree, exceptional
-  `^2E_6`, `E_6`-`E_9`, `F_4`, `G_2`, `^3D_4`) join this sector as they are
-  constructed.
+  split is proved below, as are the small orders `|SL(2,2)| = 6`,
+  `|PSL(2,2)| = 6`, `|SL(2,3)| = 24`, `|Z(SL(2,3))| = 2`, `|PSL(2,3)| = 12`,
+  `|SL(3,2)| = |PSL(3,2)| = 168`, `|A_5| = 60`, `|A_6| = 360`; the simplicity
+  theorem (Iwasawa criterion) is the main open lemma of this sector, with a
+  peeling plan. The remaining 15 families (B/C/D classical, twisted
+  Steinberg/Suzuki/Ree, exceptional `^2E_6`, `E_6`-`E_9`, `F_4`, `G_2`,
+  `^3D_4`) join this sector as they are constructed.
 * **Sector D (sporadic)** — the 26 sporadic groups as data (ATLAS names and
   orders); the concrete constructions (Mathieu groups as permutation groups,
   Monster via a presentation) are the peeling plan of this sector.
@@ -185,12 +188,30 @@ theorem card_SL_2_3 [Fact (Nat.Prime 3)] [NeZero 3] :
       ((congrArg (fun P => P / (3 - 1))
         (Fin.prod_univ_two fun i : Fin 2 => (3:ℕ)^2 - (3:ℕ)^(i:ℕ))).trans rfl))
 
+-- Reference: as `card_SL_2_2`; `|SL(3,2)| = (8-1)(8-2)(8-4)/(2-1) = 168` — the
+-- order of `PSL(3,2) ≅ PSL(2,7)`, the second-smallest nonabelian simple group
+-- (ticket #282).
+/-- **Exception-free order `|SL(3, F_2)| = 168`** (proved). -/
+theorem card_SL_3_2 [Fact (Nat.Prime 2)] [NeZero 3] :
+    Nat.card (SpecialLinearGroup (Fin 3) (ZMod 2)) = 168 :=
+  (Matrix.card_SL_field (𝔽 := ZMod 2) (n := 3)).trans
+    ((congrArg (fun c => (∏ i : Fin 3, (c ^ 3 - c ^ (i : ℕ))) / (c - 1)) (ZMod.card 2)).trans
+      ((congrArg (fun P => P / (2 - 1))
+        (Fin.prod_univ_three fun i : Fin 3 => (2:ℕ)^3 - (2:ℕ)^(i:ℕ))).trans rfl))
+
 -- Reference: mathlib pin v4.35.0-rc3, `nat_card_alternatingGroup` +
 -- `Nat.card_fin`; `|A_5| = 5!/2 = 60` by literal computation (`rfl`).
 /-- **`|A_5| = 60`** (proved; the smallest nonabelian simple group, ticket #258). -/
 theorem card_alternatingGroup_fin5 : Nat.card (alternatingGroup (Fin 5)) = 60 :=
   (nat_card_alternatingGroup (α := Fin 5)).trans
     ((congrArg (fun n => n.factorial / 2) (Nat.card_fin 5)).trans rfl)
+
+-- Reference: as `card_alternatingGroup_fin5`; `|A_6| = 6!/2 = 360` (ticket #284:
+-- `A_6 ≅ PSL(2,9)` exceptional isomorphism, under #256).
+/-- **`|A_6| = 360`** (proved). -/
+theorem card_alternatingGroup_fin6 : Nat.card (alternatingGroup (Fin 6)) = 360 :=
+  (nat_card_alternatingGroup (α := Fin 6)).trans
+    ((congrArg (fun n => n.factorial / 2) (Nat.card_fin 6)).trans rfl)
 
 -- Reference: mathlib pin v4.35.0-rc3, `Matrix.SpecialLinearGroup.center_equiv_rootsOfUnity'`,
 -- `ZMod.card_units_eq_totient`, `Nat.totient_prime`: the center of `SL(2, F_2)`
@@ -257,6 +278,81 @@ theorem not_isSimpleGroup_of_card_eq_six {G : Type*} [Group G] [Finite G]
 theorem not_isSimpleGroup_PSL_2_2 [Fact (Nat.Prime 2)] [NeZero 2] :
     ¬ IsSimpleGroup (PSL(2, ZMod 2)) :=
   not_isSimpleGroup_of_card_eq_six card_PSL_2_2
+
+-- Reference: mathlib pin v4.35.0-rc3, `rootsOfUnity`/`mem_rootsOfUnity`,
+-- `pow_card_eq_one'`, `ZMod.card_units_eq_totient`, `Nat.totient_prime`:
+-- the unit group of `ZMod 3` has order `totient 3 = 2`, so every unit squares
+-- to `1` and `μ_2(ZMod 3) = (ZMod 3)ˣ`, of order 2 (ticket #281, step 1 of the
+-- `(2,3)` exception).
+/-- **The 2nd roots of unity in `ZMod 3` are all of its unit group** (proved:
+order 2). -/
+theorem card_rootsOfUnity_two_zmod3 [Fact (Nat.Prime 3)] :
+    Nat.card (rootsOfUnity 2 (ZMod 3)) = 2 := by
+  have hunits : Nat.card (ZMod 3)ˣ = 2 :=
+    (Nat.card_eq_fintype_card (α := (ZMod 3)ˣ)).trans
+      ((ZMod.card_units_eq_totient 3).trans ((Nat.totient_prime Nat.prime_three).trans rfl))
+  have htop : rootsOfUnity 2 (ZMod 3) = ⊤ := by
+    apply (Subgroup.eq_top_iff' _).mpr
+    intro u
+    exact (mem_rootsOfUnity 2 u).mpr
+      (Eq.subst (motive := fun n => u ^ n = 1) hunits (pow_card_eq_one' (x := u)))
+  exact Eq.subst (motive := fun H : Subgroup (ZMod 3)ˣ => Nat.card ↥H = 2) htop.symm
+    ((Nat.card_congr (Subgroup.topEquiv (G := (ZMod 3)ˣ)).toEquiv).trans hunits)
+
+-- Reference: mathlib pin v4.35.0-rc3, `Matrix.SpecialLinearGroup.center_equiv_rootsOfUnity'`,
+-- `Fintype.card_fin`; as `card_center_SL_2_2` with `𝔽 = ZMod 3` and
+-- `card_rootsOfUnity_two_zmod3` (ticket #281, step 2 of the `(2,3)` exception).
+/-- **The center of `SL(2, F_3)` has order 2** (proved). -/
+theorem card_center_SL_2_3 [Fact (Nat.Prime 3)] [NeZero 2] :
+    Nat.card (Subgroup.center (SpecialLinearGroup (Fin 2) (ZMod 3))) = 2 := by
+  have h1 : Nat.card (Subgroup.center (SpecialLinearGroup (Fin 2) (ZMod 3))) =
+      Nat.card (rootsOfUnity (Fintype.card (Fin 2)) (ZMod 3)) :=
+    Nat.card_congr (Matrix.SpecialLinearGroup.center_equiv_rootsOfUnity' (0 : Fin 2)).toEquiv
+  have h2 : Nat.card (rootsOfUnity (Fintype.card (Fin 2)) (ZMod 3)) =
+      Nat.card (rootsOfUnity 2 (ZMod 3)) :=
+    congrArg (fun n => Nat.card (rootsOfUnity n (ZMod 3))) (Fintype.card_fin 2)
+  exact h1.trans (h2.trans card_rootsOfUnity_two_zmod3)
+
+-- Reference: `card_PSL_mul_card_center` + `card_center_SL_2_3` + `card_SL_2_3`:
+-- `|PSL(2,3)| * 2 = 24`, hence `|PSL(2,3)| = 12` (ticket #281, step 3 of the
+-- `(2,3)` exception; `PSL(2,3) ≅ A_4`).
+/-- **`|PSL(2, F_3)| = 12`** (proved). -/
+theorem card_PSL_2_3 [Fact (Nat.Prime 3)] [NeZero 2] :
+    Nat.card (PSL(2, ZMod 3)) = 12 :=
+  Nat.mul_right_cancel (Nat.succ_pos 1)
+    (((congrArg (fun c => Nat.card (PSL(2, ZMod 3)) * c) card_center_SL_2_3).symm.trans
+      ((card_PSL_mul_card_center 2 (ZMod 3)).trans card_SL_2_3)).trans
+      (rfl : (24:ℕ) = 12 * 2))
+
+-- Reference: as `card_center_SL_2_2` with `n = 3`, `𝔽 = ZMod 2`:
+-- `μ_3(F_2) = {1}` since `F_2ˣ` is trivial (ticket #282).
+/-- **The center of `SL(3, F_2)` is trivial** (proved). -/
+theorem card_center_SL_3_2 [Fact (Nat.Prime 2)] [NeZero 3] :
+    Nat.card (Subgroup.center (SpecialLinearGroup (Fin 3) (ZMod 2))) = 1 := by
+  have h1 : Nat.card (Subgroup.center (SpecialLinearGroup (Fin 3) (ZMod 2))) =
+      Nat.card (rootsOfUnity (Fintype.card (Fin 3)) (ZMod 2)) :=
+    Nat.card_congr (Matrix.SpecialLinearGroup.center_equiv_rootsOfUnity' (0 : Fin 3)).toEquiv
+  have h2 : Nat.card (rootsOfUnity (Fintype.card (Fin 3)) (ZMod 2)) =
+      Nat.card (rootsOfUnity 3 (ZMod 2)) :=
+    congrArg (fun n => Nat.card (rootsOfUnity n (ZMod 2))) (Fintype.card_fin 3)
+  have hle : Nat.card (rootsOfUnity 3 (ZMod 2)) ≤ Nat.card (ZMod 2)ˣ :=
+    Nat.card_le_card_of_injective (rootsOfUnity 3 (ZMod 2)).subtype fun a b h => Subtype.ext h
+  have hunits : Nat.card (ZMod 2)ˣ = 1 :=
+    (Nat.card_eq_fintype_card (α := (ZMod 2)ˣ)).trans
+      ((ZMod.card_units_eq_totient 2).trans ((Nat.totient_prime Nat.prime_two).trans rfl))
+  have hpos : 1 ≤ Nat.card (rootsOfUnity 3 (ZMod 2)) :=
+    Nat.succ_le_of_lt
+      (@Nat.card_pos (rootsOfUnity 3 (ZMod 2)) ⟨⟨(1 : (ZMod 2)ˣ), Subgroup.one_mem _⟩⟩ _)
+  exact h1.trans (h2.trans (Nat.le_antisymm (hle.trans hunits.le) hpos))
+
+-- Reference: `card_PSL_mul_card_center` + `card_center_SL_3_2` + `card_SL_3_2`
+-- (ticket #282: `|PSL(3,2)| = 168`, the second-smallest nonabelian simple group).
+/-- **`|PSL(3, F_2)| = 168`** (proved; `PSL(3,2) ≅ PSL(2,7)`). -/
+theorem card_PSL_3_2 [Fact (Nat.Prime 2)] [NeZero 3] :
+    Nat.card (PSL(3, ZMod 2)) = 168 :=
+  (Nat.mul_one (Nat.card (PSL(3, ZMod 2)))).symm.trans
+    ((congrArg (fun c => Nat.card (PSL(3, ZMod 2)) * c) card_center_SL_3_2).symm.trans
+      ((card_PSL_mul_card_center 3 (ZMod 2)).trans card_SL_3_2))
 
 -- Reference: [Wilson] ch. 5 (Iwasawa's criterion applied to `SL(n,q)` acting on
 -- projective space); mathlib pin v4.35.0-rc3,

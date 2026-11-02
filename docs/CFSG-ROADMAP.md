@@ -157,6 +157,48 @@ referee ↔ motivic Galois (T2 bet). Each row proved or bet-labeled.
   PSL cardinality proved), `BoringMath/GroupTheory/Simple/LieAlgebraBridge.lean`
   (lieAlgA/B/C/D; `dim sl(n,K) = n²−1` proved).
 
+### Phase 2 quick wins — small-order non-simplicity + PSL small orders (#280–#284)
+- **#280 CFSG.SMALL** small-order census: no finite simple group of composite
+  order `< 60` (smallest nonabelian simple is `A_5`, order 60). Sub-tickets:
+  - **#280a** order `p * q`, primes `p < q` — Sylow `q` unique
+    (`card_sylow_modEq_one` + `card_dvd_index`) — LANDED:
+    `not_isSimpleGroup_of_card_eq_prime_mul_prime` in
+    `BoringMath/GroupTheory/Simple/SmallOrders.lean`.
+  - **#280b** order `p ^ 2` — `IsPGroup.isMulCommutative_of_card_eq_prime_sq` +
+    Cauchy — LANDED: `not_isSimpleGroup_of_card_eq_prime_sq` (same file).
+  - **#280c** order 12 (the `PSL(2,3) ≅ A_4` level) — sorry with peeling plan in
+    `SmallOrders.lean`: `n_3 ∈ {1,4}`; if 4, conjugation on `Sylow 3 G` gives
+    `φ : G →* Perm (Sylow 3 G)`, transitive image with `4 ∣ |im| ∣ 12`, so
+    `|im| ∈ {4,12}`; `|im| = 4` → `ker φ` of order 3; `|im| = 12` → `G` embeds
+    as an order-12 subgroup of `S_4`, i.e. `A_4` (census:
+    `BoringMath/Symmetry/S4Census.lean`), pull back `kleinFour`.
+  - **#280d** full census of composite orders `< 60` by per-order Sylow tables
+    (12, 18, 20, 24, 28, 30, 36, 40, 42, 44, 45, 48, 50, 52, 54, 56, 58);
+    general tool: Burnside `p^a q^b` (**#280e**, not in mathlib at the pin).
+  - **#280f** generalization of #280a: `Nat.card G = m * q` with `q` prime and
+    `1 < m < q` forces the Sylow `q`-subgroup to be normal (`n_q ∣ m < q`,
+    `n_q ≡ 1 [MOD q]` ⇒ `n_q = 1`) — covers 18, 20, 28, 44, 45, … in one lemma.
+- **#281 CFSG.C.1a** close the `(2,3)` exception at group level — LANDED so far
+  in `Classification.lean`: `card_rootsOfUnity_two_zmod3 = 2`,
+  `card_center_SL_2_3 = 2`, `card_PSL_2_3 = 12`; remaining:
+  `not_isSimpleGroup_PSL_2_3` via #280c.
+- **#282 CFSG.C.1b** the order-168 family — LANDED in `Classification.lean`:
+  `card_SL_3_2 = 168`, `card_center_SL_3_2 = 1`, `card_PSL_3_2 = 168`; remaining:
+  `PSL(3,2)` simple (Sylow counting on 168: `n_7 = 8`, action on 8 Sylow
+  7-subgroups embeds into `S_8`, or Iwasawa as in #230).
+- **#283** (= #235, detailed) `Nat.card (rootsOfUnity n F_q) = gcd n (q - 1)`
+  over finite fields (`F_qˣ` cyclic of order `q-1`) → the full order formula
+  `|PSL(n,q)| = (∏_{i<n} (q^n - q^i)) / ((q-1) * gcd n (q-1))`.
+  Module `BoringMath/GroupTheory/Simple/PSLCard.lean` pins the statement
+  (`card_rootsOfUnity_zmod_prime`, TEMPORARY SORRY with peeling plan:
+  `rootsOfUnityEquivNthRoots` → Bezout+Fermat in `ZMod p` →
+  `nthRoots d 1` has card `d` for `d ∣ p-1` via `roots_X_pow_card_sub_X`;
+  or the cyclic-torsion route via `IsCyclic (ZMod p)ˣ`) and proves the
+  assembled formula `card_PSL_zmod_prime_mul_gcd` from it.
+- **#284 CFSG.C.1c** `|PSL(2,4)| = |PSL(2,5)| = 60` (needs #283);
+  `card_alternatingGroup_fin6 = 360` LANDED; exceptional isomorphisms
+  `A_5 ≅ PSL(2,4) ≅ PSL(2,5)`, `A_6 ≅ PSL(2,9)`, `A_8 ≅ PSL(4,2)` under #256.
+
 ### Phase 3 — sporadic (ATLAS)
 - **#222 PREP** ATLAS front matter + sporadic pages.
 - **#216 CFSG.D** sector tracking; **#232 CFSG.D.1** Mathieu M11–M24 as permutation groups;
