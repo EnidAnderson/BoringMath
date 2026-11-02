@@ -6,6 +6,8 @@ Authors: Enid
 import Mathlib.LinearAlgebra.Projectivization.PSL.PSL2
 import Mathlib.Algebra.Field.ZMod
 import Mathlib.FieldTheory.Finite.GaloisField
+import BoringMath.GroupTheory.Simple.Classification
+import BoringMath.GroupTheory.Simple.OrderTwelve
 
 /-!
 # Simplicity of `PSL(2, F_q)` — the rank-2 case of sector C (#230)
@@ -52,5 +54,12 @@ theorem PSL2_isSimpleGroup_galoisField {p k : ℕ} [Fact p.Prime] [NeZero k]
   PSL2_isSimpleGroup
     (Eq.subst (motive := fun n => 4 ≤ n)
       (GaloisField.card (p := p) (n := k) (NeZero.ne k)).symm h)
+
+-- Reference: `card_PSL_2_3` (Classification.lean) + `not_isSimpleGroup_of_card_eq_twelve`
+-- (OrderTwelve.lean); [Wilson] ch. 5 (`PSL(2,3) ≅ A_4`, not simple).
+/-- **`PSL(2, F_3)` is not simple** (proved: it has order 12). -/
+theorem not_isSimpleGroup_PSL_2_3 [Fact (Nat.Prime 3)] [NeZero 2] :
+    ¬ IsSimpleGroup (PSL(2, ZMod 3)) :=
+  not_isSimpleGroup_of_card_eq_twelve card_PSL_2_3
 
 end BoringMath
