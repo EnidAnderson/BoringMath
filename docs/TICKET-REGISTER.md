@@ -46,7 +46,7 @@ C in progress, D data landed.
 | #321–#326 | AlgebraicGroups | ALGEBRAICGROUPS-ROADMAP | — | all open |
 | #327–#355 | Cohomology/Forcing/ProofTheory/InfoTheory/CGT/Transcendence/Asymptotics/Optimization | LIBRARY-MAP | — | all open (proposed) |
 | #462–#467 | CombinatorialGames missing main theorems (2026-11-02 audit of Impartial/Sum/Partizan): #462 attainment lemma `exists_move_grundy_eq_of_lt`; #463 close the `grundy_sum` xor-theorem sorry (Sum.lean:84); #464 outcome-for-sums `outcome_sum_eq_p_iff`; #465 multi-heap Nim / Bouton P-iff-xor-0; #466 partizan Conway order + partial-order laws; #467 partizan outcome + determinacy. GitHub issues #372–#377 (sub-issues of #331/#332) | LIBRARY-MAP (CGT row) | Mex/Impartial/Outcome landed; Sum.lean holds the sanctioned `grundy_sum` sorry | open |
-| #356–#380 | Physics | PHYSICS-ROADMAP | #356 MHI, #357 Specializations, #358 ClassicalMechanics+Liouville (proved), #371 zeta seed | #359–#380 open |
+| #356–#380 | Physics | PHYSICS-ROADMAP | #356 MHI, #357 Specializations, #358 ClassicalMechanics+Liouville (proved), #371 zeta seed, #352 LQG items 2–15 (proved), #366 STR lane (proved) | #359–#365, #367–#380 open |
 | #381–#392 | Science + Foundations | SCIENCE-ROADMAP | #381 Verification (proved), #391 Computad (proved) | #382–#390, #392 open |
 | #393–#400 | cross-program connections | CONNECTIONS.md | — | guidance tickets open |
 | #401–#408 | LinearAlgebra | LINEARALGEBRA-ROADMAP | #401 Jordan seed, #402 RationalCanonical seed | #403–#408 open |
