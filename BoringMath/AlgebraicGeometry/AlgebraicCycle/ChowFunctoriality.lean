@@ -5,6 +5,7 @@ Authors: Enid
 -/
 import BoringMath.AlgebraicGeometry.AlgebraicCycle.ChowGroup
 import BoringMath.AlgebraicGeometry.AlgebraicCycle.Pushforward
+import BoringMath.AlgebraicGeometry.ResidueTheory.Basic
 
 /-!
 # Functoriality of Chow groups: proper pushforward on `A_*(-)` (I.2, part 1)
@@ -157,79 +158,81 @@ theorem quasiCompact_prodMapAffineLine (f : X ⟶ Y) [QuasiCompact f] :
   MorphismProperty.IsStableUnderBaseChange.of_isPullback
     (isPullback_prodMapAffineLine f) ‹QuasiCompact f›
 
--- Reference: a section composed with its retraction is the identity, applied
--- at a point (the pullback-lift laws `Scheme.Hom.comp_apply`,
--- `Scheme.Hom.id_apply`).
-/-- The retraction of a section acts as the identity on points:
-`r (i x) = x`. -/
-theorem section_point_retraction (i : X ⟶ W) (r : W ⟶ X) (h : i ≫ r = 𝟙 X) (x : ↥X) :
-    r (i x) = x :=
-  Eq.trans (Scheme.Hom.comp_apply i r x).symm
-    (Eq.trans (congrFun (congrArg (fun g : X ⟶ X => (g : ↥X → ↥X)) h) x)
-      (Scheme.Hom.id_apply x))
-
--- Reference: the residue-field split of a section: `i.map (r.map y) = y`
--- (the comp law `residueFieldMap_comp` with `i ≫ r = 𝟙` and
--- `residueFieldMap_id`, cast along `section_point_retraction`'s index
--- `X.residueField (r (i x)) = X.residueField x`). Stacks tag 01HX? —
--- REVIEW(citation): pin.
-/-- The residue-field map of a section is split-surjective: for every
-`y : κ(x)`, `i.residueFieldMap x (r.residueFieldMap (i x) (y cast to κ(r (i x)))) = y`.
-TEMPORARY SORRY: peeling plan — `Scheme.residueFieldMap_comp i r x` +
-congruence on `h` + `Scheme.residueFieldMap_id`, with the index cast
-`congrArg (β := CommRingCat.{u}) X.residueField (section_point_retraction …)` +
-`Eq.subst`. -/
-theorem residueFieldMap_section_split (i : X ⟶ W) (r : W ⟶ X) (h : i ≫ r = 𝟙 X) (x : ↥X)
-    (y : X.residueField x) :
-    i.residueFieldMap x (r.residueFieldMap (i x)
-      (cast (congrArg (β := Type u) (fun K : CommRingCat.{u} => ↥K)
-        (congrArg (β := CommRingCat.{u}) X.residueField
-          (section_point_retraction i r h x))).symm y)) = y := by
-  -- TEMPORARY SORRY: peeling plan above.
-  sorry
-
--- Reference: a section's `residueFieldMap` is an isomorphism (field homs are
--- injective; the split gives surjectivity; `ConcreteCategory.isIso_iff_bijective`).
--- Stacks tag 01HX? — REVIEW(citation): pin.
-/-- The residue-field map of a section is an isomorphism. -/
-theorem isIso_residueFieldMap_section (i : X ⟶ W) (r : W ⟶ X) (h : i ≫ r = 𝟙 X) (x : ↥X) :
-    IsIso (i.residueFieldMap x) := by
-  have hxx := section_point_retraction i r h x
-  have hinj : Function.Injective (i.residueFieldMap x) := RingHom.injective _
-  have hsurj : Function.Surjective (i.residueFieldMap x) := by
-    intro y
-    refine ⟨r.residueFieldMap (i x)
-      (cast (congrArg (β := Type u) (fun K : CommRingCat.{u} => ↥K)
-        (congrArg (β := CommRingCat.{u}) X.residueField hxx)).symm y),
-      residueFieldMap_section_split i r h x y⟩
-  exact (ConcreteCategory.isIso_iff_bijective _).mpr ⟨hinj, hsurj⟩
-
 -- Reference: the residue degree of `f × 𝔸¹` at the section point `i_t x`
--- equals that of `f` at `x` (the section's residue-field iso transports the
--- extension; `Module.finrank` is invariant under algebra isos).
+-- equals that of `f` at `x` (Fulton ch. 1, §1.4 base change along the section;
+-- Stacks tag 01HX). The section square `i_t ≫ (f × 𝔸¹) = f ≫ i_t'`
+-- (`sectionIncl_prodMap`) gives a commutative square of residue-field maps
+-- (`Scheme.residueFieldMap_comp`, `Scheme.Hom.residueFieldMap_congr`); the
+-- section residue-field maps are isos (W.1 `isIso_residueFieldMap_section`),
+-- so `Algebra.finrank_eq_of_equiv_equiv` transports the finrank.
+set_option linter.style.haveILetI false in
 /-- Residue-degree base change along a section: `(f × 𝔸¹).residueDegree (i_t x)
-= f.residueDegree x`. TEMPORARY SORRY: peeling plan — `residueDegree` is
-`Module.finrank` of the residue-field extension; the section isos
-(`isIso_residueFieldMap_section` for `i_t` and `i_t'`) transport the extension
-κ(f x) → κ(x) to κ(i_t' (f x)) → κ(i_t x); finrank invariance under algebra
-isos (`Module.finrank_eq_of_algEquiv`-style). -/
+= f.residueDegree x`. -/
 theorem residueDegree_prodMap_sectionIncl (f : X ⟶ Y) (t : specZ ⟶ affineLine)
     (ht : t ≫ affineLineProj = 𝟙 specZ) (x : ↥X) :
     (prodMapAffineLine f).residueDegree
       ((sectionIncl X t ht).base x) = f.residueDegree x := by
-  -- TEMPORARY SORRY: peeling plan above.
-  sorry
+  letI : Algebra ((prodAffineLine Y).residueField
+      ((prodMapAffineLine f) ((sectionIncl X t ht).base x)))
+      ((prodAffineLine X).residueField ((sectionIncl X t ht).base x)) :=
+    ((prodMapAffineLine f).residueFieldMap ((sectionIncl X t ht).base x)).hom.toAlgebra
+  letI : Algebra (Y.residueField (f x)) (X.residueField x) :=
+    (f.residueFieldMap x).hom.toAlgebra
+  change Module.finrank ((prodAffineLine Y).residueField
+      ((prodMapAffineLine f) ((sectionIncl X t ht).base x)))
+      ((prodAffineLine X).residueField ((sectionIncl X t ht).base x)) =
+    Module.finrank (Y.residueField (f x)) (X.residueField x)
+  -- the section square on points and residue-field maps
+  have hsq := sectionIncl_prodMap f t ht
+  have hp : ((sectionIncl X t ht) ≫ prodMapAffineLine f) x = (f ≫ sectionIncl Y t ht) x :=
+    congrFun (congrArg (fun q : X ⟶ prodAffineLine Y => (q : ↥X → ↥(prodAffineLine Y))) hsq) x
+  have hcomp1 := Scheme.residueFieldMap_comp (sectionIncl X t ht) (prodMapAffineLine f) x
+  have hcomp2 := Scheme.residueFieldMap_comp f (sectionIncl Y t ht) x
+  have hcong := Scheme.Hom.residueFieldMap_congr hsq x
+  have hsqHom : (prodMapAffineLine f).residueFieldMap ((sectionIncl X t ht).base x) ≫
+        (sectionIncl X t ht).residueFieldMap x =
+      ((prodAffineLine Y).residueFieldCongr hp).hom ≫
+        ((sectionIncl Y t ht).residueFieldMap (f x) ≫ f.residueFieldMap x) :=
+    hcomp1.symm.trans (hcong.trans
+      (congrArg (((prodAffineLine Y).residueFieldCongr hp).hom ≫ ·) hcomp2))
+  -- the section residue-field maps are isomorphisms (W.1), hence ring equivs
+  have iB : IsIso ((sectionIncl X t ht).residueFieldMap x) :=
+    isIso_residueFieldMap_section _ _ (sectionIncl_fst X t ht) x
+  have iC : IsIso ((sectionIncl Y t ht).residueFieldMap (f x)) :=
+    isIso_residueFieldMap_section _ _ (sectionIncl_fst Y t ht) (f x)
+  have bijB := (ConcreteCategory.isIso_iff_bijective _).mp iB
+  have bijC := (ConcreteCategory.isIso_iff_bijective _).mp iC
+  have bijE : Function.Bijective (((prodAffineLine Y).residueFieldCongr hp).hom.hom) :=
+    (ConcreteCategory.isIso_iff_bijective _).mp (CategoryTheory.Iso.isIso_hom _)
+  -- the square of ring isomorphisms between the two residue-field extensions
+  refine Algebra.finrank_eq_of_equiv_equiv
+    ((RingEquiv.ofBijective ((prodAffineLine Y).residueFieldCongr hp).hom.hom bijE).trans
+      (RingEquiv.ofBijective ((sectionIncl Y t ht).residueFieldMap (f x)).hom bijC))
+    (RingEquiv.ofBijective ((sectionIncl X t ht).residueFieldMap x).hom bijB) (RingHom.ext ?_)
+  -- commutativity of the square, pointwise from `hsqHom`
+  intro z
+  exact (congrFun (congrArg (fun q : (prodAffineLine Y).residueField
+      (((sectionIncl X t ht) ≫ prodMapAffineLine f) x) ⟶ X.residueField x =>
+      (q : ↥((prodAffineLine Y).residueField (((sectionIncl X t ht) ≫ prodMapAffineLine f) x)) →
+        ↥(X.residueField x))) hsqHom) z).symm
 
 -- Reference: Fulton ch. 1, §1.4 (pushforward commutes with pullback along
--- sections: `f_*(i_t*γ) = i_t'*((f × 𝔸¹)_*γ)`).
--- REVIEW(citation): pin.
+-- sections: `f_*(i_t*γ) = i_t'*((f × 𝔸¹)_*γ)`); Stacks tag 02R9 ff.
+-- REVIEW(citation): pin. TEMPORARY SORRY peeling plan: pointwise via the landed
+-- `AlgebraicCycle.pushforward_apply` (fiber sums), then
+-- `finsum_cond_eq_sum_of_cond_iff` on both sides with the finite sets
+-- `(f ⁻¹' {y} ∩ support (i_t*γ)).toFinset` and
+-- `((f × 𝔸¹) ⁻¹' {i_t' y} ∩ support γ).toFinset` (`finite_support_inter_fiber`),
+-- and `Finset.sum_bij` along `x ↦ i_t x` (injectivity: `section_injective`;
+-- surjectivity: the point-extensionality helper `sectionIncl_fst_snd_eq` — a
+-- point `w` of `X × 𝔸¹` with second projection `t`'s point equals `i_t (pr₁ w)`,
+-- via `Scheme.Pullback.carrierEquiv` and field-ness of the `Triplet.tensor`
+-- along a section (`κ(t p) ≅ κ(p)` by W.1 `isIso_residueFieldMap_section`
+-- applied to `t ≫ affineLineProj = 𝟙`); summand equality: the PROVED
+-- `residueDegree_prodMap_sectionIncl`.
+-- Reference: Fulton ch. 1, §1.4 (the statement).
 /-- **Pushforward commutes with section pullback**: `f_*(i_t*γ) =
-`i_t'*((f × 𝔸¹)_*γ)`. TEMPORARY SORRY: peeling plan — pointwise via the landed
-`AlgebraicCycle.pushforward_apply` (fiber sums), the bijection
-`x ↦ i_t x : f ⁻¹' {y} ≃ (f × 𝔸¹) ⁻¹' {i_t' y}` (from
-`sectionIncl_prodMap` and injectivity of `i_t`, then `Finset.sum_bij` on the
-finite fibers via `finite_support_inter_fiber`), and the residue-degree
-base-change equality `residueDegree_prodMap_sectionIncl`. -/
+`i_t'*((f × 𝔸¹)_*γ)`. -/
 theorem pushforward_sectionPullback (f : X ⟶ Y) [QuasiCompact f]
     [QuasiCompact (prodMapAffineLine f)]
     (t : specZ ⟶ affineLine) (ht : t ≫ affineLineProj = 𝟙 specZ)
