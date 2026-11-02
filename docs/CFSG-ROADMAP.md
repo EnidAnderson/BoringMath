@@ -106,12 +106,21 @@ reduction, #263 Artin motives, #264 realizations, #265 MTM/MZV, #266 purity.
 
 ## The lifted (motivic) library map (#267 CFSG.MOT.LIB, under #260)
 
-Motivic analogs of the CFSG tools, filed as #268–#275: abelian category of
-motives + Schur (#268), realizations as the character table (#269), local at a
-prime = ℓ-adic/p-adic Hodge fibers (#270), the Lie sector = pro-unipotent
-motivic Galois / MTM(ℤ) / MZV (#271), Artin motives + Galois images (the CFSG
-consumption point) (#272), weights/purity infrastructure (#273), sporadic
-motives (#274), ∞-categorical DM lift (#275).
+Motivic analogs of the CFSG tools, filed as #268–#275. The "?" rows of the naive
+dictionary resolve (see #267 comment) as: Sylow/p-local → decomposition &
+inertia groups at places of k, local Galois representations (Weil–Deligne, wild
+inertia), p-adic Hodge at the residue char (#270, #272); fusion systems →
+class field theory / Chebotarev as the fusion theorem of G_k, via decomposition
+groups at places above p (#272); signalizers → pro-p signalizers on the
+pro-algebraic motivic Galois group, balance = free pro-p structure of the MTM
+Lie algebra (#271); BN-pairs/buildings → Bruhat–Tits buildings of local Galois
+groups and the Fargues–Fontaine curve / period domains (#270); sporadic groups →
+Artin motives with sporadic Galois image (moonshine motive from the Monster's
+196883-dim rep), not sporadic motives (#272, #274); alternating → generic
+monodromy S_n/A_n of families (Hilbert irreducibility analog) (#272/#273);
+characters/blocks → the four realizations + comparisons (#269); Lie type →
+pro-unipotent MTM(ℤ) sector (#271/#265); CFSG → simple-mixed-motives
+classification (#266); ∞-version → simple objects of DM (#275).
 
 ## Ticket tree (TOC of the proof, in formalization order)
 
