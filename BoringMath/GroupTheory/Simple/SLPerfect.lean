@@ -5,6 +5,7 @@ Authors: Enid
 -/
 import Mathlib.LinearAlgebra.Matrix.SpecialLinearGroup
 import Mathlib.LinearAlgebra.Projectivization.PSL.PSL2
+import BoringMath.GroupTheory.Simple.SLDiag
 
 /-!
 # Perfectness of `SL(n, F)` — the Iwasawa ingredient for sector C (#230)
@@ -34,20 +35,23 @@ theorem SL2_isPerfect {F : Type*} [Field F] {a : F} (ha : a ≠ 0) (hasq : a ^ 2
   ⟨SL2.commutator_eq_top ha hasq⟩
 
 -- Reference: [Carter] ch. 5 / [Wilson] ch. 5 (`SL(n, F)` is perfect for
--- `n ≥ 3` over any field). TEMPORARY SORRY with peeling plan.
-/-- **`SL(n, F)` is perfect for `n ≥ 3`** (over any field). TEMPORARY SORRY
-with peeling plan. -/
+-- `n ≥ 3` over any field). Steps (1) and (2) are landed:
+-- `transvection_mem_commutator_of_card_three` (SLTransvection.lean) and
+-- `diag2n_mem_commutator_of_card_three` (SLDiag.lean); step (3) is the pin's
+-- `SpecialLinearGroup.diagonal_transvection_induction'` with
+-- `P := (· ∈ commutator (SL ι F))`.
+/-- **`SL(n, F)` is perfect for `n ≥ 3`** (over any field; proved). -/
 theorem SL_isPerfect {ι : Type*} [Fintype ι] [DecidableEq ι] (F : Type*) [Field F]
     (hι : 3 ≤ Fintype.card ι) : Group.IsPerfect (SpecialLinearGroup ι F) := by
-  -- TEMPORARY SORRY: the honest proof has not been instantiated yet.
-  -- PEELING PLAN:
-  --   (1) every transvection `T_ij(b)` lies in `⁅SL, SL⁆` for `n ≥ 3`:
-  --       `T_ij(b) = ⁅T_ij(1), diag(..., b, ..., b⁻¹, ...)⁆`-style identity
-  --       (pin has `commutatorElement`/`diag2_inv`/`transvection_inv` machinery
-  --       at SpecialLinearGroup.lean:739);
-  --   (2) diagonals with determinant 1 lie in `⁅SL, SL⁆` (product of
-  --       `diag(a, a⁻¹, 1, …)` and each of those is `⁅T_12(1), T_21(a-1)⁆`-style);
-  --   (3) `diagonal_transvection_induction'` (pin) closes: `⁅SL, SL⁆ = ⊤`.
-  sorry
+  haveI : Nontrivial ι := Fintype.one_lt_card_iff_nontrivial.mp
+    (Nat.lt_of_lt_of_le (Nat.lt_succ_of_le (Nat.le_add_right 1 1)) hι)
+  refine ⟨?_⟩
+  apply eq_top_iff.mpr
+  intro M _
+  exact SpecialLinearGroup.diagonal_transvection_induction'
+    (fun A => A ∈ commutator (SpecialLinearGroup ι F)) M
+    (fun i j hij c hc => diag2n_mem_commutator_of_card_three hij c hc hι)
+    (fun i j hij a => transvection_mem_commutator_of_card_three hij a hι)
+    (fun A B hA hB => Subgroup.mul_mem _ hA hB)
 
 end BoringMath
